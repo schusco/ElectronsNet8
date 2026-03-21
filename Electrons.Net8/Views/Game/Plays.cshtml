@@ -1,0 +1,15 @@
+﻿@using Electrons.Net8.Models
+@model PlayByPlayModel
+@{
+    ViewBag.Title = "Play by Play";
+}
+<div class="row">
+    <div class="col-md-12 center">
+        <h3>@Model.Title</h3>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-offset-2 col-md-8" style="border: 1px solid #800000;padding:10px">
+        @Html.DisplayFor(m => m.Innings)
+    </div>
+</div>

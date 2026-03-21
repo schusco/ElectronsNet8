@@ -1,0 +1,91 @@
+﻿@model GameModel
+@using Elecredesign;
+@using Electrons.Net8
+@using Electrons.Net8.Models
+@{
+    ViewBag.Title = "Game Stats";
+}
+<div class="content">
+    <div class="row" style="margin-top:5px">
+        <div class="col-lg-12 center">
+            <h4>@Model.DateAndLocation
+                @if (Model.HasPlayByPlay)
+                {
+                            <span>&nbsp;Html.ActionLink("(Play by Play)", "Plays", "Game", new { id = Model.GameId }, null)</span>
+                }
+            </h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-1 pull-left">
+            <img src="@Model.HomeLogo" height="70" width="70" alt="@Model.HomeLine.Team" />
+        </div>
+        <div class="col-lg-1 text-start" style="text-align:left">
+            <h1>@Model.HomeLine.Runs</h1>
+        </div>
+        <div class="col-lg-8" style="padding:0px !important">
+            <table class="tronTable widemargin">
+                <tr>
+                    <th>Team</th>
+                    @for (int i = 1; i <= Model.Innings; i++)
+                    {
+                        <th>@i</th>
+                    }
+                    <th>R</th>
+                    <th>H</th>
+                    <th>E</th>
+                </tr>
+                <tr>
+                    <td class="tronTable">@Model.AwayLine.Team</td>
+                    @for (int i = 0; i < Model.Innings; i++)
+                    {
+                        <td class="tronTable">@Model.AwayLine.Innings[i]</td>
+                    }
+                    <td class="tronTable">@Model.AwayLine.Runs</td>
+                    <td class="tronTable">@Model.AwayLine.Hits</td>
+                    <td class="tronTable">@Model.AwayLine.Errors</td>
+                </tr>
+                <tr>
+                    <td class="tronTable oddrow">@Model.HomeLine.Team</td>
+                    @for (int i = 0; i < Model.Innings; i++)
+                    {
+                        <td class="tronTable oddrow">@Model.HomeLine.Innings[i]</td>
+                    }
+                    <td class="tronTable oddrow">@Model.HomeLine.Runs</td>
+                    <td class="tronTable oddrow">@Model.HomeLine.Hits</td>
+                    <td class="tronTable oddrow">@Model.HomeLine.Errors</td>
+                </tr>
+            </table>
+        </div>
+        <div class="col-lg-1" style="text-align:right">
+            <h1>@Model.AwayLine.Runs</h1>
+        </div>
+        <div class="col-lg-1 ">
+            <img src="@Model.AwayLogo" height="70" width="70" alt="@Model.AwayLine.Team" />
+        </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+        <div class="col-lg-12">
+            @if (Model.PitchingStats.Any())
+            {
+                @Html.Table(Model.PitchingStats, "tronTable", "tronTable", "tronTable oddrow", new { @class = "tronTable wide" }, false);
+            }
+        </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+        <div class="col-lg-12">
+            @if (Model.HittingStats.Any())
+            {
+                @Html.Table(Model.HittingStats, "tronTable", "tronTable", "tronTable oddrow", new { @class = "tronTable wide" }, false)
+            }
+        </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+        <div class="col-lg-12">
+            @if (!string.IsNullOrEmpty(Model.Notes))
+            {
+                <p>Notes: @Model.Notes</p>
+            }
+        </div>
+    </div>
+</div>

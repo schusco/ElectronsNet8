@@ -1,0 +1,57 @@
+﻿@model HistoryModel
+@using Elecredesign
+@using Electrons.Net8
+@using Electrons.Net8.Models
+@{
+    ViewBag.Title = "Electrons History";
+}
+
+<div class="row">
+    <div class="col-sm-6">
+        <div>
+            <h3 class="center">Franchise History</h3>
+        </div>
+        <div>
+            @Html.Table(Model.Franchise, "tronTable", "tronTable", "tronTable oddrow", new { @class = "tronTable", style = "width:70%;margin-left:auto;margin-right:auto" })
+        </div>
+        <div>
+            <h3 class="center">Managerial History</h3>
+        </div>
+        <div>
+            @Html.Table(Model.Manager, "tronTable", "tronTable", "tronTable oddrow", new { @class = "tronTable", style = "width:70%;margin-left:auto;margin-right:auto" })
+        </div>
+        <div>
+            <h3 class="center">Championship History</h3>
+        </div>
+        <div>
+            @Html.Table(Model.Championship, "tronTable", "tronTable", "tronTable oddrow", new { @class = "tronTable", style = "width:70%;margin-left:auto;margin-right:auto" })
+        </div>
+        <div>
+            <h3 class="center">162 Game Players</h3>
+        </div>
+        <div>
+            @Html.Table(Model.Players, "tronTable", "tronTable", "tronTable oddrow", new { @class="tronTable", style = "width:70%;margin-left:auto;margin-right:auto" })
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div>
+            <h3 class="center">Stadium History</h3>
+        </div>
+        <div>
+            @Html.Table(Model.Stadium, "tronTable", "tronTable", "tronTable oddrow", new { @class = "tronTable", style = "width:70%;margin-left:auto;margin-right:auto" })
+        </div>
+        <div>
+            <h3 class="center">Retired Numbers</h3>
+        </div>
+        <div>
+            @Html.Table(Model.Retired, "tronTable", "tronTable", "tronTable oddrow", new { @class = "tronTable", style = "width:70%;margin-left:auto;margin-right:auto" })
+        </div>
+        <div>
+            <h3 class="center">Year by Year Results</h3>
+        </div>
+        <div>
+            @Html.Table(Model.Results, "tronTable", "tronTable", "tronTable oddrow", new { @class = "tronTable", style = "width:70%;margin-left:auto;margin-right:auto" })
+        </div>
+
+    </div>
+</div>

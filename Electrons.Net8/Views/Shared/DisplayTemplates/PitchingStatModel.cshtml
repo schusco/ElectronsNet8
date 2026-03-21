@@ -1,0 +1,14 @@
+﻿@using Electrons.Net8.Models
+@model PitchingStatModel
+@if (Model.Display.Any())
+{
+    <tr style="height:26px">
+        <td>
+            <span style="font-weight:bold">@Model.Stat -&nbsp;</span>
+            @foreach (var stat in Model.Display)
+            {
+                <span><span style="white-space: nowrap">@stat.Key</span> <span style="white-space:nowrap">@stat.Value@(stat.Key != Model.Display.Last().Key ? ", " : "")</span></span>
+            }
+        </td>
+    </tr>
+}

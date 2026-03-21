@@ -1,0 +1,148 @@
+﻿@using Electrons.Net8.Models
+@model ScheduleModel
+@{
+    ViewBag.Title = "Schedule";
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 d-flex align-items-center">
+            <div style="flex:1"></div>
+            <div class="text-center">
+                <h2 class="mb-0">@Model.Monthtext</h2>
+            </div>
+            <div style="flex:1" class="d-flex justify-content-end">
+                @if (Model.HasSchedule)
+                {
+                    <a asp-action="Download" class = "ghost-link">Download Printable Schedule</a>
+                }
+            </div>
+        </div>
+    </div>    
+    <div class="row">
+        <div class="col-1">
+            <a asp-action="Index" asp-route-month="@Model.PrevMonth" asp-route-year="@Model.PrevYear">
+                <div class="leftArrow">&nbsp;</div>
+            </a>
+        </div>
+        <div class="col-10">
+            <div class="row mb-3">
+                @*<ul class="monthLinks d-inline">*@
+                <div class="col-2 " style="text-align:center">
+                    @Html.ActionLink("March", "Index", new { month = 3, year = Model.Year }, new { @class = "monthLinks" })
+                </div>
+                <div class="col-2 " style="text-align:center">
+                    @Html.ActionLink("April", "Index", new { month = 4, year = Model.Year }, new { @class = "monthLinks" })
+                </div>
+                <div class="col-2" style="text-align:center">
+                    @Html.ActionLink("May", "Index", new { month = 5, year = Model.Year }, new { @class = "monthLinks" })
+                </div>
+                <div class="col-2" style="text-align:center">
+                    @Html.ActionLink("June", "Index", new { month = 6, year = Model.Year }, new { @class = "monthLinks" })
+                </div>
+                <div class="col-2" style="text-align:center">
+                    @Html.ActionLink("July", "Index", new { month = 7, year = Model.Year }, new { @class = "monthLinks" })
+                </div>
+                <div class="col-2" style="text-align:center">
+                    @Html.ActionLink("August", "Index", new { month = 8, year = Model.Year }, new { @class = "monthLinks" })
+                </div>
+                @*</ul>*@
+            </div>
+        </div>
+        <div class="col-1">
+            <a asp-action="Index" asp-route-month="@Model.NextMonth" asp-route-year="@Model.NextYear" class="d-inline-flex justify-content-end w-100">
+                <div class="rightArrow">&nbsp;</div>
+            </a>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col col-xs-12">
+            <table class="schedTable">
+                <tr>
+                    <th>Sunday</th>
+                    <th>Monday</th>
+                    <th>Tuesday</th>
+                    <th>Wednesday</th>
+                    <th>Thursday</th>
+                    <th>Friday</th>
+                    <th>Saturday</th>
+                </tr>
+                @{
+                    int counter = 1;
+
+                    for (int i = 0; i < 5; i++)
+                    {
+
+                        <tr>
+                            @if (i == 0)
+                            {
+                                if (Model.DaysToSkip > 0)
+                                {
+                                    <td colspan="@Model.DaysToSkip" class="emptyCell">&nbsp</td>
+                                }
+                                for (int fwc = 7; fwc > @Model.DaysToSkip; fwc--)
+                                {
+                                    var dayModel = Model.Days[counter];
+                                    <td class="@dayModel.CellCss">
+                                        @Html.DisplayFor(m => m.Days[counter], "ScheduleDay")
+                                    </td>
+                                    counter++;
+                                }
+                            }
+                            @if (i > 0)
+                            {
+                                for (int j = 0; j < 7; j++)
+                                {
+                                    if (counter <= Model.DaysInMonth)
+                                    {
+
+                                        var dayModel = Model.Days[counter];
+                                        <td class="@dayModel.CellCss">@Html.DisplayFor(m => m.Days[counter], "ScheduleDay")</td>
+                                        counter++;
+                                    }
+                                    if (counter > Model.DaysInMonth)
+                                    {
+                                        var span = 7 - j - 1;
+                                        if (span > 0)
+                                        {
+                                            <td colspan="@span" class="emptyCell">&nbsp;</td>
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        </tr>
+                    }
+                    if (counter <= Model.DaysInMonth)
+                    {
+                        <tr>
+                            @{
+                                int leftover = 7;
+                                while (counter <= Model.DaysInMonth)
+                                {
+                                    var dayModel = Model.Days[counter];
+                                    <td class="@dayModel.CellCss">@Html.DisplayFor(m => m.Days[counter], "ScheduleDay")</td>
+                                    counter++;
+                                    leftover--;
+                                }
+                                if (leftover > 0)
+                                {
+                                    <td colspan="@leftover" class="emptyCell">&nbsp;</td>
+                                }
+                            }
+                        </tr>
+                    }
+                }
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        @foreach (var link in Model.Links)
+        {
+            <div class="col col-sm-3">
+                <a href="@link.Value" class="navlink">@link.Key</a>
+            </div>
+        }
+
+    </div>
+</div>

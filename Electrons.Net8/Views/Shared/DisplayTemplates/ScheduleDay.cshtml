@@ -1,0 +1,33 @@
+﻿@using Electrons.Net8
+@using Electrons.Net8.Models
+@model ScheduleDayModel
+
+@{
+    string css = "regular";
+    if (Model.DayOfMonth == DateTime.Now.Day && Model.Month == DateTime.Now.Month && Model.Year == DateTime.Now.Year)
+    {
+        css = "currentDay";
+    }
+
+    <div class="@css">@Model.DayOfMonth</div>
+    foreach (var game in Model.Games)
+    {
+        if (game.Finished)
+        {
+            var linkCss = Model.Events.Any() ? "whiteLink" : "scheduleLink";
+            <div><span style=""padding-right:3px"">@game.HvInd</span>@Html.Image(game.OpponentLogo,"22")<span style=""padding-left:3px"">@game.GameDescr</span><span style="padding-left:4px">@Html.ActionLink(game.GetScore(), "Recap", "Game", new { id = game.GameId }, new { @class = linkCss })</span></div>
+        }   
+        else
+        {
+            <div><span style="" padding-right:3px"">@game.HvInd</span>@Html.Image(game.OpponentLogo, "22")<span style="" padding-left:3px"">@game.GameDescr</span></div>
+        }
+    }
+    foreach (var birthday in Model.Birthdays)
+    {
+        <div class="birthdayText">@birthday</div>
+    }
+    foreach (var schedEvent in Model.Events)
+    {
+        <span class="inline">@schedEvent</span>
+    }
+}

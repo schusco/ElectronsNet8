@@ -1,0 +1,93 @@
+﻿@model MainModel
+@using Elecredesign;
+@using Electrons.Net8
+@using Electrons.Net8.Models
+<div class="container theme-showcase" role="main">
+    <div class="row">
+        <div class="col-sm-12 mt-3">
+            <div class="jumbotron">
+                <h1 class="display-4 center" style="font-weight:bold">@Html.Raw(Model.JumboText)</h1>
+            </div>
+            @*<div>
+                    <h3 class="center alert alert-info">@Html.ActionLink("Click Here","Index","Electrons20")<span> for 20th Aniversary Party Info</span></h3>
+                </div>*@
+        </div>
+    </div>
+    <div class="row" mt-1>
+        <div class="col-md-4 mt-1">
+            <div class="tronNextouting align-content-start">
+                <div class="row mt-1">
+                    <div class="nextOutingText col col-sm-12">
+                        Next Outing
+                    </div>
+                </div>
+
+                <div class="row mt-3 nextOutingRow">
+                    @if (!string.IsNullOrEmpty(@Model.HomeLogo) && !string.IsNullOrEmpty(@Model.AwayLogo))
+                    {
+                        <div class="col col-xs-4 center">
+                            @Html.Image(Model.HomeLogo, "85")
+                        </div>
+                        <div class="col col-xs-4 center pt-4">
+                            <span class="nextOutingText center">Vs.</span>
+
+                        </div>
+                        <div class="col col-xs-4 center">
+                            @Html.Image(Model.AwayLogo, "85")
+                        </div>
+                    }
+                    else
+                    {
+                        <div style="margin-top:120px">&nbsp;</div>
+                    }
+                </div>
+                <div class=" row mt-4">
+                    <div class="nextOutingText col col-sm-12">
+                        @Model.GameDate
+                    </div>
+                </div>
+                <div class=" row mt-1">
+                    <div class=" nextOutingText col col-sm-12">
+                        @Model.Location
+                    </div>
+                </div>
+                <div class="row mt-1">
+                    <div class="nextOutingText col col-sm-12">
+                        @if (Model.NextGameInProgress)
+                        {
+                            <span>@Html.ActionLink("Watch Live", "Live", "Game")</span>
+                        }
+                        else if (Model.NextGameRecap)
+                        {
+                            <span>@Html.ActionLink("Game Recap", "Live", "Game")</span>
+                        }
+                        else
+                        {
+                            <span>@Html.ActionLink("Complete Schedule", "Index", "Schedule", null, new { @class = "complSched" })</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8 mt-1">
+            @Html.Carousel()
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-6 ">
+            <div class="tronStandings pb-3 mb-3">
+                <div class="col-md-12 nextOutingText">
+                    Standings
+                </div>
+                <div class="col-md-12 tronStandings">
+                    @Html.Table(m => m.Standings, "tronTable", "tronTable", "tronTable oddrow", new { @class = "tronTable" })
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 tronLegend">
+            "Dogged by rumors, plagued by scandal, shunned by the mainstream media, fueled by steroids, ravaged by STDs, weakened by kryptonite, prohibited from standing within 200 yards of most elementary schools, and suffering from an overall lack of athletic ability, the Winnemac Electrons prepare to engage in what will be the greatest baseball story ever told."
+        </div>
+    </div>
+</div> <!-- /container -->

@@ -1,0 +1,14 @@
+﻿@using Electrons.Net8
+@using Electrons.Net8.Models
+@model InningModel
+@{
+    ViewBag.Title = "Inning";
+}
+<fieldset style="margin-top:5px;">
+    <legend style="background-color:#dddddd;border-bottom:1px solid #666666;margin-bottom:5px;"><span style="padding-left:5px">@Html.Image(Model.Logo,"30")<span style="margin-left:5px">@Model.Description</span></legend>
+    @foreach (var ev in Model.Events)
+    {
+        <span style="padding-left:5px;padding-top:2px;padding-bottom:2px;border-bottom:1px solid #ddd" class="block @(ev.ScoringPlay ? "score": "")">@ev</span>
+    }
+    <p style="margin-top:5px;padding-left:5px;font-weight:bold">@Model.Summary</p>
+</fieldset>

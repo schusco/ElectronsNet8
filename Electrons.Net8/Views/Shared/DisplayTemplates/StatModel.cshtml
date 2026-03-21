@@ -1,0 +1,14 @@
+﻿@using Electrons.Net8.Models
+@model StatModel
+@if (Model.Stats.Any())
+{
+    <tr style="height:26px">
+        <td>
+            <span style="font-weight:bold">@Model.Stat -&nbsp;</span>
+            @foreach (var stat in Model.Stats)
+            {
+                <span><span style="white-space: nowrap">@stat.PlayerName</span> <span style="white-space:nowrap">@stat.GameTotal (@(stat.SeasonTotal+stat.GameTotal))@(stat.PlayerName != Model.Stats.Last().PlayerName ? ", " : "")</span></span>
+            }
+        </td>
+    </tr>
+}

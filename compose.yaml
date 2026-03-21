@@ -1,0 +1,10 @@
+# Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP.NET Core service.
+
+services:
+  electronsnet8:
+    image: electronsnet8
+    build:
+      context: .
+      dockerfile: Electrons.Net8/Dockerfile
+    ports:
+      - 8080:8080

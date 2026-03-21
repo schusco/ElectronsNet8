@@ -1,0 +1,46 @@
+﻿@using Electrons.Core.Net8.Games
+@model System.Collections.Generic.IDictionary<Position, string>
+@{
+    var imageUrl = ViewData["image"] as string;
+}
+<div class="fieldImg mt-2">
+    <div class="row">
+        <div class="col-sm-12" style="margin:auto">
+            <div class="defenseText">@Model[Position.CF]</div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="defenseText" style="text-align:center">@Model[Position.LF]</div>
+        </div>
+        <div class="col-sm-6">
+            <div class="defenseText" style="text-align:center">@Model[Position.RF]</div>
+        </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+        <div class="col-sm-6">
+            <div class="defenseText" style="text-align:right">@Model[Position.SS]</div>
+        </div>
+        <div class="col-sm-6">
+            <div class="defenseText" style="text-align:left">@Model[Position._2B]</div>
+        </div>
+    </div>
+    <div class="row" style="margin-top:25px">
+        <div class="col-sm-6">
+            <div class="defenseText" style="text-align:center">@Model[Position._3B]</div>
+        </div>
+        <div class="col-sm-6">
+            <div class="defenseText" style="text-align:center">@Model[Position._1B]</div>
+        </div>
+    </div>
+    <div class="row" style="margin-top:5px">
+        <div class="col-sm-12" style="margin:auto">
+            <div class="defenseText">@Model[Position.P]</div>
+        </div>
+    </div>
+    <div class="row" style="margin-top:35px">
+        <div class="col-sm-12" style="margin:auto">
+            <div class="defenseText">@Model[Position.C]</div>
+        </div>
+    </div>
+</div>

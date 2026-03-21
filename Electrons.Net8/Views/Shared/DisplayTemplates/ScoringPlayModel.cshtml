@@ -1,0 +1,35 @@
+﻿@using Electrons.Net8
+@using Electrons.Net8.Models
+@model ScoringPlayModel
+<table class="scoringplay">
+    <thead>
+        <tr>
+            <th colspan="2">
+                @Model.InningText
+            </th>
+            <th>
+                @Html.Image(Model.AwayLogo,"25")
+            </th>
+            <th>
+                @Html.Image(Model.HomeLogo,"25")
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var play in Model.Plays)
+        {
+            <tr>
+                <td width="10%">
+                    @Html.Image(play.TeamLogo,"35")
+                </td>
+                <td width="80%">
+                    @play.ScoreText
+                </td>
+                <td width="5%" style="text-align:center">@play.AwayScore</td>
+                <td width="5%" style="text-align:center">@play.HomeScore</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+

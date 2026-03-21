@@ -1,0 +1,66 @@
+﻿@using Electrons.Net8
+@using Electrons.Net8.Models
+@model LiveGameModel
+<table class="linescore">
+    <tr>
+        <th style="width:30px"></th>
+        <th ></th>
+        @{
+            var totalInnings = Model.TotalInnings;
+            if (Model.AwayInnings.Count > 7)
+            {
+                totalInnings = Model.AwayInnings.Count;
+            }
+            for (int i = 1; i <= totalInnings; i++)
+            {
+                <th>@i</th>
+            }
+        }
+        <th>R</th>
+        <th>H</th>
+        <th>E</th>
+    </tr>
+    <tr>
+        <td>@Html.Image(Model.AwayLogo,"24")</td>
+        <td style="text-align:left;min-width:100px">@Model.AwayName</td>
+        @for (int i = 0; i < totalInnings; i++)
+        {
+            if (i >= Model.AwayInnings.Count)
+            {
+                <td class="text-center">-</td>
+            }
+            else
+            {
+                <td class="text-center">@Model.AwayInnings[i]</td>
+            }
+        }
+        <td class="text-center">@Model.AwayScore</td>
+        <td class="text-center">@Model.AwayHits</td>
+        <td class="text-center">@Model.AwayErrors</td>
+    </tr>
+    <tr>
+        <td>@Html.Image(Model.HomeLogo,"24")</td>
+        <td style="text-align:left;min-width:100px;">@Model.HomeName</td>
+        @for (int i = 0; i < totalInnings; i++)
+        {
+            if (i >= Model.HomeInnings.Count)
+            {
+                <td class="text-center">-</td>
+            }
+            else
+            {
+                <td class="text-center">@Model.HomeInnings[i]</td>
+            }
+        }
+        <td class="text-center">@Model.HomeScore</td>
+        <td class="text-center">@Model.HomeHits</td>
+        <td class="text-center">@Model.HomeErrors</td>
+    </tr>
+    <tfoot>
+        <tr>
+            <td colspan="@(Model.TotalInnings+5)" >
+                @Model.LocationText&nbsp;&nbsp;<span style="font-size:11px;color:#666">@Model.CityText</span>
+            </td>
+        </tr>
+    </tfoot>
+</table>

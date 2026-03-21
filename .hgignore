@@ -1,0 +1,36 @@
+# Ignore file for Visual Studio 2008
+
+# use glob syntax
+syntax: glob
+
+# Ignore these directories
+Temp/
+[Ll]ogs/
+[Bb]in/
+CVS/
+[Dd]ebug*/
+[Oo]bj/
+[Rr]elease*/
+_ReSharper*/
+Attachments/
+AttachmentDir/
+.vs/
+.git/
+
+# Ignore these files
+[Bb]uild[Ll]og.*
+*~
+.\#*
+*.bak
+*.ncb
+*.obj
+*.suo
+*.swp
+*.user
+*.orig
+*.xap
+.gitignore
+
+#NUnit stuff
+TestResult.xml
+*VisualState.xml

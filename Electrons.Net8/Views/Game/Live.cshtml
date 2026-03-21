@@ -1,0 +1,231 @@
+﻿@using Elecredesign
+@using Electrons.Core.Net8
+@using Electrons.Net8
+@using Electrons.Net8.Models
+@model LiveGameModel
+@{
+    Layout = "~/Views/Shared/_NoHeaderLayout.cshtml";
+    ViewBag.Title = Model.Title;        
+    ViewData.Add("home", false);
+    ViewData.Add("logo", Model.AwayLogo);
+    ViewData.Add("team", Model.AwayName);
+    ViewData.Add("image", "~/Content/images/baseballDiamond.gif");
+}
+<nav class="navbar navbar-expand-sm fixed-top ">
+
+    <div class="tronHeaderbar" style="width:100%;height:100px;margin-top:0">
+        <div class="container-fluid">
+            <div class="row wide align-content-center">
+                <div class="navbar-left mt-auto mb-auto ml-3">
+                    <div class="dropdown">
+                        <button type="button" class="btn dropdown-toggle menuButton" title="Navigation menu" data-toggle="dropdown" id="navmenu">
+                            <i class="bi bi-list"></i>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="navmenu" style="background: #800000">
+                            <a href="~/" class="headerLink menuStyle dropdown-item">Home</a>
+                            <a href="~/Schedule" class="headerLink menuStyle dropdown-item">Schedule</a>
+                            <a href="~/Statistics" class="headerLink menuStyle dropdown-item">Statistics</a>
+                            <a href="~/Roster" class="headerLink menuStyle dropdown-item">Roster</a>
+                            <a href="~/DepthChart" class="headerLink menuStyle dropdown-item">Depth Chart</a>
+                            <a href="~/History" class="headerLink menuStyle dropdown-item">History</a>
+                            <a href="~/Ballpark" class="headerLink menuStyle dropdown-item">Ball Park</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="navbar-header d-inline">
+
+                        <div class="navbar-brand navbar-left mr-lg-3 d-none d-md-inline teamName">
+                            @Html.Image(@Model.AwayLogo,"70")
+                        </div>
+                        <h3 class="navbar-text navbar-left mr-lg-3 teamName d-none d-lg-inline">@Model.AwayName</h3>
+                        <h1 class="navbar-text navbar-left scoreStyle">@Model.AwayScore</h1>
+                    </div>
+                </div>
+                <div class="col mx-auto">
+                    <div class="navbar-text ">
+                        <div class="navbar-text" style="margin-top:5px">
+                            @if (Model.GameIsOver)
+                            {
+                                <span class="sbStyle">Final</span>
+                            }
+                            else if (!Model.IsStarted)
+                            {
+                                <span class="sbStyle">@string.Format("Game Time: {0}", Model.GameTime)</span>
+                            }
+                            else
+                            {
+                                if (Model.InningHalf == HalfInning.Bottom)
+                                {
+                                    <i class="bi bi-caret-down-fill"></i>
+                                }
+                                if (Model.InningHalf == HalfInning.Top)
+                                {
+                                    <i class="bi bi-caret-up-fill"></i>
+                                }
+                                <span class="sbStyle">&nbsp;@Model.InningNumber&nbsp;</span>
+                            }
+                            <div class="d-none d-lg-inline-block" style="border:1px solid gray;margin-top:0">
+                                <span class="bsoStyle">B</span>
+                                <span class="@(Model.Balls > 0 ? "ballDot" : "noBallDot")"></span>
+                                <span class="@(Model.Balls > 1 ? "ballDot" : "noBallDot")"></span>
+                                <span class="@(Model.Balls > 2 ? "ballDot" : "noBallDot")"></span>
+                                <span class="bsoStyle">S</span>
+                                <span class="@(Model.Strikes > 0 ? "strikeDot" : "noStrikeDot")"></span>
+                                <span class="@(Model.Strikes > 1 ? "strikeDot" : "noStrikeDot")"></span>
+                                <span class="bsoStyle">O</span>
+                                <span class="@((Model.Outs == 1 || Model.Outs==2) ? "outDot" : "noOutDot")"></span>
+                                <span class="@(Model.Outs == 2 ? "outDot" : "noOutDot")"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <h1 class="navbar-text navbar-right scoreStyle">@Model.HomeScore</h1>
+                    <h3 class="navbar-text navbar-right ml-lg-3 d-none d-lg-inline teamName">@Model.HomeName</h3>
+                    <div class="navbar-brand navbar-right ml-lg-3 d-none d-md-inline" >
+                        @Html.Image(Model.HomeLogo,"70")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+<div class="container-fluid" style="padding-top:110px">
+    <div class="row">
+        <div class="col col-md-6 ml-auto mr-auto">
+            <div class="d-none d-md-flex">
+                @Html.Partial("LineScore")
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid mt-2">
+    <div class="row">
+        <div class="col col-md-10 ml-auto mr-auto">
+            <ul class="nav nav-tabs " role="tablist">
+                <li role="presentation" class=" nav-item"><a href="#live" aria-controls="live" class="nav-link active " role="tab" data-toggle="tab"><span class="tabText">Live Game Stats</span></a></li>
+                <li role="presentation" class="nav-item"><a href="#boxscore" aria-controls="boxscore" class="nav-link " role="tab" data-toggle="tab"><span class="tabText">Full Box Score</span></a></li>
+                <li role="presentation" class="nav-item"><a href="#pbp" aria-controls="pbp" role="tab" class="nav-link " data-toggle="tab"><span class="tabText">Play By Play</span></a></li>
+            </ul>
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active scroll" id="live">
+                    <div class="row" style="margin-top:5px">
+                        <div class="col-md-3">
+                            <div style="margin-right:0;margin-left:auto;text-align:right">
+                                @Html.Partial("BoxScore", Model.AwayBox, ViewData)
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs bluebottom" role="tablist">
+                                        <li role="presentation" class=" nav-item"><a href="#inning" class="nav-link active" aria-controls="live" role="tab" data-toggle="tab"><span class="tabText">Inning</span></a></li>
+                                        <li role="presentation" class="nav-item"><a href="#runners" class="nav-link" aria-controls="live" role="tab" data-toggle="tab"><span class="tabText">Runners</span></a></li>
+                                        <li role="presentation" class="nav-item"><a href="#defense" class="nav-link" aria-controls="live" role="tab" data-toggle="tab"><span class="tabText">Defense</span></a></li>
+                                    </ul>
+                                    <div class="tab-content">
+                                        <div role="tabpanel" class="tab-pane active" id="inning">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <p style="text-align:left;margin-top:8px;">@Html.Image(Model.PitcherLogo,"25")@Html.Raw(object.ReferenceEquals(Model.CurrentPitcher, null) ? "" : string.Format("&nbsp;{0} pitching", Model.CurrentPitcher))</p>
+                                                    <p style="text-align:left">@Html.Image(@Model.HitterLogo,"25")&nbsp;@Model.AbString</p>
+                                                    <fieldset style="margin-top:15px">
+                                                        <legend>Previous At Bats</legend>
+                                                        @foreach (var ab in Model.PreviousAbs)
+                                                        {
+                                                            <div style="text-align:left">@ab</div>
+                                                        }
+                                                    </fieldset>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <fieldset style="margin-top:8px">
+                                                        <legend>Pitches</legend>
+                                                        <ol>
+                                                            @foreach (var pitch in Model.Pitches)
+                                                            {
+                                                                <li>@pitch</li>
+                                                            }
+                                                        </ol>
+                                                    </fieldset>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div role="tabpanel" class="tab-pane" id="runners">
+
+                                            <div class="fieldImg mt-2">
+                                                @if (!Model.GameIsOver)
+                                                {
+                                                    <div class="runner onSecond" style="height:20px;">@Model.RunnerOnSecond</div>
+                                                    <div class="runner onThird" style="position:relative;top:80px;left:5px;width:100px;height:30px">@Model.RunnerOnThird</div>
+                                                    <div class="runner onFirst" style="position:relative;top:50px;width:100px;height:30px">@Model.RunnerOnFirst</div>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div role="tabpanel" class="tab-pane" id="defense">
+                                            @Html.Partial("DefensiveAlignment", Model.Defense, ViewData)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <fieldset style="margin-top:15px">
+                                        <legend>Scoring Plays</legend>
+                                        @Html.DisplayFor(m => m.ScoringPlays)
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            @{
+                                ViewData["home"] = true;
+                                ViewData["logo"] = Model.HomeLogo;
+                                ViewData["team"] = Model.HomeName;
+                            }
+                            @Html.Partial("BoxScore", Model.HomeBox, ViewData)
+                        </div>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="boxscore">
+                    <div class="row" style="margin-top:5px">
+                        <div class="col-xl-6">
+                            <p class="teamName">@Html.Image(Model.AwayLogo, "35")<span style="margin-left:5px">@Model.AwayName</span></p>
+                            @if (Model.AwayBox.HittingBox.Stats.Any())
+                            {
+                                @Html.Table(Model.AwayBox.HittingBox.Stats, new { @class = "scoreTable wide" });
+                            }
+                            @if (Model.HomeBox.PitchingBox.Stats.Any())
+                            {
+                                @Html.Table(Model.AwayBox.PitchingBox.Stats, new { @class = "scoreTable wide" });
+                            }
+                        </div>
+                        <div class="col-xl-6">
+                            <p class="teamName">@Html.Image(Model.HomeLogo,"35")<span style="margin-left:5px;" >@Model.HomeName</span></p>
+                            @if (Model.HomeBox.HittingBox.Stats.Any())
+                            {
+                                @Html.Table(Model.HomeBox.HittingBox.Stats, new { @class = "scoreTable wide" });
+                            }
+                            @if (Model.HomeBox.PitchingBox.Stats.Any())
+                            {
+                                @Html.Table(Model.HomeBox.PitchingBox.Stats, new { @class = "scoreTable wide" });
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane scroll" id="pbp">
+                    <div class="row">
+                        <div class="col-md-8">
+                            @Html.DisplayFor(m => m.Innings)
+                        </div>
+                        <div class="col-md-4">
+                            @Html.DisplayFor(m => m.ScoringPlays)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

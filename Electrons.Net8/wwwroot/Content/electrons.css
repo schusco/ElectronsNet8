@@ -1,0 +1,712 @@
+﻿/* CSS Document */
+
+.tronHeaderbar {
+    margin-top: 10px;
+    min-height: 50px;
+    position: relative;
+    background: #800000;
+    text-align: center;
+    border-radius: 4px;
+    width: 100%;
+    color: white;
+}
+
+ul.dropdown-menu > li > a:hover {
+    background-color: #800000;
+    background-image: none;
+}
+.ghost-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    color: #6c757d; /* Subtle gray */
+    text-decoration: none;
+    font-size: 0.9rem;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+    .ghost-link:hover {
+        color: #800000; /* Your brand blue */
+        background-color: rgba(30, 0, 0, 0.05); /* Very light blue tint */
+        border-color: rgba(80, 0, 0, 0.2);
+    }
+
+    .ghost-link i {
+        font-size: 1.1rem; /* Makes the icon slightly larger than the text */
+    }
+a.scheduleLink {
+    color: #800000;
+    text-decoration: underline;
+}
+a.scheduleLink:hover{
+    text-decoration:none;
+}
+/*a:hover{
+    background-color:#800;
+    color: white;
+}*/
+a:active {
+    background-color: #800000;
+}
+.dropdown-menu {
+    z-index: 1050;
+}
+td.eventCss > div > span > a.scheduleLink {
+    color: white;
+    text-decoration: underline;
+}
+
+a.whiteLink {
+    color: white;
+    text-decoration: underline;
+}
+
+a.headerLink {
+    height: 50px;
+    display: inline-block;
+    border-radius: 10px;
+}
+
+    a.headerLink:hover {
+        background-color: #888 !important;
+        background-image: none;
+    }
+
+    a.headerLink:active {
+        background-color: #888 !important;
+        background-image: none;
+    }
+
+#loadingDiv {
+    padding-top: 4px 8px 4px 8px;
+    position: absolute;
+    background-color: white;
+    top: 45%;
+    left: 45%;
+    border: 3px solid #990000;
+    visibility: hidden;
+}
+
+.menuStyle {
+    background-color: #800000;
+    font-size: 2em;
+    margin: auto;
+    color: white !important;
+    font-style: italic;
+    font-family: 'Brush Script MT';
+    border-radius: 10px;
+}
+
+li.menuStyle:hover {
+    background-color: #888888;
+}
+
+a.menuStyle:hover {
+    background-color: #888888;
+}
+
+button.menuButton {
+    background: #800000;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.nav > li > a {
+    padding-right: 15px;
+    padding-left: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+ul.nav-tabs > li.nav-link > a.active {
+    background-color: #7AccD6;
+}
+
+ul.nav-tabs > li.active > a:focus {
+    background-color: #7AccD6;
+}
+
+ul.nav-tabs > li.nav-link > a {
+    border: 1px solid #7ACCD6 !important;
+    border-top-left-radius: 10px !important;
+    border-top-right-radius: 10px;
+}
+
+ul.nav-tabs {
+    border-bottom: 1px solid #7ACCD6
+}
+
+.spinner {
+    background-image: url('images/spinner.gif');
+}
+
+div {
+    color: #800000;
+}
+
+.regular {
+    text-align: left;
+    width: 100%;
+}
+
+.currentDay {
+    text-align: left;
+    width: 100%;
+    background-color: burlywood;
+}
+
+span.inline {
+    display: inline-block;
+}
+
+span.block {
+    display: block;
+}
+
+span.score {
+    color: dimgray;
+    font-weight: bold;
+}
+
+table.scoringplay {
+    width: 100%;
+    margin-top: 5px;
+}
+
+    table.scoringplay tr {
+        border-bottom: 1px solid #ddd;
+    }
+
+    table.scoringplay thead th {
+        background-color: #ddd;
+        padding-left: 3px;
+    }
+
+    table.scoringplay tbody td {
+        padding-top: 3px;
+    }
+
+.scoreStyle {
+    padding-top: 12px;
+    color: white;
+}
+
+.inningStyle {
+    width: 300px;
+    padding-top: 20px
+}
+
+.ballDot {
+    height: 10px;
+    width: 10px;
+    background-color: blue;
+    border-radius: 50%;
+    display: inline-block;
+    /*margin: 0 2px 0 2px;*/
+}
+
+.noBallDot {
+    height: 10px;
+    width: 10px;
+    border: 1px solid gray;
+    border-radius: 50%;
+    display: inline-block;
+    /*margin: 0 2px 0 2px;*/
+}
+
+.strikeDot {
+    height: 10px;
+    width: 10px;
+    background-color: red;
+    border-radius: 50%;
+    display: inline-block;
+    /*margin: 0 2px 0 2px;*/
+}
+
+body {
+    padding-top: 70px;
+}
+
+.noStrikeDot {
+    height: 10px;
+    width: 10px;
+    border: 1px solid gray;
+    border-radius: 50%;
+    display: inline-block;
+    /*margin: 0 2px 0 2px;*/
+}
+
+.outDot {
+    height: 10px;
+    width: 10px;
+    background-color: sandybrown;
+    border-radius: 50%;
+    display: inline-block;
+    /*margin: 0 2px 0 2px;*/
+}
+
+.noOutDot {
+    height: 10px;
+    width: 10px;
+    border: 1px solid gray;
+    border-radius: 50%;
+    display: inline-block;
+    /*margin: 0 2px 0 2px;*/
+}
+
+p.teamName {
+    font-size: 16px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.sbStyle {
+    font-size: 1.5em;
+    color: white;
+}
+
+span.bsoStyle {
+    margin: 0 2px 0 4px;
+    font-weight: bold;
+    color: white;
+}
+
+tr.current {
+    background-color: lightgoldenrodyellow;
+}
+
+h3.teamName {
+    color: white;
+}
+
+table.linescore {
+    font-size: 16px;
+    margin: auto;
+    width: 70%;
+}
+
+    table.linescore tr td {
+        padding: 2px;
+    }
+
+    table.linescore th {
+        width: 40px;
+        text-align: center;
+        background-color: #eee;
+    }
+
+    table.linescore tfoot tr td {
+        color: #222;
+        font-size: 12px;
+        text-align: left;
+        padding: 4px 4px 4px 10px;
+    }
+
+    table.linescore tfoot tr {
+        background-color: #eee;
+    }
+
+.defenseText {
+    color: #ddd;
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    margin: auto;
+}
+
+div.scroll {
+    height: 600px;
+    overflow-y: auto;
+    padding: 6px 15px 6px 15px;
+}
+
+span.posString {
+    font-size: 11px;
+    color: gray;
+    margin-left: 3px;
+}
+
+table.alignRight {
+    margin-left: auto;
+}
+
+table.scoreTable th {
+    background-color: #eee;
+    padding: 3px 2px 3px 2px;
+    text-align: center;
+}
+
+table.scoreTable td {
+    padding: 3px 2px 3px 2px;
+    text-align: center;
+}
+
+    table.scoreTable td.alignLeft {
+        text-align: left;
+    }
+
+table.scoreTable th.alignLeft {
+    text-align: left;
+}
+
+table.scoreTable td.alignRight {
+    text-align: right;
+}
+
+table.scoreTable tr {
+    border-bottom: 1px solid #ddd;
+    padding: 2px;
+}
+
+.runner {
+    position: relative;
+    color: white;
+    width: 122px;
+    float: left;
+    clear: left;
+    text-align: center;
+}
+
+.onFirst {
+    float: right;
+    padding-right: 5px;
+    color: white;
+}
+
+.onSecond {
+    left: 60px;
+    top: 30px;
+}
+
+.onThird {
+    float: left;
+    padding-left: 5px;
+    color: white;
+}
+
+span.tabText {
+    color: #800000;
+    font-weight: bold;
+    padding-bottom: 4px;
+}
+/*span.tabText:hover{
+    color:white;
+    background-color:#800000;
+}*/
+table.wide {
+    width: 100%;
+}
+
+table.statData {
+    text-align: left;
+}
+
+    table.statData th {
+        background-color: #eee;
+        padding: 2px;
+    }
+
+    table.statData td {
+        padding: 2px;
+    }
+
+table.schedTable {
+    width: 100%;
+    border: 1px solid black;
+}
+
+    table.schedTable td {
+        padding: 2px;
+        border: 1px solid black;
+        min-height: 100px;
+        vertical-align: top;
+        text-align: left;
+        max-width: 130px;
+        height: 100px;
+    }
+
+        table.schedTable td.eventCss {
+            background-color: #800000;
+            color: white;
+        }
+
+            table.schedTable td.eventCss div {
+                color: white;
+            }
+
+.headImg {
+    height: 50px;
+    border: 0;
+}
+
+a > img.dropdown-item:hover {
+    background-color: #800000;
+}
+
+table.schedTable td.homeGame {
+    background-color: white;
+}
+
+    table.schedTable td.homeGame div {
+        color: #800000;
+    }
+
+table.schedTable td.awayGame {
+    background-color: #ccc;
+}
+
+    table.schedTable td.awayGame div {
+        color: black
+    }
+
+a.monthLinks {
+    text-decoration: underline;
+    list-style-type: none;
+    color: #800000;
+    text-align: center;
+}
+
+    a.monthLinks:hover {
+        color: #888;
+        text-decoration: none;
+    }
+
+.navlink {
+    text-decoration: underline;
+    padding-top: 5px;
+    margin-top: 5px;
+    margin-left: 0;
+    color:#800000
+}
+a {
+    color:#800000;
+}
+    a.complSched{
+        color:white;
+    }
+    a.complSched:hover{
+        color:#888;
+        text-decoration:underline;
+    }
+    a:hover {
+        color: #800000;
+        text-decoration: underline;
+    }
+table.schedTable th {
+    background-color: #800000;
+    text-align: center;
+    color: white;
+    width: 14%;
+    border: 1px solid black;
+}
+
+table.schedTable td.emptyCell {
+    border: 0;
+    background-color: #888;
+}
+
+.tronHeaderlogo {
+    text-align: center;
+    background: #ffffff;
+}
+
+table.schedTable td {
+    background-color: #eee;
+}
+
+.nextOutingText {
+    color: white;
+    font-size: 2em;
+    text-align: center;
+}
+
+a.nextOutingText {
+    color: white !important;
+}
+
+.tronNavbar {
+    background: #800000;
+    border-color: #800000;
+    width: 100%;
+    border-radius: 10px;
+}
+
+    .tronNavbar a {
+        color: #ffffff;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+.center {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+/*.tronNav a:focus {
+    background: #7ACCD6 !important;
+}*/
+
+/*.tronNav a:hover {
+    background: #7ACCD6 !important;
+}*/
+
+.birthdayText {
+    font-size: .7em;
+    color: #333;
+}
+/*.tronNav li a.headerLink{
+    background-color:#800;
+}*/
+.tronNextouting {
+    background: #668466;
+    min-height: 330px;
+    background-image: url(images/_fieldimg.png);
+    background-repeat: repeat-y;
+    background-size: 100%;
+}
+
+.depthChartImg {
+    background-image: url(images/depthchart_field_larger.jpg);
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 508px;
+    width: 950px;
+}
+
+div.fieldImg {
+    background-image: url('images/baseballDiamond.gif');
+    height: 250px;
+    width: 250px;
+}
+
+.leftArrow {
+    cursor: pointer;
+    width: 0;
+    height: 20px;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 10px solid #800000;
+}
+
+.rightArrow {
+    cursor: pointer;
+    width: 0;
+    height: 20px;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 10px solid #800000;
+}
+
+.tronCarousel {
+    max-height: 472px;
+}
+
+a.navlink:hover {
+    text-decoration: none;
+}
+
+ul.nav-tabs > li.nav-item > a.navlink.active {
+    background-color: #ddd !important;
+}
+
+ul.nav-tabs {
+    border-top-right-radius: .5em;
+    border-top-left-radius: .5em;
+}
+li.nav-item:hover {
+    color: #888;
+}
+
+.tronStandings {
+    background: #800000;
+    min-height: 100px;    
+}
+
+img.tronCarouselImage {
+    max-height: 472px;
+}
+
+.content {
+    margin-left: 100px;
+    margin-right: 100px;
+}
+
+.tronLegend {
+    padding: 20px;
+}
+
+.tronTable {
+    background-color: #CCC;
+    color: #800000;
+    border: 1px solid #800000;
+    padding: 2px;
+    text-align: center;
+}
+
+    .tronTable.widemargin {
+        width: 100%;
+    }
+
+.wide {
+    width: 100%;
+}
+
+.oddrow {
+    background-color: white !important;
+}
+
+.tronTable th {
+    background-color: #aaa;
+    color: black;
+    border: 1px solid #800000;
+    min-width: 50px;
+    padding: 2px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.tronTable td {
+    border: 1px solid #800000;
+}
+
+.header {
+    text-decoration: underline;
+    background-image: url(sorter/bg.gif);
+    background-repeat: no-repeat;
+    background-position: right center;
+    padding-right: 20px;
+}
+
+.headerSortUp {
+    background-image: url(sorter/asc.gif);
+    background-repeat: no-repeat;
+    background-position: right center;
+}
+
+.headerSortDown {
+    background-image: url(sorter/desc.gif);
+    background-repeat: no-repeat;
+    background-position: right center;
+}
+
+table.tronTable {
+    width: 100%;
+}
+
+table.tablesorter .even {
+    background-color: #CCC;
+}
+
+table.tablesorter .odd {
+    background-color: white ;
+}
+nav.navbar {
+    padding-bottom:0px;
+}

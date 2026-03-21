@@ -1,0 +1,96 @@
+﻿@using Elecredesign.Core
+@using Electrons.Core.Net8
+@using Electrons.Net8
+@using Electrons.Net8.Models
+@model BoxScore
+@{
+    var home = (bool)ViewData["home"];
+    var logo = (string)ViewData["logo"];
+    var team = (string)ViewData["team"];
+    var alignCss = home ? "" : "alignRight";
+}
+
+<table class="scoreTable @alignCss" style="width:100%">
+    <tr>
+        <td colspan="5">
+            <p class="teamName">@Html.Image(@logo,"35")<span style="margin-left:5px;">@team</span></p>
+        </td>
+    </tr>
+    <tr>
+        <th style=" min-width:130px;text-align:left">Hitters</th>
+        <th style="width: 30px;text-align: center">AB</th>
+        <th style="width:30px;text-align:center">R</th>
+        <th style="width: 30px;text-align: center">H</th>
+        <th style="width: 30px;text-align: center">RBI</th>
+    </tr>
+    @foreach (var stat in Model.HittingBox.Stats)
+    {
+        <tr style="height:26px" class="@(stat.Player==Model.CurrentHitter? "current":"")">
+            <td style="text-align:left">@stat.Player.FullName<span class="posString">@(stat.Player.Position == null ?"" : stat.Player.Position.PositionString)</span></td>
+            <td style="text-align:center">@stat.AB</td>
+            <td style="text-align:center">@stat.Runs</td>
+            <td style="text-align:center">@stat.H</td>
+            <td style="text-align:center">@stat.RBI</td>
+        </tr>
+    }
+</table>
+<table class="statData @alignCss" style="margin-top:20px;width:100%">
+    <tr>
+        <th>Hitting</th>
+    </tr>
+    @Html.DisplayFor(m => m.HittingBox.Doubles)
+    @Html.DisplayFor(m => m.HittingBox.Triples)
+    @Html.DisplayFor(m => m.HittingBox.HomeRuns)
+    @Html.DisplayFor(m => m.HittingBox.Rbis)
+    @if (Model.RispAb > 0)
+    {
+        <tr style="height:26px">
+            <td>
+                <span style="font-weight:bold">RISP H/AB -&nbsp;</span>
+                <span>@Model.RispH/@Model.RispAb</span>
+            </td>
+        </tr>
+    }
+</table>
+@if (Model.HittingBox.Stats.Any(a => a.SB > 0 || a.CS > 0))
+{
+    <table class="statData @alignCss" style="margin-top:20px;width:100%">
+        <tr>
+            <th>Base Running</th>
+        </tr>
+        @Html.DisplayFor(m => m.HittingBox.StolenBases)
+        @Html.DisplayFor(m => m.HittingBox.CaughtStealing)
+    </table>
+}
+<table class="scoreTable" style="width:100%;margin-top:20px">
+    <tr>
+        <th style=" min-width:150px;text-align:left">Pitchers</th>
+        <th style="width: 30px;text-align: center">IP</th>
+        <th style="width:30px;text-align:center">R</th>
+        <th style="width: 30px;text-align: center">H</th>
+        <th style="width: 30px;text-align: center">K</th>
+    </tr>
+    @foreach (var stat in Model.PitchingBox.Stats)
+    {
+        var decisionText = "";
+        if (stat.Decision != Decision.ND)
+        {
+            decisionText = string.Format("({0})", stat.Decision.GetDescription());
+        }
+        <tr style="height:26px">
+            <td style="text-align:left">@stat.Player.FullName&nbsp;@decisionText</td>
+            <td style="text-align:center">@stat.IP</td>
+            <td style="text-align:center">@stat.R</td>
+            <td style="text-align:center">@stat.H</td>
+            <td style="text-align:center">@stat.K</td>
+        </tr>
+    }
+</table>
+<table class="statData @alignCss" style="margin-top:20px;width:100%">
+    <tr>
+        <th>Pitching</th>
+    </tr>
+    @Html.DisplayFor(m => m.PitchingBox.Pitches)
+    @Html.DisplayFor(m => m.PitchingBox.BattersFaced)
+    @Html.DisplayFor(m => m.PitchingBox.BattedBalls)
+</table>

@@ -1,0 +1,119 @@
+﻿@using Elecredesign
+@using Electrons.Net8
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <link rel="icon" href="/favicon.ico" />
+
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+
+    <link href="~/Content/bootstrap-icons.css" rel="stylesheet" />
+    <!-- Electrons theme -->
+    <link href="~/Content/electrons.css" rel="stylesheet" />
+
+</head>
+
+<body role="document" style="margin-left:25px;margin-right:25px; padding:5px">   
+    <!-- navbar -->
+    <div class="tronHeaderbar menuStyle">
+        <p><span style="position:absolute;left:10px">@ViewBag.LocalText</span>Baseball Club</p>
+    </div>
+    <div class="tronHeaderlogo"><img src="~/Content/images/headerlogo.gif" width="350" height="100" /></div>
+
+    <nav class="navbar navbar-expand-sm tronNavbar navbar-inverse sticky-top" role="navigation">
+        <div class="container-fluid">
+
+            <div class="navbar-header">
+                <button type="button" class="btn btn-outline-light navbar-toggle d-md-none collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <i class="bi bi-list"></i>
+                </button>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse justify-content-center ">
+                <div class="row w-100 ">
+                    <div class="col col-auto ml-auto mr-auto">
+                        <ul class="nav navbar-nav w-100 ml-auto mr-auto tronNav">
+                            <li class="menuStyle"><a href="~/" class="headerLink ">Home</a></li>
+                            <li class="menuStyle"><a href="~/Schedule" class="headerLink">Schedule</a></li>
+                            <li class="menuStyle"><a href="~/Statistics" class="headerLink">Statistics</a></li>
+                            <li class="menuStyle"><a href="~/Roster" class="headerLink">Roster</a></li>
+                            <li class="menuStyle"><a href="~/DepthChart" class="headerLink">Depth Chart</a></li>
+                            <li class="menuStyle"><a href="~/History" class="headerLink">History</a></li>
+                            <li class="menuStyle"><a href="~/Ballpark" class="headerLink">Ball Park</a></li>
+                            <li class="mr-2 float-lg-right"><a href="http://www.facebook.com/pages/Ks-Dugout/191467100876630" class="headerLink" target="_ks"><img src="~/Content/images/navsponsor.png" class=" float-right" width="30" height="50" alt="k's dugout" /></a></li>
+                            <li class=" mr-2 float-lg-right"><a href="http://www.electricalaudio.com/" class="headerLink" target="_electricalAudio"><img src="~/Content/images/navelectricalaudio.png" class="float-right" width="30" height="50" alt="electrical audio" /></a></li>
+                            <li class=" mr-2 float-lg-right"><a href="http://twitter.com/ElectronsBBall" class="headerLink" target="_twitter"><img src="~/Content/images/navtwitter.png" class="float-right" alt="follow us" width="30" height="50" /></a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div><!--/.nav-collapse -->
+        </div>
+    </nav>
+
+
+    @RenderBody()
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+
+    <script src="~/Scripts/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="~/Scripts/jquery.tablesorter.min.js"></script>
+    <script src="~/Scripts/jquery.tablesorter.widgets.js"></script>
+    <script>
+        $(document).on("ajaxStart",function () {
+            $('#loadingDiv').show();
+        })
+        $(document).on("ajaxStop",function () {
+            $('#loadingDiv').hide();
+        })
+        $(document).ready(function () {
+            
+            $(".tablesorter").tablesorter({
+                cssHeader: 'header',
+                cssAsc: 'headerSortUp',
+                cssDesc: 'headerSortDown',
+                sortInitialOrder: 'desc',
+                sortList: [[0, 0]],
+                widgets: ['zebra']
+            });
+            $(".getleaders").on('click', function (e) {
+                e.preventDefault();
+                var form = $("#myForm");
+                var url = form.attr("action");
+                var useHit = $(this).attr('name') == 'Hit';
+                var data = { Hit: useHit };
+                if (useHit) {
+                    data.Stat = $('#SelectedCategory').val();
+                    $('input.hit:checked').each(function (index) {
+                        data.Category = $(this).val();
+                        console.log('Category val: ' + $(this).val());
+                    })
+                } else {
+                    data.Stat = $('#SelectedPitchCategory').val();
+                    $('input.pitch:checked').each(function (index) {
+                        data.Category = $(this).val();
+                        console.log('Category val: ' + $(this).val());
+
+                    })
+                }
+                data.hit = useHit;
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: data,
+                    success: function (result) {
+                        $("#stats").html(result);
+                    }
+                });
+            })
+        });
+    </script>
+</body>
+</html>

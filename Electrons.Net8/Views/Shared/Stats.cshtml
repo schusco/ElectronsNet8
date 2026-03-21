@@ -1,0 +1,9 @@
+﻿@model LeadersModel
+@using Elecredesign;
+@using Electrons.Net8
+@using Electrons.Net8.Models
+@{
+    ViewBag.Title = "Stats";
+}
+
+@Html.Table(Model.Stats, "tronTable", "tronTable oddrow", new { @class = "tronTable" })
