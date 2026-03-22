@@ -8,6 +8,6 @@ deploy_godaddy:
   script:
     # Use the existing publish profile. 
     # Note: We pass the password via variable to keep it out of the repo.
-    - dotnet publish Electrons.Net8/Electrons.Net8.csproj -c Release /p:PublishProfile="dev.electronsbaseball.com - Web Deploy" /p:Password="$env:GD_PASSWORD" /p:AllowUntrustedCertificate=True
+    - dotnet publish Electrons.Net8/Electrons.Net8.csproj -c Release /p:PublishProfile="dev.electronsbaseball.com - Web Deploy.pubxml" /p:Password="$env:GD_PASSWORD" /p:AllowUntrustedCertificate=True
   only:
     - master
