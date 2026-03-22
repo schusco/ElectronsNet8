@@ -2,7 +2,7 @@ stages:
   - deploy
   - release
 
-deploy_godaddy:
+deploy_godaddy_dev:
   stage: deploy
   tags:
     - saas-windows-medium-amd64
@@ -12,6 +12,16 @@ deploy_godaddy:
     - dotnet publish Electrons.Net8/Electrons.Net8.csproj -c Release /p:PublishProfile="dev.electronsbaseball.com - Web Deploy.pubxml" /p:Password="$env:GD_PASSWORD" /p:AllowUntrustedCertificate=True
   only:
     - master
+
+deploy_production:
+  stage: deploy
+  tags:
+    - saas-windows-medium-amd64
+  script:
+    - dotnet publish Electrons.Net8/Electrons.Net8.csproj -c Release /p:PublishProfile="GoDaddy Electrons Prod - Web Deploy.pubxml" /p:Password="$env:GD_PASSWORD" /p:AllowUntrustedCertificate=True 
+  when: manual
+  only:
+    - tags
 
 create_release:
   stage: release
