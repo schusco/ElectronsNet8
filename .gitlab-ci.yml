@@ -18,15 +18,10 @@ create_release:
   tags:
     - saas-windows-medium-amd64
   script:
-    - |
-      $body = @{
-        name = "Release $CI_COMMIT_TAG"
-        tag_name = "$CI_COMMIT_TAG"
-        description = "Stable build of ElectronsNet8 - $CI_COMMIT_TAG"
-      } | ConvertTo-Json
-      Invoke-RestMethod -Method Post -Uri "$CI_API_V4_URL/projects/$CI_PROJECT_ID/releases" `
-        -Headers @{"PRIVATE-TOKEN"="$CI_JOB_TOKEN"} `
-        -ContentType "application/json" `
-        -Body $body
+    - echo "Creating release for $CI_COMMIT_TAG"
+  release:
+    tag_name: '$CI_COMMIT_TAG'
+    description: 'Stable build of ElectronsNet8 - $CI_COMMIT_TAG'
+    ref: '$CI_COMMIT_SHA'
   only:
     - tags
