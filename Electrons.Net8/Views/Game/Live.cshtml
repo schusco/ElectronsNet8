@@ -95,7 +95,7 @@
     <div class="row">
         <div class="col col-md-6 ml-auto mr-auto">
             <div class="d-none d-md-flex">
-                @Html.Partial("LineScore")
+                <partial name="LineScore" />
             </div>
         </div>
     </div>
@@ -113,7 +113,7 @@
                     <div class="row" style="margin-top:5px">
                         <div class="col-md-3">
                             <div style="margin-right:0;margin-left:auto;text-align:right">
-                                @Html.Partial("BoxScore", Model.AwayBox, ViewData)
+                                <partial name="BoxScore" for="AwayBox" view-data="ViewData" />
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -164,7 +164,7 @@
                                             </div>
                                         </div>
                                         <div role="tabpanel" class="tab-pane" id="defense">
-                                            @Html.Partial("DefensiveAlignment", Model.Defense, ViewData)
+                                            <partial name="DefensiveAlignment" for="Defense" view-data="ViewData" />
                                         </div>
                                     </div>
                                 </div>
@@ -184,7 +184,7 @@
                                 ViewData["logo"] = Model.HomeLogo;
                                 ViewData["team"] = Model.HomeName;
                             }
-                            @Html.Partial("BoxScore", Model.HomeBox, ViewData)
+                            <partial name="BoxScore" for="HomeBox" view-data="ViewData" />
                         </div>
                     </div>
                 </div>

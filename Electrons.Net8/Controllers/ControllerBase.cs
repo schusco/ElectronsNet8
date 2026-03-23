@@ -49,11 +49,6 @@ namespace Electrons.Net8.Controllers
         {
             Log = LogManager.GetLogger("ErrorLog");
             ViewBag.Title = "Winnemac Electrons Baseball";
-#if Local
-            ViewBag.LocalText = "Local Instance";
-#elif Amazon
-            ViewBag.LocalText = "Amazon Instance";
-#endif
         }
     }
 }

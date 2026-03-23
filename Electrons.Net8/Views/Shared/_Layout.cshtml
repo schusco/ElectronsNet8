@@ -22,7 +22,16 @@
 <body role="document" style="margin-left:25px;margin-right:25px; padding:5px">   
     <!-- navbar -->
     <div class="tronHeaderbar menuStyle">
-        <p><span style="position:absolute;left:10px">@ViewBag.LocalText</span>Baseball Club</p>
+        <p><span style="position:absolute;left:10px">
+            <environment include="Development">
+                <strong>NOTICE:</strong>Local Db instance
+            </environment>            
+            <environment include="Staging">
+                <strong>TESTING:</strong>Staging Db instance
+            </environment>
+            </span>
+            Baseball Club
+        </p>
     </div>
     <div class="tronHeaderlogo"><img src="~/Content/images/headerlogo.gif" width="350" height="100" /></div>
 
