@@ -1,38 +1,56 @@
 ﻿using Electrons.Core.Net8.Entities;
 using Electrons.Core.Net8.Games;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Primitives;
 using NHibernate;
 using NHibernate.Criterion;
 using NHibernate.Transform;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Electrons.Core.Net8.Infrastructure
 {
-    public class Repository
+    public interface IRepository
     {
-        public Repository(DatabaseConfig config, int currentGameId)
+        Task<IList<HittingStatsRow>> GetSeasonHittingStatsAsync(int year, bool playoffs = false, DateTime? toDate = null);
+        Task<IList<PitchingStatsRow>> GetSeasonPitchingStatsAsync(int year, bool playoffs = false);
+        Task<DateTime> GetStatsLastUpdatedAsync();
+        //Task<IList<HittingStatsRow>> GetCareerHittingStatsAsync();
+        // Task<IList<PitchingStatsRow>> GetCareerPitchingStatsAsync();
+    }
+    public class Repository : IRepository
+    {
+        private readonly ISession _session;
+        private readonly IMemoryCache _cache;
+        private static CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private readonly object _lock = new object();
+        public Repository(ISession session, IMemoryCache cache)
+        {
+            _session = session;
+            _cache = cache;
+        }
+        public Repository(DatabaseConfig config)
         {
             var helper = new NHibernateHelper(config);
-            Session = helper.OpenSession(false);
-            CurrentGameId = currentGameId;
+            _session = helper.OpenSession(false);
         }
-
-        public ISession Session { get; }
+        public ISession Session { get => _session; }
         public int CurrentYear => Session.QueryOver<GameData>().SelectList(s => s.SelectMax(q => q.GameDate)).SingleOrDefault<DateTime>().Year;
-        public bool IsLiveGameInProgress
-        {
-            get
-            {
-                var game = CurrentLiveGame;
-                return game.IsStarted && !game.IsGameOver;
-            }
-        }
-        public BaseballGame CurrentLiveGame => Session.Get<GameData>(CurrentGameId).FullGame;
-        private int CurrentGameId { get; set; }
+        //public bool IsLiveGameInProgress
+        //{
+        //    get
+        //    {
+        //        var game = CurrentLiveGame;
+        //        return game.IsStarted && !game.IsGameOver;
+        //    }
+        //}
+        //public BaseballGame CurrentLiveGame => Session.Get<GameData>(CurrentGameId).FullGame;
+        //private int CurrentGameId { get; set; }
         public IEnumerable<StandingsRow> GetStandings(string division = "")
         {
             var query = Session.QueryOver<StandingsRow>().Where(w => w.IsActive).OrderBy(o => o.Points).Desc.ThenBy(t => t.Losses).Asc.ThenBy(t => t.Wins).Desc;
@@ -262,7 +280,7 @@ namespace Electrons.Core.Net8.Infrastructure
                 Session.SaveOrUpdate(game);
             });
         }
-        public IList<HittingStatsRow> GetCareerHittingStats()
+        private async Task<IList<HittingStatsRow>> GetCareerHittingStatsAsync()
         {
             HittingStatsRow model = null;
             PlayerProfile player = null;
@@ -292,12 +310,14 @@ namespace Electrons.Core.Net8.Infrastructure
                                 ).Where(() => !player.IsHidden)
                                 .TransformUsing(Transformers.AliasToBean<HittingStatsRow>());
 
-            var list = query.List<HittingStatsRow>()
-                .OrderBy(o => o.Year).ThenBy(o => o.Playoff).ToList();
-            list.ForEach(f => f.DisplayAll(true));
+            var list = await query.ListAsync<HittingStatsRow>();
+            //var 
+            //  .Result.ToList();
+            //                .OrderBy(o => o.Year).ThenBy(o => o.Playoff).ToList();
+            //list.ForEach(f => f.DisplayAll(true));
             return list;
         }
-        public IList<PitchingStatsRow> GetCareerPitchingStats()
+        public async Task<IList<PitchingStatsRow>> GetCareerPitchingStatsAsync()
         {
             PitchingStatsRow row = null;
             GameData subGame = null;
@@ -320,7 +340,7 @@ namespace Electrons.Core.Net8.Infrastructure
                 .Where(w => w.DecisionVal == "S" || w.DecisionVal == "BS" || w.DecisionVal == "BS,W" || w.DecisionVal == "BS,L").Where(w => w.Player.Id == player.Id && game.Playoff == subGame.Playoff)
                 .Where(Restrictions.EqProperty(NhProjections.Year(() => game.GameDate), NhProjections.Year(() => subGame.GameDate)));
 
-            var list = Session.QueryOver<PitchingStats>()
+            var list = await Session.QueryOver<PitchingStats>()
                 .JoinAlias(j => j.Game, () => game)
                 .JoinAlias(j => j.Player, () => player)
                 .SelectList(z => z.SelectCount(s => s.Id).WithAlias(() => row.Games)
@@ -345,8 +365,9 @@ namespace Electrons.Core.Net8.Infrastructure
                  .SelectGroup(() => game.Playoff).WithAlias(() => row.Playoff)
                  .Select(Projections.GroupProperty(NhProjections.Year(() => game.GameDate)).WithAlias(() => row.Year))
                  ).Where(() => !player.IsHidden)
-                 .TransformUsing(Transformers.AliasToBean<PitchingStatsRow>()).List<PitchingStatsRow>().ToList();
-            list.ForEach(f => f.DisplayAll(true));
+                 .TransformUsing(Transformers.AliasToBean<PitchingStatsRow>()).ListAsync<PitchingStatsRow>();
+
+            // list.ForEach(f => f.DisplayAll(true));
             return list;
         }
         public IList<HittingStatsRow> GetCareerHittingStats(int pid)
@@ -532,6 +553,35 @@ namespace Electrons.Core.Net8.Infrastructure
             // from hittingstats h join gameschedule g on g.game_id=h.game_id join players p on p.player_id=h.player_id where year(game_date)=@param2 and playoff=@param1
             //group by p.last_name,p.first_name,year(game_date),g.playoff";
         }
+        public async Task<IList<HittingStatsRow>> GetSeasonHittingStatsAsync(int year, bool playoffs = false, DateTime? toDate = null)
+        {
+            HittingStatsRow model = null;
+            PlayerProfile player = null;
+            GameData game = null;
+            var query = Session.QueryOver<HittingStats>().JoinAlias(j => j.Game, () => game)
+                .JoinAlias(j => j.Profile, () => player)
+                .Where(Restrictions.Eq(NhProjections.Year(() => game.GameDate), year))
+                .Where(() => game.Playoff == playoffs).Where(() => !player.IsHidden);
+            if (year == CurrentYear)
+                query = query.Where(() => player.Current);
+            if (toDate.HasValue)
+                query = query.Where(() => game.GameDate < toDate);
+
+            query = GetHittingSelectList(query, Projections.GroupProperty(Projections.Property(() => player.Id)), () => model.Id);
+
+            var list = await query.ListAsync<HittingStatsRow>();
+
+            list.ToList().ForEach(f =>
+            {
+                f.Player = Player.Create(f.UniformNumber, f.FirstName, f.LastName);
+                f.DisplayAll(true);
+            });
+
+            if (list.Any())
+                AddHittingTotals(list);
+
+            return list;
+        }
         public IList<PitchingStatsRow> GetSeasonPitchingStats(int year, bool playoffs = false)
         {
             PitchingStatsRow row = null;
@@ -563,6 +613,25 @@ namespace Electrons.Core.Net8.Infrastructure
             // from pitchingstats h join gameschedule g on g.game_id=h.game_id join players p on p.player_id=h.player_id where year(game_date)=@param2 and playoff=@param1
             //group by p.last_name,p.first_name,year(game_date),g.playoff";
 
+        }
+        public async Task<IList<PitchingStatsRow>> GetSeasonPitchingStatsAsync(int year, bool playoffs = false)
+        {
+            PitchingStatsRow row = null;
+            PlayerProfile player = null;
+            GameData game = null;
+            var query = Session.QueryOver<PitchingStats>()
+                .JoinAlias(j => j.Game, () => game)
+                .JoinAlias(j => j.Player, () => player)
+                .Where(Restrictions.Eq(NhProjections.Year(() => game.GameDate), year))
+                .Where(() => game.Playoff == playoffs).Where(() => !player.IsHidden);
+
+            query = GetPitchingSelectList(query, year, false, () => row.Id);
+            var list = await query.ListAsync<PitchingStatsRow>();
+            list.ToList().ForEach(a => a.DisplayAll(true));
+            if (list.Any())
+                AddPitchingTotals(list);
+
+            return list;
         }
         public bool UpdateGame(GameData game, IsolationLevel level)
         {
@@ -681,6 +750,43 @@ namespace Electrons.Core.Net8.Infrastructure
             }
         }
 
+        public async Task<DateTime> GetStatsLastUpdatedAsync()
+        {
+            var p = await Session.GetAsync<PlayerProfile>(0);
+            return p.DOB.Value;
+        }
+        private async Task<T> GetCareerStatsFromCacheAsync<T>(string cacheKey, Func<Task<T>> queryMethod) where T : IEnumerable<IDisplayToggleable>
+        {
+            if (!_cache.TryGetValue(cacheKey, out T stats))
+            {
+                stats = await queryMethod();
+                if (stats != null)
+                {
+                    foreach (var item in stats)
+                        item.DisplayAll(true);
+                }
+                var cacheEntryOptions = new MemoryCacheEntryOptions().AddExpirationToken(new CancellationChangeToken(_cancellationTokenSource.Token));
+                _cache.Set(cacheKey, stats, cacheEntryOptions);
+            }
+            return stats;
+        }
+        public async Task<IList<HittingStatsRow>> GetCareerHittingStatsFromCacheAsync()
+        {
+            return await GetCareerStatsFromCacheAsync("HittingRecords", GetCareerHittingStatsAsync);
+        }
+        public async Task<IList<PitchingStatsRow>> GetCareerPitchingStatsFromCacheAsync()
+        {
+            return await GetCareerStatsFromCacheAsync("PitchingRecords", GetCareerPitchingStatsAsync);
+        }
+        public void ResetRecordsCache()
+        {
+            lock (_lock)
+            {
+                _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
+                _cancellationTokenSource = new CancellationTokenSource();
+            }         
+        }
     }
 }
 

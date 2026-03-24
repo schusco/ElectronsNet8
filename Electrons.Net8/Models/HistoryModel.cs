@@ -1,10 +1,11 @@
 ﻿using Electrons.Core.Net8.Entities;
 using Electrons.Core.Net8.Infrastructure;
+using System;
 using System.Collections.Generic;
 
 namespace Electrons.Net8.Models
 {
-    public class HistoryModel
+    public class HistoryModel : StatsBasedCacheModel
     {
         public HistoryModel(Repository repo)
         {
@@ -15,8 +16,7 @@ namespace Electrons.Net8.Models
             Manager = repo.GetManagers();
             Retired = repo.GetHistory<RetiredNumbers>();
             Players = repo.Get162Players();
-        }
-
+        }        
         public IList<FranchiseHistory> Franchise { get; set; }
         public IList<StadiumHistory> Stadium { get; set; }
         public IList<PlayoffHistory> Championship { get; set; }

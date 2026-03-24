@@ -3,12 +3,14 @@ using Electrons.Net8.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using System;
 
 namespace Electrons.Net8.Controllers
 {
-    public class ScheduleController(IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings) : ControllerBase(httpContextAccessor, env, settings)
+    public class ScheduleController(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings) :
+        ControllerBase(session, cache, httpContextAccessor, env, settings)
     {
         [Route("schedule/{year:int?}/{month:int?}")]
         public ActionResult Index(int? month, int? year)

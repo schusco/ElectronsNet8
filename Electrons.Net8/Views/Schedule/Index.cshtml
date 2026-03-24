@@ -55,6 +55,7 @@
 
         </div>
     </div>
+    <cache expires-sliding="@TimeSpan.FromMinutes(5)" >
     <div class="row">
         <div class="col col-xs-12">
             <table class="schedTable">
@@ -136,6 +137,7 @@
             </table>
         </div>
     </div>
+    </cache>
     <div class="row">
         @foreach (var link in Model.Links)
         {

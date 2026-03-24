@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using System.Text;
 using System.Text.Json;
@@ -19,13 +20,13 @@ namespace Electrons.Net8.Controllers
         protected HttpContext CurrentContext => _httpContextAccessor.HttpContext;
         protected IWebHostEnvironment WebHostEnvironment { get; set; }
         protected GameSettings GameSettings { get; set; }
-        public ControllerBase(IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings)
+        public ControllerBase(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings)
         {
             _httpContextAccessor = httpContextAccessor;
             GameSettings = settings.Value;
             WebHostEnvironment = env;
             var configPath = WebHostEnvironment.ContentRootPath;
-            Repository = new Repository(GameSettings.DefaultConnection, GameSettings.CurrentGameId);
+            Repository = new Repository(session, cache);
         }
         protected T GetSessionValue<T>(string key) where T : class
         {

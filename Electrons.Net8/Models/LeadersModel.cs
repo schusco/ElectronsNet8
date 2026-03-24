@@ -91,7 +91,7 @@ namespace Electrons.Net8.Models
                     if (qualifier) filteredStats = filteredStats.Where(w => w.Innings > threshold);
                     tempStats = filteredStats.Select(s => LeadersRow.Create(s, statCategory, category, format));
                 }
-                if (string.IsNullOrEmpty(format))
+                if (!string.IsNullOrEmpty(format))
                     tempStats = tempStats.Where(w => int.Parse(w.Stat.ToString()) > 0);
                 if (sort)
                     Stats = tempStats.OrderBy(o => o.Stat, new StatComparer()).Where(w => w.HasValue).Take(displayTotal).ToList();

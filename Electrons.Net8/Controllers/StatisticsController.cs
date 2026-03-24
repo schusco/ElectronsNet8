@@ -9,20 +9,23 @@ using Electrons.Core.Net8.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Options;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Electrons.Net8.Controllers
 {
-    public class StatisticsController(IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings) : ControllerBase(httpContextAccessor, env, settings)
+    public class StatisticsController(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings)
+        : ControllerBase(session, cache, httpContextAccessor, env, settings)
     {
         [Route("statistics/{id:int?}/{type?}")]
-        public ActionResult Index(int? id, string type)
+        public async Task<IActionResult> Index(int? id, string type)
         {
-            bool isPlayoffs;
-            if (type is null)
-                isPlayoffs = false;
-            else
-                isPlayoffs = type.Equals("playoffs", StringComparison.OrdinalIgnoreCase) || type.Equals("true", StringComparison.OrdinalIgnoreCase);
-            return View(GetStatsModel(id, isPlayoffs));
+            bool isPlayoffs = (type is null) ? false : type.Equals("playoffs", StringComparison.OrdinalIgnoreCase) || type.Equals("true", StringComparison.OrdinalIgnoreCase);
+            if (!id.HasValue)
+                id = Repository.Seasons().First();
+            var model = new StatsModel(id.Value);
+            await model.Fill(Repository,isPlayoffs);
+            return View(model);
         }
         public ActionResult Game(int? id)
         {
@@ -33,12 +36,13 @@ namespace Electrons.Net8.Controllers
                 return View(new GameModel(game, CurrentContext));
             return RedirectToAction("Recap", "Game", new { id = id.Value });
         }
-        public ActionResult Season(int? id, bool playoff = false) => View("Index", GetStatsModel(id, playoff));
         [HttpGet]
         public ActionResult Records() => View("Records", new LeadersModel(GameSettings));
-        public ActionResult GetLeaders(LeadersModel model)
+        public async Task<IActionResult> GetLeaders(LeadersModel model)
         {
-            model.Fill(AllHitting, AllPitching, GameSettings);
+            var hittingRecords = await Repository.GetCareerHittingStatsFromCacheAsync();
+            var pitchingRecords = await Repository.GetCareerPitchingStatsFromCacheAsync();
+            model.Fill(hittingRecords, pitchingRecords, GameSettings);
             return PartialView("Stats", model);
         }
         public ActionResult Export(int? id)
@@ -46,40 +50,6 @@ namespace Electrons.Net8.Controllers
             if (!id.HasValue && id < DateTime.Today.Year)
                 return new StatusCodeResult((int)HttpStatusCode.NoContent);
             return File(ExcelGenerator.Export(id.Value, Repository), "application/download", "stats.xlsx");
-        }
-        private StatsModel GetStatsModel(int? id, bool playoff)
-        {
-            if (!id.HasValue)
-                id = Repository.Seasons().First();
-
-            return new StatsModel(Repository, id.Value, playoff);
-        }
-
-        private IList<HittingStatsRow> AllHitting
-        {
-            get
-            {
-                var stats = GetSessionValue<IList<HittingStatsRow>>("allhitting");
-                if (stats == null)
-                {
-                    stats = Repository.GetCareerHittingStats();
-                    SetSessionObject("allhitting", stats);
-                }
-                return stats;
-            }
-        }
-        private IList<PitchingStatsRow> AllPitching
-        {
-            get
-            {
-                var stats = GetSessionValue<IList<PitchingStatsRow>>("allpitching");
-                if (stats == null)
-                {
-                    stats = Repository.GetCareerPitchingStats();
-                    SetSessionObject("allpitching", stats);
-                }
-                return stats;
-            }
-        }
+        }        
     }
 }

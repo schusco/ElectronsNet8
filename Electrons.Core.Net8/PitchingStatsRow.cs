@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Electrons.Core.Net8
 {
-    public class PitchingStatsRow
+    public class PitchingStatsRow : IDisplayToggleable
     {
         public PitchingStatsRow() { }
         public PitchingStatsRow(bool all) => _displayAll = all;

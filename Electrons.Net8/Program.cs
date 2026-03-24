@@ -1,4 +1,5 @@
 
+using Electrons.Core.Net8.Infrastructure;
 using Electrons.Net8;
 using Electrons.Net8.Models;
 using log4net.Repository.Hierarchy;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NHibernate;
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,6 +29,12 @@ builder.Services.AddSession(options =>
 });
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllersWithViews();
+builder.Services.AddMemoryCache();
+
+var config = builder.Configuration.GetSection("GameSettings").Get<GameSettings>();
+var helper = new NHibernateHelper(config.DefaultConnection);
+builder.Services.AddSingleton(NHibernateHelper.SessionFactory);
+builder.Services.AddScoped(f => f.GetRequiredService<ISessionFactory>().OpenSession());
 
 var app = builder.Build();
 app.Logger.LogInformation($"Current Environment: {app.Environment.EnvironmentName}");

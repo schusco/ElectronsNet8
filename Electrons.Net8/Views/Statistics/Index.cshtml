@@ -8,12 +8,12 @@
 <div>
     <div class="row">
         <div class="col-sm-4">
-            <div class="btn-group pt-3 pb-1" role="group"  aria-label="...">
-                <a asp-route-id="@Model.Year" asp-route-type="" class="btn btn-outline-primary" >Season</a>
+            <div class="btn-group pt-3 pb-1" role="group" aria-label="...">
+                <a asp-route-id="@Model.Year" asp-route-type="" class="btn btn-outline-primary">Season</a>
                 <a asp-route-id="@Model.Year" asp-route-type="playoffs" class="btn btn-outline-primary">Playoffs</a>
                 <a class="btn btn-outline-primary" href="~/Statistics/Records">Records</a>
             </div>
-            </div>
+        </div>
         <div class="col-sm-4" style="text-align:center">
             <h2>Pitching Stats</h2>
         </div>
@@ -26,7 +26,7 @@
                     <div class="dropdown-menu" role="menu">
                         @for (int i = 2005; i <= DateTime.Now.Year; i++)
                         {
-                            <a class="dropdown-item" href="~/Statistics/Season/@i">@i</a>
+                            <a class="dropdown-item" href="~/Statistics/@i">@i</a>
                         }
                     </div>
                 </div>
@@ -36,11 +36,18 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-sm-12">@Html.Table(Model.PitchingStats, new { @class = "tronTable tablesorter" }, true)</div>
+    <cache vary-by="@Model.StatsLastUpdated" expires-after="@TimeSpan.FromHours(1)" vary-by-route="id,type">        
+        <div class="col-sm-12">@Html.Table(Model.PitchingStats, new { @class = "tronTable tablesorter" }, true)</div>
+    </cache>
 </div>
 <div class="row">
     <div class="col-sm-12" style="text-align:center"><h2>Hitting Stats</h2></div>
 </div>
 <div class="row">
-    <div class="col-sm-12">@Html.Table(Model.HittingStats, new { @class = "tronTable tablesorter" }, true)</div>
+    <cache vary-by="@Model.StatsLastUpdated" expires-after="@TimeSpan.FromHours(1)" vary-by-route="id,type">
+        <div class="col-sm-12">@Html.Table(Model.HittingStats, new { @class = "tronTable tablesorter" }, true)</div>
+    </cache>
 </div>
+<p class="text-muted small">
+    Data last refreshed: @Model.StatsLastUpdated.ToString("g")
+</p>

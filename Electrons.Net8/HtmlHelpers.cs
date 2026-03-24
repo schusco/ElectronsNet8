@@ -163,9 +163,9 @@ namespace Electrons.Net8
                     if (valueprop == null)
                         throw new InvalidOperationException(string.Format("Property '{0}' does not exist in type '{1}'",
                                                                           prop.GetHeaderProperty(), type.Name));
-                    var testdata = data.First();
-                    var test = valueprop.GetValue(testdata, null);
-                    innertext = test.ToString();
+                    var statData = data.FirstOrDefault();
+
+                    innertext = statData is null ? "" : valueprop.GetValue(statData, null).ToString();
                 }
                 else
                     innertext = prop.Name;

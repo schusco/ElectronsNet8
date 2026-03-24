@@ -5,7 +5,11 @@ using System.Linq;
 
 namespace Electrons.Core.Net8
 {
-    public class HittingStatsRow : IHasPlayer
+    public interface IDisplayToggleable
+    {
+        void DisplayAll(bool all);
+    }
+    public class HittingStatsRow : IHasPlayer, IDisplayToggleable
     {
         public HittingStatsRow() { }
         public HittingStatsRow(bool all) => _displayAll = all;
@@ -21,7 +25,7 @@ namespace Electrons.Core.Net8
                 Playoff = s.Game.Playoff;
                 Year = s.Game.GameDate.Year;
             }
-            Player = (Player)s.Profile.Player;
+            Player = s.Profile.Player;
             AtBats = s.AtBats;
             Runs = s.Runs;
             Hits = s.Hits;
@@ -175,7 +179,7 @@ namespace Electrons.Core.Net8
                 Year = stats.First().Game.GameDate.Year,
                 Games = stats.Count(),
                 Player = stats.First().Profile.Player
-                
+
             };
         }
         public override string ToString() => $"{LastName}, {FirstName}, Year: {Year}, Playoff: {Playoff}";

@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace Electrons.Core.Net8.Infrastructure
 {
-    internal class NHibernateHelper
+    public class NHibernateHelper
     {
         /// <summary>
         /// ISessionFactory implementation is thread safe...

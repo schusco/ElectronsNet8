@@ -9,6 +9,7 @@ namespace Electrons.Net8
         {
             ThresholdSettings = new ThresholdSettings();
         }
+        public string ApiKey { get; set; }
         public DatabaseConfig DefaultConnection { get; set; }
         public int CurrentGameId { get; set; }
         public string JumboText { get; set; }

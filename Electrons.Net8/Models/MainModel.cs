@@ -26,10 +26,10 @@ namespace Electrons.Net8.Models
                 AwayTeam = gd.AwayTeam;
                 GameDate = gd.GameDate.ToString("g");
                 Location = data.Location.Field;
-                var inProgress = repo.IsLiveGameInProgress;
-                if (gd.GameDate.Date == DateTime.Today && gd.GameDate.AddHours(4) > DateTime.Now && inProgress)
+                //var inProgress = repo.IsLiveGameInProgress;
+                if (gd.GameDate.Date == DateTime.Today && gd.GameDate.AddHours(4) > DateTime.Now)
                     NextGameInProgress = true;
-                else if (gd.GameDate.AddHours(18) < DateTime.Now && !inProgress)
+                else if (gd.GameDate.AddHours(18) < DateTime.Now)
                     NextGameRecap = true;
             }
             Standings = repo.GetStandings("CMBA").OrderByDescending(o => o.Points).ThenByDescending(o => o.Wins);
