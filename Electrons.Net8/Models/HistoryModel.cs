@@ -7,7 +7,7 @@ namespace Electrons.Net8.Models
 {
     public class HistoryModel : StatsBasedCacheModel
     {
-        public HistoryModel(Repository repo)
+        public HistoryModel(Repository repo,DateTime lastUpdate)
         {
             Franchise = repo.GetHistory<FranchiseHistory>();
             Stadium = repo.GetHistory<StadiumHistory>();
@@ -16,6 +16,7 @@ namespace Electrons.Net8.Models
             Manager = repo.GetManagers();
             Retired = repo.GetHistory<RetiredNumbers>();
             Players = repo.Get162Players();
+            StatsLastUpdated = lastUpdate;
         }        
         public IList<FranchiseHistory> Franchise { get; set; }
         public IList<StadiumHistory> Stadium { get; set; }

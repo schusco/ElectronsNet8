@@ -60,7 +60,7 @@ namespace Electrons.Core.Net8.Infrastructure
         }
         public IList<PlayerHistory> Get162Players()
         {
-            return Session.QueryOver<PlayerHistory>().OrderBy(o => o.Date).Asc.List();
+            return Session.QueryOver<PlayerHistory>().List().OrderBy(o => o.Date).ToList();
         }
         public IList<BirthdayModel> GetBirthdays(int month)
         {

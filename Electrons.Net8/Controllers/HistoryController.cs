@@ -14,10 +14,7 @@ namespace Electrons.Net8.Controllers
         public async Task<IActionResult> Index()
         {
             var lastUpdate = await Repository.GetStatsLastUpdatedAsync();
-            var model = new HistoryModel(Repository)
-            {
-                StatsLastUpdated = lastUpdate
-            };
+            var model = new HistoryModel(Repository,lastUpdate);
             return View(model);
         }
     }

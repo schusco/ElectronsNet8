@@ -28,7 +28,7 @@ namespace Electrons.Core.Net8.Entities
                 return $"{YearStart} - {endYear}";
             }
         }
-        public virtual string YearHeader => "Years";        
+        public virtual string YearHeader => "Years";
         public virtual string Category { get; protected set; }
 
         public override string ToString() => $"{YearStart} - {Data} - {Finish}";
@@ -170,26 +170,15 @@ namespace Electrons.Core.Net8.Entities
             };
         }
     }
-    [Class(Table = "notablePlayers")]
-    public class PlayerHistory
+    [Subclass(ExtendsType = typeof(HistoryRow), DiscriminatorValue = "Player")]
+    public class PlayerHistory:HistoryRow
     {
         public PlayerHistory() { }
-        public PlayerHistory(string lname, string fname, DateTime date)
-        {
-            LastName = lname;
-            FirstName = fname;
-            Date = date;
-        }
-        [Property(Column = "First_Name")]
-        public virtual string FirstName { get; set; }
-        [Id(Name = "LastName", Column = "Last_Name")]
-        public virtual string LastName { get; set; }
-        [TableColumn(SortOrder = 5)]
-        public virtual string Player => $"{FirstName} {LastName}";
-
-        [Property(Column = "Date")]
-        public virtual DateTime Date { get; protected set; }
-        [TableColumn(SortOrder = 10, HeaderText = "Date")]
-        public virtual string GameDate => Date.ToShortDateString();
+        [TableColumn(HeaderText = "Player", SortOrder = 5)]
+        public override string Data { get ; protected set ; }
+        [TableColumn(HeaderText = "Date", SortOrder = 10)]
+        public override string Finish { get; protected set; }
+        public override string YearData => base.YearData;
+        public virtual DateTime Date => DateTime.Parse(Finish);
     }
 }
