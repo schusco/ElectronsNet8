@@ -34,7 +34,13 @@ builder.Services.AddMemoryCache();
 var config = builder.Configuration.GetSection("GameSettings").Get<GameSettings>();
 var helper = new NHibernateHelper(config.DefaultConnection);
 builder.Services.AddSingleton(NHibernateHelper.SessionFactory);
-builder.Services.AddScoped(f => f.GetRequiredService<ISessionFactory>().OpenSession());
+builder.Services.AddScoped(f =>
+{
+    var factory = f.GetRequiredService<ISessionFactory>();
+    var session = factory.OpenSession();
+    session.CreateSQLQuery($"SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));").ExecuteUpdate();
+    return session;
+});
 
 var app = builder.Build();
 app.Logger.LogInformation($"Current Environment: {app.Environment.EnvironmentName}");
