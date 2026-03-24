@@ -20,7 +20,7 @@ namespace Electrons.Net8.Controllers
             return Json(games.Select(GameJson.Create));
         }
         [AllowAnonymous, HttpPost("admin/clear-cache")]
-        public IActionResult ClearRecordsCache([FromHeader(Name = "X-Api=Key")] string apiKey)
+        public IActionResult ClearRecordsCache([FromHeader(Name = "X-Api-Key")] string apiKey)
         {
             if (string.IsNullOrEmpty(apiKey) || apiKey != GameSettings.ApiKey)
                 return Unauthorized();
