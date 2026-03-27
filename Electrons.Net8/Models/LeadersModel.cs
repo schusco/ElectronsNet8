@@ -49,7 +49,7 @@ namespace Electrons.Net8.Models
                 else if (statCategory == StatsCategory.Season)
                 {
                     threshold = Thresholds.SeasonHitting;
-                    tempStats = hitting.Select(s => LeadersRow.Create(s, PitchCategory, category, format));
+                    tempStats = hitting.Select(s => LeadersRow.Create(s, statCategory, category, format));
                 }
                 else
                 {
