@@ -740,12 +740,12 @@ namespace Electrons.Core.Net8.Infrastructure
             {
                 Session.BeginTransaction(level);
                 code.Invoke();
-                Session.Transaction.Commit();
+                Session.GetCurrentTransaction().Commit();
                 return true;
             }
             catch (Exception)
             {
-                Session.Transaction.Rollback();
+                Session.GetCurrentTransaction().Rollback();
                 return false;
             }
         }

@@ -1,3 +1,3 @@
 ﻿@using Electrons.Core.Net8
 @model BirthdayModel
-<span class="birthdayText">@Model.DisplayText</span><br/>
+<span class="birthdayText">@Model.DisplayText(Model.BirthDate.Year)</span><br/>

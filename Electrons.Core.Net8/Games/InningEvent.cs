@@ -193,7 +193,6 @@ namespace Electrons.Core.Net8.Games
         protected internal void AddRunningEventsToString(StringBuilder sb, Player batter)
         {
             bool scoringAdded = false;
-            bool advancesAdded = false;
             foreach (var rev in RunningEvents.OrderBy(o => o.Sequence))
             {
                 if (rev is OutOnBases)

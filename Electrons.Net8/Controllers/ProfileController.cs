@@ -19,7 +19,7 @@ namespace Electrons.Net8.Controllers
             if (profile is null || profile.Nickname == "XX")
                 return RedirectToAction("Index", "Roster");
             var model = new ProfileModel(profile, Repository.GetCareerHittingStats(id.Value), Repository.GetCareerPitchingStats(id.Value));
-            model.ImageFile = System.IO.File.Exists(Path.Combine(env.WebRootPath, model.ImageFile)) ? model.ImageFile : "Content/images/players/NotAvailable.png";
+            model.ImageFile = System.IO.File.Exists(Path.Combine(WebHostEnvironment.WebRootPath, model.ImageFile)) ? model.ImageFile : "Content/images/players/NotAvailable.png";
             return View(model);
         }
 
