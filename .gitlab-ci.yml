@@ -9,7 +9,7 @@ deploy_godaddy_dev:
   script:
     # Use the existing publish profile. 
     # Note: We pass the password via variable to keep it out of the repo.
-    - dotnet publish Electrons.Net8/Electrons.Net8.csproj -c Release /p:PublishProfile="dev.electronsbaseball.com - Web Deploy.pubxml" /p:Password="$env:GD_PASSWORD" /p:AllowUntrustedCertificate=True
+    - dotnet publish Electrons.Net8/Electrons.Net8.csproj -c Release /p:PublishProfile="test.electronsbaseball.com - Web Deploy.pubxml" /p:Password="$env:GD_PASSWORD" /p:AllowUntrustedCertificate=True
   only:
     - master
 
@@ -18,7 +18,7 @@ deploy_production:
   tags:
     - saas-windows-medium-amd64
   script:
-    - dotnet publish Electrons.Net8/Electrons.Net8.csproj -c Release /p:PublishProfile="GoDaddy Electrons Prod - Web Deploy.pubxml" /p:Password="$env:GD_PASSWORD" /p:AllowUntrustedCertificate=True 
+    - dotnet publish Electrons.Net8/Electrons.Net8.csproj -c Release /p:PublishProfile="deploy.electronsbaseball.com - Web Deploy.pubxml" /p:Password="$env:GD_PASSWORD" /p:AllowUntrustedCertificate=True 
   when: manual
   only:
     - tags

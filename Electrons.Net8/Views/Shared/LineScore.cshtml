@@ -57,9 +57,16 @@
         <td class="text-center">@Model.HomeErrors</td>
     </tr>
     <tfoot>
-        <tr>
-            <td colspan="@(Model.TotalInnings+5)" >
+        <tr>@{
+                var TotalColumns = Model.TotalInnings + 5;
+                var locColumns = TotalColumns / 2;
+                var dateColumns = TotalColumns - locColumns;
+            }
+            <td colspan="@locColumns" >
                 @Model.LocationText&nbsp;&nbsp;<span style="font-size:11px;color:#666">@Model.CityText</span>
+            </td>
+            <td colspan="@dateColumns" style="text-align:right; padding-right:1em">
+                @Model.DateString
             </td>
         </tr>
     </tfoot>

@@ -2,6 +2,7 @@
 using Electrons.Core.Net8.Entities;
 using Electrons.Core.Net8.Games;
 using Electrons.Core.Net8.Infrastructure;
+using Google.Protobuf.WellKnownTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +35,7 @@ namespace Electrons.Net8.Models
         private void Fill(BaseballGame fullGame, DateTime gameDate, Location location, List<HittingStatsRow> seasonStats = null)
         {
             Title = $"{fullGame.AwayTeam} @ {fullGame.HomeTeam}, {fullGame.GameDate.ToShortDateString()}";
+            DateString = fullGame.StartTime.HasValue ? fullGame.StartTime.Value.ToString("M/d/yyyy h:mm tt") : fullGame.GameDate.ToLongDateString();
             GameIsOver = fullGame.IsGameOver;
             IsStarted = fullGame.IsStarted;
             GameTime = gameDate.ToShortTimeString();
@@ -113,6 +115,7 @@ namespace Electrons.Net8.Models
             HomeBox = HomeBoxScore.Create(game, seasonStats);
             AwayBox = AwayBoxScore.Create(game, seasonStats);
         }
+        public string DateString { get; set; }
         public IList<string> PreviousAbs { get; set; }
         public IList<string> Pitches { get; set; }
         public IDictionary<Position, string> Defense { get; private set; }
