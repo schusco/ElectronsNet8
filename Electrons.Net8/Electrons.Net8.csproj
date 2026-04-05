@@ -72,6 +72,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Electrons.Core.Net8.Infrastructure\Electrons.Core.Net8.Infrastructure.csproj" />
     <ProjectReference Include="..\Electrons.Core.Net8\Electrons.Core.Net8.csproj" />
+    <ProjectReference Include="..\External\CmbaLeagueApp\ScoreboardApi.Models\ScoreboardApi.Models.csproj" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
@@ -538,11 +539,6 @@
     <None Include="wwwroot\Scripts\umd\popper.min.js" />
     <None Include="wwwroot\Scripts\umd\popper.min.js.map" />
     <None Include="wwwroot\Scripts\_references.js" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="ScoreboardApi.Models">
-      <HintPath>..\..\CmbaLeagueApp\ScoreboardApi.Models\bin\Debug\net8.0\ScoreboardApi.Models.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Preview|AnyCPU'">
     <OutputPath>bin\</OutputPath>
