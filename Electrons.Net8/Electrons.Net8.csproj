@@ -33,7 +33,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ErrorPage.html" />
-    <Content Include="favicon.ico" />
     <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="logs\nhibernate.txt" />
     <Content Include="pagelayout.html" />
@@ -411,6 +410,7 @@
     <None Include="wwwroot\Content\themes\base\tabs.css" />
     <None Include="wwwroot\Content\themes\base\theme.css" />
     <None Include="wwwroot\Content\themes\base\tooltip.css" />
+    <None Include="wwwroot\favicon.ico" />
     <None Include="wwwroot\Scripts\bootstrap.bundle.js" />
     <None Include="wwwroot\Scripts\bootstrap.bundle.js.map" />
     <None Include="wwwroot\Scripts\bootstrap.bundle.min.js" />
@@ -538,6 +538,11 @@
     <None Include="wwwroot\Scripts\umd\popper.min.js" />
     <None Include="wwwroot\Scripts\umd\popper.min.js.map" />
     <None Include="wwwroot\Scripts\_references.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="ScoreboardApi.Models">
+      <HintPath>..\..\CmbaLeagueApp\ScoreboardApi.Models\bin\Debug\net8.0\ScoreboardApi.Models.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Preview|AnyCPU'">
     <OutputPath>bin\</OutputPath>

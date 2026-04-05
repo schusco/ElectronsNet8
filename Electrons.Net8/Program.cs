@@ -1,8 +1,6 @@
 
 using Electrons.Core.Net8.Infrastructure;
 using Electrons.Net8;
-using Electrons.Net8.Models;
-using log4net.Repository.Hierarchy;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,9 +39,24 @@ builder.Services.AddScoped(f =>
     session.CreateSQLQuery($"SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));").ExecuteUpdate();
     return session;
 });
-
+builder.Services.AddHttpClient();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("SignalRPolicy", policy =>
+    {
+        policy.WithOrigins("https://18.218.101.1", "https://localhost:7046")
+               .AllowAnyMethod()
+               .AllowAnyHeader()
+               .AllowCredentials();
+    });
+});
+builder.Services.AddSignalR(options =>
+{
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+});
 var app = builder.Build();
 app.Logger.LogInformation($"Current Environment: {app.Environment.EnvironmentName}");
+app.UseCors("SignalRPolicy");
 
 if (!app.Environment.IsDevelopment())
 {

@@ -1,5 +1,7 @@
 ﻿@using Elecredesign
 @using Electrons.Net8
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -15,20 +17,21 @@
 
     <link href="~/Content/bootstrap-icons.css" rel="stylesheet" />
     <!-- Electrons theme -->
-    <link href="~/Content/electrons.css" rel="stylesheet" />
+    <link href="~/Content/electrons.css?v=@DateTime.Now.Ticks" rel="stylesheet" />
 
 </head>
 
-<body role="document" style="margin-left:25px;margin-right:25px; padding:5px">   
+<body role="document" style="margin-left:25px;margin-right:25px; padding:5px">
     <!-- navbar -->
     <div class="tronHeaderbar menuStyle">
-        <p><span style="position:absolute;left:10px">
-            <environment include="Development">
-                <strong>NOTICE:</strong>Local Db instance
-            </environment>            
-            <environment include="Staging">
-                <strong>TESTING:</strong>Staging Db instance
-            </environment>
+        <p>
+            <span style="position:absolute;left:10px">
+                <environment include="Development">
+                    <strong>NOTICE:</strong>Local Db instance
+                </environment>
+                <environment include="Staging">
+                    <strong>TESTING:</strong>Staging Db instance
+                </environment>
             </span>
             Baseball Club
         </p>
@@ -75,6 +78,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script src="~/Scripts/jquery.tablesorter.min.js"></script>
     <script src="~/Scripts/jquery.tablesorter.widgets.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
     <script>
         $(document).on("ajaxStart",function () {
             $('#loadingDiv').show();
@@ -83,7 +87,7 @@
             $('#loadingDiv').hide();
         })
         $(document).ready(function () {
-            
+
             $(".tablesorter").tablesorter({
                 cssHeader: 'header',
                 cssAsc: 'headerSortUp',
@@ -101,15 +105,12 @@
                 if (useHit) {
                     data.Stat = $('#SelectedCategory').val();
                     $('input.hit:checked').each(function (index) {
-                        data.Category = $(this).val();
-                        console.log('Category val: ' + $(this).val());
+                        data.Category = $(this).val();                        
                     })
                 } else {
                     data.Stat = $('#SelectedPitchCategory').val();
                     $('input.pitch:checked').each(function (index) {
                         data.Category = $(this).val();
-                        console.log('Category val: ' + $(this).val());
-
                     })
                 }
                 data.hit = useHit;
@@ -122,7 +123,42 @@
                     }
                 });
             })
+                });
+        const baseurl="@Configuration["GameSettings:BaseApiUrl"]";       
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl(baseurl+"scorehub")
+            .withAutomaticReconnect([0, 2000, 5000, 10000, null])
+            .build();
+        connection.serverTimeoutInMilliseconds=30000; // 30 second timeout
+        connection.keepAliveIntervalInMilliseconds= 15000; // 15 second keep alive ping
+
+        connection.on("GameUpdated", (game) => {            
+            // 1. Find the elements on the page
+            const homeScoreEl = document.getElementById(`score-home-${game.gameId}`);
+            const awayScoreEl = document.getElementById(`score-away-${game.gameId}`);
+            const inningEl = document.getElementById(`score-inning-${game.gameId}`);
+            if (homeScoreEl && awayScoreEl) {
+                // 2. Update the text (This is your "Binding")
+                homeScoreEl.innerText = game.homeRuns;
+                awayScoreEl.innerText = game.awayRuns;
+                if (game.status=="Scheduled") {
+                    inningEl.innerText = 'In Progress';
+                } else {
+                    inningEl.innerText = game.status;
+                }
+                // 3. Add your CSS "Pop" animation
+                const card = document.getElementById(`game-${game.gameId}`);
+                const scoreCells = card.querySelectorAll('.score-box');
+                
+                scoreCells.forEach(cell => {
+                    cell.classList.add('score-updated');
+                    setTimeout(() => cell.classList.remove('score-updated'), 2000);
+                });                
+                
+            }
         });
+
+        connection.start().catch(err => console.error(err));
     </script>
 </body>
 </html>

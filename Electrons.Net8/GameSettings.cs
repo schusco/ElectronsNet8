@@ -15,6 +15,7 @@ namespace Electrons.Net8
         public string JumboText { get; set; }
         public bool WhiningToggle { get; set; }
         public string CarouselImagesVirtualPath { get; set; }
+        public string BaseApiUrl { get; set; }
         public ThresholdSettings ThresholdSettings { get; set; }
     }
     public class ThresholdSettings

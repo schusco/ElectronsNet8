@@ -10,7 +10,40 @@
     width: 100%;
     color: white;
 }
+.score-updated {
+    animation: card-glow-pulse 2.5s ease-in-out;
+    
+    outline-offset: -4px;
+}
 
+    .score-updated::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(46, 204, 113, 0.2); /* Light Electrons Green */
+        border-radius: inherit; /* Matches your card's corner roundness */
+        pointer-events: none; /* Allows clicks to pass through to buttons */
+        animation: overlay-fade 2s ease-out forwards;
+    }
+
+@keyframes card-glow-pulse {
+    0% {
+        box-shadow: 0 0 0px rgba(46, 204, 113, 0);
+    }
+
+    20% {
+        box-shadow: 0 0 30px 10px rgba(46, 204, 113, 0.5);
+        transform: translateY(-2px); /* Makes it 'float' slightly without moving neighbors */
+    }
+
+    100% {
+        box-shadow: 0 0 40px 15px rgba(46, 204, 113, 0);
+        transform: translateY(0);
+    }
+}
 ul.dropdown-menu > li > a:hover {
     background-color: #800000;
     background-image: none;
