@@ -13,7 +13,7 @@ namespace Electrons.Net8.Models
     {
         public MainModel() { }
 
-        public MainModel(Repository repo, GameSettings settings, IWebHostEnvironment env, GameScore apiData)
+        public MainModel(Repository repo, GameSettings settings, IWebHostEnvironment env, GameScore apiData, List<ScoreboardApi.Models.StandingsRow> standings = null)
         {
             JumboText = settings.JumboText;
             var nextOutingTime = DateTime.Now.AddHours(-3);
@@ -25,7 +25,7 @@ namespace Electrons.Net8.Models
                     NextGameInProgress = true;
                 if (nextOuting.GameFile != null)
                     NextGameRecap = true;
-                if (DateTime.Now.AddHours(-12) < nextOuting.GameDate)
+                if (lastOuting != nextOuting)
                     DisplayLastGame = true;
                 var displayOuting = DisplayLastGame && lastOuting != null ? lastOuting : nextOuting;
                 var gd = GameDataModel.Create(displayOuting);
@@ -35,7 +35,7 @@ namespace Electrons.Net8.Models
                 AwayTeam = gd.AwayTeam;
                 GameId = apiData?.GameId;
                 GameDate = gd.GameDate.ToString("g");
-                Location = nextOuting.Location.Field;                
+                Location = nextOuting.Location.Field;
                 if (NextGameInProgress)
                 {
                     if (apiData != null)
@@ -58,7 +58,12 @@ namespace Electrons.Net8.Models
                     }
                 }
             }
-            Standings = repo.GetStandings("CMBA").OrderByDescending(o => o.Points).ThenByDescending(o => o.Wins);
+            if (standings == null)
+                Standings = repo.GetStandings("CMBA").Select(s => StandingsModel.Create(s.Team, s.Wins, s.Losses, s.Ties, s.Points))
+                    .OrderByDescending(o => o.Points).ThenByDescending(o => o.Wins);
+            else
+                Standings = standings.Select(s => StandingsModel.Create(s.Name, s.Wins, s.Losses, s.Ties, s.Points))
+                    .OrderByDescending(o => o.Points).ThenByDescending(o => o.Wins);
         }
         public string JumboText { get; set; }
         public string HomeTeam { get; set; }
@@ -74,6 +79,6 @@ namespace Electrons.Net8.Models
         public bool NextGameInProgress { get; set; }
         public bool NextGameRecap { get; set; }
         public bool DisplayLastGame { get; set; }
-        public IEnumerable<StandingsRow> Standings { get; set; }
+        public IEnumerable<StandingsModel> Standings { get; set; }
     }
 }

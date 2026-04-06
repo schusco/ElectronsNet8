@@ -9,6 +9,7 @@ namespace Electrons.Net8
         {
             ThresholdSettings = new ThresholdSettings();
         }
+        public bool UseApiForStandings { get; set; }
         public string ApiKey { get; set; }
         public DatabaseConfig DefaultConnection { get; set; }
         public int CurrentGameId { get; set; }

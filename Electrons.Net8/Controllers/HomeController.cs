@@ -19,12 +19,21 @@ namespace Electrons.Net8.Controllers
         IOptionsSnapshot<GameSettings> settings, HttpClient client)
         : ControllerBase(session, cache, httpContextAccessor, env, settings)
     {
-        private HttpClient _client = client;
+        private readonly HttpClient _client = client;
         public async Task<ActionResult> Index()
-        {            
+        {
+            List<StandingsRow> standings = null;
             List<GameScore> apiData = await _client.GetFromJsonAsync<List<GameScore>>($"{GameSettings.BaseApiUrl}api/Games/getbydate/{DateTime.Now:yyyy-MM-dd}");
+            if (GameSettings.UseApiForStandings)
+            {
+                var apiStandings = await _client.GetFromJsonAsync<List<StandingsRow>>($"{GameSettings.BaseApiUrl}api/Standings/CMBA");
+                if (apiStandings != null)
+                {
+                    standings = apiStandings;
+                }
+            }
             var currentGame = apiData?.FirstOrDefault(w => w.HomeTeamId == 1 || w.AwayTeamId == 1);
-            return View(new MainModel(Repository, GameSettings, WebHostEnvironment, currentGame));
+            return View(new MainModel(Repository, GameSettings, WebHostEnvironment, currentGame, standings));
         }
         public ActionResult Electrons20() => View();
         public ActionResult Whining() => View();

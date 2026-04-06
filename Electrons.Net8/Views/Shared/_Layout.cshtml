@@ -159,6 +159,11 @@
         });
 
         connection.start().catch(err => console.error(err));
+        setInterval(() =>{
+            if (connection.state === signalR.HubConnectionState.Connnected) {
+                connection.invoke("Heartbeat").catch(err => console.error("Heartbeat failed: ", err));
+            }
+        }, 20000);
     </script>
 </body>
 </html>
