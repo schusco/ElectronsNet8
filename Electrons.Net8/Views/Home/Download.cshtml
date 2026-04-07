@@ -7,11 +7,11 @@
     <li><strong class="pe-2">Note:</strong>&nbsp;Enable "Install from Unknown Sources" in your phone settings to complete installation</li>
     <li>
         <a href="~/Content/com.companyname.scoreboardapp.apk">Download for Android</a>
+        @if (Context.Request.Query["manager"] == "true" && Configuration["GameSettings:ShowAppLink"] == "True")
+        {
+            <environment include="Staging,Development">
+                &nbsp;|&nbsp;<a href="~/Content/electronsbaseball.electronsbaseball.apk">Download for Android (Manager Build)</a>
+            </environment>            
+        }
     </li>
-    @if (Context.Request.Query["manager"] == "true" && Configuration["GameSettings:ShowAppLink"]=="true")
-    {
-        <environment include="Staging">
-            <li>&nbsp;|&nbsp;<a href="~/Content/electronsbaseball.electronsbaseball.apk">Download for Android (Manager Build)</a></li>
-        </environment>
-    }
 </ul>
