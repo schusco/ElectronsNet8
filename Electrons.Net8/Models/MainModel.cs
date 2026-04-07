@@ -1,6 +1,4 @@
-﻿using Electrons.Core.Net8;
-using Electrons.Core.Net8.Entities;
-using Electrons.Core.Net8.Infrastructure;
+﻿using Electrons.Core.Net8.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using ScoreboardApi.Models;
 using System;

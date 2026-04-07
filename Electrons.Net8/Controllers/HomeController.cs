@@ -7,7 +7,6 @@ using Microsoft.Extensions.Options;
 using ScoreboardApi.Models;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -25,13 +24,8 @@ namespace Electrons.Net8.Controllers
             List<StandingsRow> standings = null;
             List<GameScore> apiData = await _client.GetFromJsonAsync<List<GameScore>>($"{GameSettings.BaseApiUrl}api/Games/getbydate/{DateTime.Now:yyyy-MM-dd}");
             if (GameSettings.UseApiForStandings)
-            {
-                var apiStandings = await _client.GetFromJsonAsync<List<StandingsRow>>($"{GameSettings.BaseApiUrl}api/Standings/CMBA");
-                if (apiStandings != null)
-                {
-                    standings = apiStandings;
-                }
-            }
+                standings = await _client.GetFromJsonAsync<List<StandingsRow>>($"{GameSettings.BaseApiUrl}api/Standings/CMBA");
+
             var currentGame = apiData?.FirstOrDefault(w => w.HomeTeamId == 1 || w.AwayTeamId == 1);
             return View(new MainModel(Repository, GameSettings, WebHostEnvironment, currentGame, standings));
         }
