@@ -1,4 +1,4 @@
-
+using Microsoft.AspNetCore.StaticFiles;
 using Electrons.Core.Net8.Infrastructure;
 using Electrons.Net8;
 using Microsoft.AspNetCore.Builder;
@@ -55,6 +55,16 @@ builder.Services.AddSignalR(options =>
     options.KeepAliveInterval = TimeSpan.FromSeconds(15);
 });
 var app = builder.Build();
+var provider = new FileExtensionContentTypeProvider();
+
+// 2. Add the .apk mapping
+provider.Mappings[".apk"] = "application/vnd.android.package-archive";
+
+// 3. Tell the app to use this provider
+app.UseStaticFiles(new StaticFileOptions
+{
+    ContentTypeProvider = provider
+});
 app.Logger.LogInformation($"Current Environment: {app.Environment.EnvironmentName}");
 app.UseCors("SignalRPolicy");
 

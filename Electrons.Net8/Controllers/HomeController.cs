@@ -29,6 +29,7 @@ namespace Electrons.Net8.Controllers
             var currentGame = apiData?.FirstOrDefault(w => w.HomeTeamId == 1 || w.AwayTeamId == 1);
             return View(new MainModel(Repository, GameSettings, WebHostEnvironment, currentGame, standings));
         }
+        public ActionResult Download() => View();
         public ActionResult Electrons20() => View();
         public ActionResult Whining() => View();
     }
