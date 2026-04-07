@@ -785,7 +785,44 @@ namespace Electrons.Core.Net8.Infrastructure
                 _cancellationTokenSource.Cancel();
                 _cancellationTokenSource.Dispose();
                 _cancellationTokenSource = new CancellationTokenSource();
-            }         
+            }
+        }
+
+        public async Task<IList<YearlySummary>> GetHistoricalTrendsAsync(int startYear)
+        {
+            YearlySummary model = null;
+            GameData game = null;
+            HittingStats h = null;
+            var summaries = await _session.QueryOver(() => h).JoinAlias(() => h.Game, () => game)
+                .Where(Restrictions.Gt(NhProjections.Year(() => game.GameDate), startYear))
+                .Where(() => game.Playoff == false)
+                .SelectList(s => s.Select(Projections.GroupProperty(NhProjections.Year(() => game.GameDate)).WithAlias(()=> model.Year))
+                    .SelectSum(() => h.Hits).WithAlias(() => model.TotalHits)
+                    .SelectSum(() => h.Runs).WithAlias(() => model.TotalRuns)
+                    .SelectSum(() => h.HomeRuns).WithAlias(() => model.TotalHomeRuns)
+                    .SelectSum(()=>h.StrikeOuts).WithAlias(()=> model.TotalStrikeOuts)
+                    .SelectSum(() => h.Doubles).WithAlias(() => model.TotalDoubles)
+                    .SelectSum(() => h.Triples).WithAlias(() => model.TotalTriples)
+                    ).TransformUsing(Transformers.AliasToBean<YearlySummary>())
+                .ListAsync<YearlySummary>();
+            return summaries;
+        }
+        public async Task<IList<YearlySummary>> GetPitchingTrendsAsync(int startYear)
+        {
+            YearlySummary model = null;
+            GameData game = null;
+            PitchingStats h = null;
+            var summaries = await _session.QueryOver(() => h).JoinAlias(() => h.Game, () => game)
+
+                .Where(Restrictions.Gt(NhProjections.Year(() => game.GameDate), startYear))
+                .Where(() => game.Playoff == false)
+                .SelectList(s => s.Select(Projections.GroupProperty(NhProjections.Year(() => game.GameDate)).WithAlias(() => model.Year))
+                    .SelectSum(() => h.Hits).WithAlias(() => model.TotalHits)
+                    .SelectSum(() => h.Runs).WithAlias(() => model.TotalRuns)                    
+                    .SelectSum(() => h.StrikeOuts).WithAlias(() => model.TotalStrikeOuts)                    
+                    ).TransformUsing(Transformers.AliasToBean<YearlySummary>())
+                .ListAsync<YearlySummary>();
+            return summaries;
         }
     }
 }

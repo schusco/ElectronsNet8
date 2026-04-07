@@ -5,13 +5,17 @@
 @{
     ViewBag.Title = "Statistics";
 }
+
 <div>
     <div class="row">
         <div class="col-sm-4">
             <div class="btn-group pt-3 pb-1" role="group" aria-label="...">
                 <a asp-route-id="@Model.Year" asp-route-type="" class="btn btn-outline-primary">Season</a>
                 <a asp-route-id="@Model.Year" asp-route-type="playoffs" class="btn btn-outline-primary">Playoffs</a>
-                <a class="btn btn-outline-primary" href="~/Statistics/Records">Records</a>
+                <a href="~/statistics/records" class="btn btn-outline-primary" >Records</a>
+                <button id="toggleTrendsButton" class="btn btn-outline-primary" data-toggle="collapse" data-target="#statsCollapse" aria-expanded="false" aria-controls="statsCollapse">
+                    View Trends
+                </button>
             </div>
         </div>
         <div class="col-sm-4" style="text-align:center">
@@ -34,20 +38,168 @@
             </div>
         </div>
     </div>
+    <div class="collapse mb-3" id="statsCollapse">
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Pitching Trends</h5>
+                        <canvas id="pitStatsChart" style="max-height: 400px;"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Season Trends</h5>
+                        <canvas id="statsChart2" style="max-height: 400px;"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Season Trends</h5>
+                        <canvas id="statsChart" style="max-height: 400px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <cache vary-by="@Model.StatsLastUpdated" expires-after="@TimeSpan.FromHours(1)" vary-by-route="id,type">
+            <div class="col-sm-12">@Html.Table(Model.PitchingStats, new { @class = "tronTable tablesorter" }, true)</div>
+        </cache>
+    </div>
+    <div class="row">
+        <div class="col-sm-12" style="text-align:center"><h2>Hitting Stats</h2></div>
+    </div>
+    <div class="row">
+        <cache vary-by="@Model.StatsLastUpdated" expires-after="@TimeSpan.FromHours(1)" vary-by-route="id,type">
+            <div class="col-sm-12">@Html.Table(Model.HittingStats, new { @class = "tronTable tablesorter" }, true)</div>
+        </cache>
+    </div>
+    <p class="text-muted small">
+        Data last refreshed: @Model.StatsLastUpdated.ToString("g")
+    </p>
 </div>
-<div class="row">
-    <cache vary-by="@Model.StatsLastUpdated" expires-after="@TimeSpan.FromHours(1)" vary-by-route="id,type">
-        <div class="col-sm-12">@Html.Table(Model.PitchingStats, new { @class = "tronTable tablesorter" }, true)</div>
-    </cache>
-</div>
-<div class="row">
-    <div class="col-sm-12" style="text-align:center"><h2>Hitting Stats</h2></div>
-</div>
-<div class="row">
-    <cache vary-by="@Model.StatsLastUpdated" expires-after="@TimeSpan.FromHours(1)" vary-by-route="id,type">
-        <div class="col-sm-12">@Html.Table(Model.HittingStats, new { @class = "tronTable tablesorter" }, true)</div>
-    </cache>
-</div>
-<p class="text-muted small">
-    Data last refreshed: @Model.StatsLastUpdated.ToString("g")
-</p>
+<script>
+     const ctx1 = document.getElementById('statsChart').getContext('2d');
+     const ctx2 = document.getElementById('pitStatsChart').getContext('2d');
+     const ctx3 = document.getElementById('statsChart2').getContext('2d');
+
+     // Injecting C# data into JS (serialized as JSON)
+     const dataFromCsharp = @Html.Raw(Json.Serialize(Model.HistoricalTrends));
+
+     new Chart(ctx1, {
+         type: 'line', // 'bar' also works great for Home Runs
+         data: {
+             labels: dataFromCsharp.map(x=>x.year),
+             datasets: [
+             {
+                 label: 'Strike Outs',
+                 data: dataFromCsharp.map(x=>x.totalStrikeOuts),
+                 borderColor: '#007bff', // Bootstrap Primary Blue
+                 backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                 fill: true,
+                 tension: 0.3 // Makes the line curved/smooth
+             },
+             {
+                 label: 'Total Runs',
+                 data: dataFromCsharp.map(x=>x.totalRuns),
+                 borderColor: '#cc0000', // Bootstrap Primary Blue
+                 backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                 fill: true,
+                 tension: 0.3 // Makes the line curved/smooth
+             },
+             {
+                 label: 'Total Hits',
+                 data: dataFromCsharp.map(x=>x.totalHits),
+                 borderColor: '#00cc00', // Bootstrap Primary Blue
+                 backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                 fill: true,
+                 tension: 0.3 // Makes the line curved/smooth
+             }]
+         },
+         options: {
+             responsive: true,
+             scales: {
+                 y: { beginAtZero: true }
+             }
+         }
+     });
+    new Chart(ctx3, {
+        type: 'line', // 'bar' also works great for Home Runs
+        data: {
+            labels: dataFromCsharp.map(x=>x.year),
+            datasets: [
+            {
+                label: 'Home Runs',
+                data: dataFromCsharp.map(x=>x.totalHomeRuns),
+                borderColor: '#007bff', // Bootstrap Primary Blue
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                fill: true,
+                tension: 0.3 // Makes the line curved/smooth
+            },
+            {
+                label: 'Doubles',
+                data: dataFromCsharp.map(x=>x.totalDoubles),
+                borderColor: '#cc0000', // Bootstrap Primary Blue
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                fill: true,
+                tension: 0.3 // Makes the line curved/smooth
+            },
+            {
+                label: 'Triples',
+                data: dataFromCsharp.map(x=>x.totalTriples),
+                borderColor: '#00cc00', // Bootstrap Primary Blue
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                fill: true,
+                tension: 0.3 // Makes the line curved/smooth
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+     new Chart(ctx2, {
+         type: 'line', // 'bar' also works great for Home Runs
+         data: {
+             labels: dataFromCsharp.map(x=>x.year),
+             datasets: [
+             {
+                 label: 'Strike Outs',
+                 data: dataFromCsharp.map(x=>x.totalPitchingStrikeouts),
+                 borderColor: '#007bff', // Bootstrap Primary Blue
+                 backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                 fill: true,
+                 tension: 0.3 // Makes the line curved/smooth
+             },
+             {
+                 label: 'Total Runs',
+                 data: dataFromCsharp.map(x=>x.totalPitchingRuns),
+                 borderColor: '#cc0000', // Bootstrap Primary Blue
+                 backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                 fill: true,
+                 tension: 0.3 // Makes the line curved/smooth
+             },
+             {
+                 label: 'Total Hits',
+                 data: dataFromCsharp.map(x=>x.totalPitchingHits),
+                 borderColor: '#00cc00', // Bootstrap Primary Blue
+                 backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                 fill: true,
+                 tension: 0.3 // Makes the line curved/smooth
+             }]
+         },
+         options: {
+             responsive: true,
+             scales: {
+                 y: { beginAtZero: true }
+             }
+         }
+     });
+</script>

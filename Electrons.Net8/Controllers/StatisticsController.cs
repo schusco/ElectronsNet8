@@ -35,8 +35,8 @@ namespace Electrons.Net8.Controllers
             if (game.FullGame is null)
                 return View(new GameModel(game, CurrentContext));
             return RedirectToAction("Recap", "Game", new { id = id.Value });
-        }
-        [HttpGet]
+        }       
+        [HttpGet,Route("statistics/records")]
         public ActionResult Records() => View("Records", new LeadersModel(GameSettings));
         public async Task<IActionResult> GetLeaders(LeadersModel model)
         {
