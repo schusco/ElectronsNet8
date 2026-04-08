@@ -1,6 +1,5 @@
 ﻿using Electrons.Core.Net8;
 using Electrons.Net8;
-using iText.Layout;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
@@ -355,7 +354,7 @@ namespace Electrons.Net8
                         if (!string.IsNullOrEmpty(attribute.ImageFormat))
                         {
                             var imagePath = string.Format(attribute.ImageFormat, innertext.Replace(" ", ""));
-                            imageTag = ToHtmlString(helper.Image(imagePath, "25") as TagBuilder);
+                            imageTag = ToHtmlString(helper.Image(imagePath, "25", "25") as TagBuilder);
                         }
                         if (!string.IsNullOrEmpty(attribute.ColumnCss))
                         {
@@ -402,12 +401,14 @@ namespace Electrons.Net8
             return helper.Table(expression, "", "", "", htmlattibutes);
         }
 
-        public static IHtmlContent Image(this IHtmlHelper helper, string path, string? height = null)
+        public static IHtmlContent Image(this IHtmlHelper helper, string path, string? height = null, string? width = null)
         {
             var urlHelper = helper.ViewContext.HttpContext.RequestServices.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(helper.ViewContext);
             var imageTag = new TagBuilder("img");
             imageTag.Attributes.Add("src", urlHelper.Content(path));
             imageTag.Attributes.Add("height", height);
+            if (!string.IsNullOrEmpty(width))
+                imageTag.Attributes.Add("width", width);
             imageTag.Attributes.Add("style", "color:white;text-align:center");
             return imageTag;
         }
