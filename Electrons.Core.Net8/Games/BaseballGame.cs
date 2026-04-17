@@ -75,6 +75,8 @@ namespace Electrons.Core.Net8.Games
             if (!HomeTeam.GamePitchers.Any())
                 HomeTeam.SetStartingPitcher((Pitcher)Player.Unknown(0));
             _StartTime = DateTime.Now;
+            HomeTeam.GameStarted();
+            AwayTeam.GameStarted();
             return StartNextInning();
         }
         public void DelayGame()
@@ -277,8 +279,8 @@ namespace Electrons.Core.Net8.Games
             if (!IsGameOver)
                 CheckForEndOfGame();
             InningEnded?.Invoke(this, new InningChangeEventArgs(sender as Inning));
-            if (!IsGameOver)
-                StartNextInning();
+            if (!IsGameOver)            
+                StartNextInning();            
         }
         public bool AddScoring()
         {
@@ -533,7 +535,7 @@ namespace Electrons.Core.Net8.Games
         public void SetHomeTeam(Team team)
         {
             if (HomeTeam != null)
-                throw new BaseballGameException("Home team already defined");
+                throw new BaseballGameException("Home team already defined");            
             HomeTeam = team;
         }
         [JsonIgnore]
@@ -607,6 +609,11 @@ namespace Electrons.Core.Net8.Games
                 game.AwayTeam.SetNextHitter(game.Innings.Where(w => w.Half == HalfInning.Top).SelectMany(s => s.Events).LastOrDefault()?.Batter);
                 if (game.IsGameOver)
                     game.SetPitchersOfRecord();
+                if (game.IsStarted)
+                {
+                    game.homeTeam.GameStarted();
+                    game.awayTeam.GameStarted();
+                }
             }
             catch (Exception ex)
             {
@@ -774,7 +781,7 @@ namespace Electrons.Core.Net8.Games
                 var advance = CurrentAb.AdvancingRunners.Single(s => s.AdvanceTo == onBase && s.Player == runner);
                 if (!advance.GetType().IsIn(typeof(StolenBase), typeof(StealOfHome), typeof(AdvancedOnError)))
                 {
-                    CurrentAb.RemoveRunningEvent(advance);
+                    //CurrentAb.RemoveRunningEvent(advance);
                     return advance;
                 }
             }

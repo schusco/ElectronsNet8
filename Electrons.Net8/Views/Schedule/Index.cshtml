@@ -2,6 +2,12 @@
 @model ScheduleModel
 @{
     ViewBag.Title = "Schedule";
+    // Ensure we have the values the logic is actually using
+    var currentYear = ViewContext.RouteData.Values["year"] ?? DateTime.Now.Year;
+    var currentMonth = ViewContext.RouteData.Values["month"] ?? DateTime.Now.Month;
+    
+    // Create a unique string for this specific month/year combination
+    string scheduleKey = $"electrons_{currentYear}_{currentMonth}";
 }
 <div class="container-fluid">
     <div class="row">
@@ -55,7 +61,7 @@
 
         </div>
     </div>
-    <cache expires-sliding="@TimeSpan.FromMinutes(5)" vary-by-route="month,year" >
+    <cache expires-after="@TimeSpan.FromMinutes(10)" vary-by="@scheduleKey" >
     <div class="row">
         <div class="col col-xs-12">
             <table class="schedTable">

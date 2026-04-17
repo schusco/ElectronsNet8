@@ -1,18 +1,20 @@
 ﻿using Electrons.Core.Net8.Entities;
+using NHibernate.Mapping.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Electrons.Core.Net8.Games
 {
-    public class PStats
+
+    public class PStats : IHasPlayer
     {
         [TableColumn("Pitchers", 1, Class = "alignLeft")]
         public string PitcherDisplay => $"{Player} {(Decision != Decision.ND ? $"({Decision.GetDescription()})" : "")}";
         public string PlayerName => $"{Player.FirstName[0]}. {Player.LastName}";
         public Pitcher Player { get; private set; }
         public Decision Decision { get; private set; }
-        public string DecisionDiplay => Decision.GetDescription();
+        public string DecisionDisplay => Decision.GetDescription();
         public int GS { get; private set; }
         [TableColumn("H", 10)]
         public int H { get; private set; }
@@ -47,6 +49,8 @@ namespace Electrons.Core.Net8.Games
         public virtual int Strikes { get; private set; }
         public int GroundOuts { get; private set; }
         public int FlyOuts { get; private set; }
+
+        Player IHasPlayer.Player => (Player)Player;
 
         internal Pitcher GetPitcher(IEnumerable<Pitcher> gamePitchers) => gamePitchers.First(s => s == Player);
 
@@ -103,6 +107,11 @@ namespace Electrons.Core.Net8.Games
                 R = stats.Runs,
                 Outs = (int)Math.Round(stats.InningsPitched * 3)
             };
+        }
+
+        public void SetPlayerAsDuplicate()
+        {
+            throw new NotImplementedException();
         }
     }
 }

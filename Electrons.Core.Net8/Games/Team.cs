@@ -32,9 +32,9 @@ namespace Electrons.Core.Net8.Games
         public IList<Player> AllBatters => Lineup.Union(_substitutions.Where(w => !(w is ReliefPitcher)).Select(s => s.NewPlayer)).ToList();
         public IEnumerable<Player> Roster => _roster.OrderBy(o => o.Number).ToList();
         [JsonIgnore]
-        public List<Player> Bench => _roster.Except(Lineup).Except(Replaced).OrderBy(o => o.Number).ToList();
+        public List<Player> Bench => Lineup.Any() ? _roster.Except(Lineup).Except(Replaced).OrderBy(o => o.Number).ToList() : new List<Player>();
         [JsonIgnore]
-        public List<Player> AvailablePitchers => Bench.Union(Lineup).OrderByDescending(o => o.IsPitcher).ToList();
+        public List<Player> AvailablePitchers => _roster.Except(Replaced).OrderByDescending(o => o.IsPitcher).ToList();
         [JsonIgnore]
         public List<Player> Replaced => _substitutions.Select(s => s.Replaced).ToList();
         [JsonIgnore]
@@ -51,12 +51,12 @@ namespace Electrons.Core.Net8.Games
                 var spot = i + 1;
                 _order.AddToLineup(spot, players[i]);
             }
-            if (players.Count >= 9)
-                OrderIsSet = true;
+            //if (players.Count >= 9 && _gameStarted)
+            //    OrderIsSet = true;
         }
         public void SetHomeField(Field field) => HomeField = field;
         internal Player NextHitter(bool noAdvance) => _order.Next(noAdvance);
-        
+
         private class BattingOrder
         {
             internal BattingOrder() : this(9) { }
@@ -65,8 +65,8 @@ namespace Electrons.Core.Net8.Games
             {
                 _battingOrder = new Dictionary<int, Player>();
                 _spotsInOrder = spots;
-                foreach (var spot in Enumerable.Range(1, _spotsInOrder))
-                    _battingOrder[spot] = Player.Blank;
+                //foreach (var spot in Enumerable.Range(1, _spotsInOrder))
+                //    _battingOrder[spot] = Player.Blank;
             }
             internal BattingOrder(List<Player> players) : this(players.Count)
             {
@@ -78,7 +78,7 @@ namespace Electrons.Core.Net8.Games
             public Player CurrentHitter => _battingOrder[CurrentSpot];
             internal Player AddToLineup(int spot, Player player)
             {
-                if (spot >= 1 && _battingOrder.ContainsKey(spot))
+                if (spot >= 1)
                 {
                     var replaced = _battingOrder.ContainsKey(spot) ? _battingOrder[spot] : null;
                     _battingOrder[spot] = player;
@@ -96,12 +96,9 @@ namespace Electrons.Core.Net8.Games
             internal void RemoveFromLineup(Player player)
             {
                 var spot = _battingOrder.Values.ToList().IndexOf(player) + 1;
-                if (spot <= 9)
-                    _battingOrder[spot] = Player.Blank;
-                else
-                    _battingOrder.Remove(spot);
+                _battingOrder.Remove(spot);
             }
-            public IList<Player> Order => _battingOrder.Values.ToList();
+            public IList<Player> Order => _battingOrder.OrderBy(o => o.Key).Select(s => s.Value).ToList();
             internal Player Next(bool noAdvance)
             {
                 if (noAdvance)
@@ -131,14 +128,19 @@ namespace Electrons.Core.Net8.Games
         }
         internal void FillOrder()
         {
-            foreach (var player in _order.Order)
+            var battersInOrder = _order.Order.Count;
+            for (int i = 9; i > battersInOrder; i--)
             {
-                if (string.IsNullOrEmpty(player.FirstName))
-                {
-                    _order.ReplaceWithUnknown(player);
-                    OrderIsSet = true;
-                }
+                _order.Sub(Player.Unknown(i), i);
             }
+            //foreach (var player in _order.Order)
+            //{
+            //    if (string.IsNullOrEmpty(player.FirstName))
+            //    {
+            //        _order.ReplaceWithUnknown(player);
+            //OrderIsSet = true;
+            //    }
+            //}
         }
         public void SetRoster(IEnumerable<Player> roster) => _roster = roster.ToList();
         public Player AddToLineup(Player player, int? spot = null)
@@ -146,13 +148,18 @@ namespace Electrons.Core.Net8.Games
             if (!spot.HasValue)
                 spot = Lineup.Count(c => !string.IsNullOrEmpty(c.FirstName)) + 1;
             var replaced = _order.AddToLineup(spot.Value, player);
-            if (_order.Order.Count(c => !string.IsNullOrEmpty(c.FirstName)) >= 9)
-                OrderIsSet = true;
+            //if (_order.Order.Count(c => !string.IsNullOrEmpty(c.FirstName)) >= 9)
+            //    OrderIsSet = true;
             return replaced;
         }
         [JsonIgnore]
         public Pitcher PitcherOfRecord => GamePitchers.Single(s => s.IsPitcherOfRecord);
-        public void RemoveFromLineup(Player player) => _order.RemoveFromLineup(player);
+        public bool RemoveFromLineup(Player player)
+        {
+            if (!OrderIsSet)
+                _order.RemoveFromLineup(player);
+            return !OrderIsSet;
+        }
         internal List<Pitcher> GamePitchers { get; }
         public void AddPlayer(Player player)
         {
@@ -184,7 +191,7 @@ namespace Electrons.Core.Net8.Games
             team.SetBattingOrder(lineup);
             foreach (var player in teamEl.Descendants("Pitchers").Descendants("Player"))
             {
-                var pitcher = (Pitcher)Player.Load(player);                
+                var pitcher = (Pitcher)Player.Load(player);
                 team.GamePitchers.Add(pitcher);
             }
             if (teamEl.Descendants().Any(a => a.Name == "HomeField"))
@@ -218,7 +225,7 @@ namespace Electrons.Core.Net8.Games
                 return tm;
             }
         }
-        public bool OrderIsSet { get; private set; }
+        public bool OrderIsSet => _order.Order.Count >= 9 && _gameIsStarted;
         internal void SetNextHitter(Player batter)
         {
             int lineupSpot = 0;
@@ -342,9 +349,21 @@ namespace Electrons.Core.Net8.Games
         }
         public Player GetPlayer(string text, int num) => _roster.SingleOrDefault(s => s.LastName == text.Trim() && s.Number == num);
 
+        internal void GameStarted()
+        {
+            _gameIsStarted = true;
+        }
+        public static Team CreateWithUnknownRoster(string name) => new Team(name, Enumerable.Range(1, 25).Select(s => Player.Create(s, "Unknown", "Player")).ToList());
+
+        public int GetLineupSpotFor(Player player)
+        {
+            return _order.LineupSpotOf(player);
+        }
+
         private readonly List<Substitution> _substitutions;
         private List<Player> _roster;
-        private readonly BattingOrder _order;
+        private BattingOrder _order;
+        private bool _gameIsStarted;
 
     }
 }

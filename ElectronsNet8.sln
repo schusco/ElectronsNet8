@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectronsTest", "..\Electro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScoreboardApi.Models", "External\CmbaLeagueApp\ScoreboardApi.Models\ScoreboardApi.Models.csproj", "{A6F6B808-C724-6804-63A1-E77DED0B964F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scorebook", "Scorebook\Scorebook.csproj", "{8EB61A0C-B0B2-4AFE-AE9A-9C07C2894791}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,6 +74,17 @@ Global
 		{A6F6B808-C724-6804-63A1-E77DED0B964F}.Preview|Any CPU.Build.0 = Release|Any CPU
 		{A6F6B808-C724-6804-63A1-E77DED0B964F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A6F6B808-C724-6804-63A1-E77DED0B964F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EB61A0C-B0B2-4AFE-AE9A-9C07C2894791}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EB61A0C-B0B2-4AFE-AE9A-9C07C2894791}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EB61A0C-B0B2-4AFE-AE9A-9C07C2894791}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{8EB61A0C-B0B2-4AFE-AE9A-9C07C2894791}.Local|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EB61A0C-B0B2-4AFE-AE9A-9C07C2894791}.Local|Any CPU.Build.0 = Debug|Any CPU
+		{8EB61A0C-B0B2-4AFE-AE9A-9C07C2894791}.Prev|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EB61A0C-B0B2-4AFE-AE9A-9C07C2894791}.Prev|Any CPU.Build.0 = Debug|Any CPU
+		{8EB61A0C-B0B2-4AFE-AE9A-9C07C2894791}.Preview|Any CPU.ActiveCfg = Release|Any CPU
+		{8EB61A0C-B0B2-4AFE-AE9A-9C07C2894791}.Preview|Any CPU.Build.0 = Release|Any CPU
+		{8EB61A0C-B0B2-4AFE-AE9A-9C07C2894791}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EB61A0C-B0B2-4AFE-AE9A-9C07C2894791}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

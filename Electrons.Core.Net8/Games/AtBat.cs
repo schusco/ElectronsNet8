@@ -352,6 +352,8 @@ namespace Electrons.Core.Net8.Games
             else
             {
                 var actualEvent = _events.SingleOrDefault(s => s.RunningEvents.Contains(rev));
+                if (actualEvent is RunnerAdvanceOnBatteryError)
+                    return;
                 actualEvent?.RemoveRunningEvent(rev);
             }
             OnRunningEventChanged(rev);

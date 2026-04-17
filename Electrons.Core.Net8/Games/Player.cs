@@ -112,6 +112,7 @@ namespace Electrons.Core.Net8.Games
             DisplayNumber = number;
         }
         public override Position Position { get; protected set; }
+        public Player HittingFor { get; private set; }
         public static bool operator ==(Player lhs, Player rhs) => lhs?.Equals(rhs) ?? false;
         public static bool operator !=(Player lhs, Player rhs) => !(lhs == rhs);
         public override bool Equals(object obj)
@@ -146,10 +147,26 @@ namespace Electrons.Core.Net8.Games
             FirstName = !string.IsNullOrWhiteSpace(xel.Element("FirstName").Value) ? xel.Element("FirstName").Value : "Unknown";
             DisplayNumber = xel.Element("Number").Value;
             Position = Position.FromString(xel.Element("Position")?.Value);
+            if (xel.Descendants().Any(a => a.Name == "HittingFor"))
+                HittingFor = Load(xel.Descendants().Single(a => a.Name == "HittingFor"));
+
             IsUnknown = string.IsNullOrEmpty(LastName) || FirstName == "Unknown" && LastName == "Player";
             return this;
         }
-
+        public override XElement Xml
+        {
+            get
+            {
+                var xel = base.Xml;
+                if (!(HittingFor is null))
+                    xel.Add(HittingFor?.Xml);
+                return xel;
+            }
+        }
+        public void SetDhFor(Player dhPlayer)
+        {
+            HittingFor = dhPlayer;
+        }
     }
     public class Pitcher : PlayerBase
     {
@@ -185,7 +202,7 @@ namespace Electrons.Core.Net8.Games
             };
         }
     }
-    public class Position
+    public class Position : IEqualityComparer<Position>
     {
         private Position(int posNumber, Positions pos, string positionText, string posString, string logPosString)
         {
@@ -299,6 +316,27 @@ namespace Electrons.Core.Net8.Games
                     return pos;
             }
             throw new BaseballGameException("Invalid Position");
+        }
+        public static bool operator ==(Position lhs, Position rhs)
+        {
+            if (lhs is null && rhs is null)
+                return true;
+            if (lhs is null)
+                return false;
+            return lhs.Equals(rhs);
+        }
+        public static bool operator !=(Position lhs, Position rhs)
+        {
+            return !(lhs == rhs);
+        }
+        public bool Equals(Position x, Position y)
+        {
+            return x?.PositionNumber == y?.PositionNumber;
+        }
+
+        public int GetHashCode(Position obj)
+        {
+            return obj.PositionNumber.GetHashCode();
         }
     }
 }
