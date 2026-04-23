@@ -65,6 +65,9 @@ namespace Scorebook
             }
             OnPropertyChanged(nameof(Game));
             ShowLineScore = true;
+            InningNumber = "Final";
+            IsTopHalfOfInning = false;
+            IsBottomHalfOfInning = false;
         }
         private void Game_InningEnded(object? sender, InningChangeEventArgs e)
         {
@@ -74,6 +77,9 @@ namespace Scorebook
         }
         private void Game_InningStarted(object? sender, InningChangeEventArgs e)
         {
+            InningNumber = Game.CurrentInning.Number.ToString();
+            IsTopHalfOfInning = Game.CurrentInning.Half == HalfInning.Top;
+            IsBottomHalfOfInning = Game.CurrentInning.Half == HalfInning.Bottom;
             Defense.FieldingTeam = Game?.FieldingTeam;
             OnPropertyChanged(nameof(Defense));
         }
@@ -305,13 +311,33 @@ namespace Scorebook
         }
         public bool IsSideBarOpen
         {
-            get => _isSideBarOpen;
+            get
+            {
+                if (DeviceInfo.Platform == DevicePlatform.WinUI)
+                    return true;
+                return _isSideBarOpen;
+            }
             set
             {
-                _isSideBarOpen = value;
+                if (DeviceInfo.Platform == DevicePlatform.WinUI)
+                    _isSideBarOpen = true;
+                else
+                    _isSideBarOpen = value;
                 OnPropertyChanged(nameof(IsSideBarOpen));
+                OnPropertyChanged(nameof(ShowMainArea));
+                OnPropertyChanged(nameof(ShowLineupBackGround));
             }
         }
+        public bool ShowMainArea
+        {
+            get
+            {
+                if (DeviceInfo.Platform == DevicePlatform.WinUI)
+                    return true;
+                return !IsSideBarOpen;
+            }
+        }
+        public bool ShowLineupBackGround => !ShowMainArea;
         public bool ShowFieldPositionLinks
         {
             get => _isGameStarted && !_showDefensiveAlignment;
@@ -436,6 +462,78 @@ namespace Scorebook
                 }
             }
         }
+        public bool ShowDesktopActionButtons
+        {
+            get => _showDesktopActionButtons;
+            set
+            {
+                _showDesktopActionButtons = value;
+                OnPropertyChanged(nameof(ShowDesktopActionButtons));
+            }
+        }
+        public bool MobileActionTrigger
+        {
+            get => _mobileActionTrigger;
+            set
+            {
+                _mobileActionTrigger = value;
+                OnPropertyChanged(nameof(MobileActionTrigger));
+            }
+        }
+        public bool ShowActionDialog
+        {
+            get => _showActionDialog;
+            set
+            {
+                _showActionDialog = value;
+                OnPropertyChanged(nameof(ShowActionDialog));
+            }
+        }
+        public string InningNumber
+        {
+            get => _inningNumber;
+            set
+            {
+                _inningNumber = value;
+                OnPropertyChanged(nameof(InningNumber));
+            }
+        }
+        public bool IsTopHalfOfInning
+        {
+            get => _isTopHalfOfInning;
+            set
+            {
+                _isTopHalfOfInning = value;
+                OnPropertyChanged(nameof(IsTopHalfOfInning));
+            }
+        }
+        public bool IsBottomHalfOfInning
+        {
+            get => _isBottomHalfOfInning;
+            set
+            {
+                _isBottomHalfOfInning = value;
+                OnPropertyChanged(nameof(IsBottomHalfOfInning));
+            }
+        }
+        public string HomeMobileText
+        {
+            get => MobileActionTrigger ? _homeMobileText : "";
+            set
+            {
+                _homeMobileText = value;
+                OnPropertyChanged(nameof(HomeMobileText));
+            }
+        }
+        public string AwayMobileText
+        {
+            get => MobileActionTrigger ? _awayMobileText : "";
+            set
+            {
+                _awayMobileText = value;
+                OnPropertyChanged(nameof(AwayMobileText));
+            }
+        }
         public PitchTotals CurrentPitchStats
         {
             get
@@ -454,6 +552,9 @@ namespace Scorebook
         public ObservableCollection<string> InningEvents { get; set; } = [];
         public ObservableCollection<string> CurrentAbPitches { get; set; } = [];
         public ObservableCollection<string> Leagues { get; set; } = [];
+        public ObservableCollection<GameScore> Schedule { get; set; } = [];
+        public ObservableCollection<Team> ApiTeams { get; set; } = [];
+        public ObservableCollection<CoreTeam> Teams { get; set; } = [];
         public ObservableCollection<Team> FilteredHomeTeams { get; set; } = [];
         public ObservableCollection<Team> FilteredAwayTeams { get; set; } = [];
         public ObservableCollection<Player> TeamPlayers { get; set; } = [];
@@ -466,7 +567,7 @@ namespace Scorebook
         public ObservableCollection<PositionStatus> PositionStatusList { get; set; } = [];
         public ObservableCollection<LineupPosition> ActiveLineup => EditingHomeLineup.GetValueOrDefault() ? HomeLineup : AwayLineup;
         public ObservableCollection<string> PreviousAtBats { get; set; } = [];
-        public bool TeamsAreLoaded => _apiTeams?.Count != 0;
+        public bool TeamsAreLoaded => ApiTeams?.Count != 0;
         public bool CanStartGame => SelectedHomeTeam != null && SelectedAwayTeam != null;
         internal void UpdateRunners()
         {
@@ -484,20 +585,32 @@ namespace Scorebook
             if (InningEvents.Any())
             {
                 InningEvents.RemoveAt(0);
-                InningEvents.Insert(0, CurrentAb.ToString());
+                InningEvents.Insert(0, CurrentAb?.ToString() ?? "");
             }
             if (Game?.CurrentAb != null && Game.CurrentAb != CurrentAb)
             {
                 CurrentAb = Game?.CurrentAb;
-                InningEvents.Insert(0, CurrentAb.ToString());
+                InningEvents.Insert(0, CurrentAb?.ToString() ?? "");
             }
 
             var lineup = Game?.CurrentInning.Half == HalfInning.Top ? AwayLineup : HomeLineup;
             foreach (var lp in lineup)
                 lp.IsActive = false;
             var current = lineup.SingleOrDefault(s => s.Player == CurrentAb?.Batter);
-            if (!(current is null))
+            if (current is not null)
                 current.IsActive = true;
+            var pitcherText = $"Pitching: {CurrentAb?.Pitcher?.FullName}";
+            var hitterText = $"Batting: {CurrentAb?.Batter?.FullName}";
+            if (Game?.CurrentInning?.Half == HalfInning.Bottom)
+            {
+                AwayMobileText = pitcherText;
+                HomeMobileText = hitterText;
+            }
+            else
+            {
+                HomeMobileText = pitcherText;
+                AwayMobileText = hitterText;
+            }
             UpdatePitches();
             OnPropertyChanged(nameof(CurrentBalls));
             OnPropertyChanged(nameof(CurrentStrikes));
@@ -915,6 +1028,8 @@ namespace Scorebook
             OnPropertyChanged(nameof(CurrentOuts));
             OnPropertyChanged(nameof(NextBatterText));
             UpdateRunners();
+            if (MobileActionTrigger)
+                ShowActionDialog = false;
         });
         public ICommand ReturnRunnerCommand => new Command(() =>
         {
@@ -927,9 +1042,9 @@ namespace Scorebook
         });
         public ICommand SelectFromScheduleCommand => new Command(async () =>
         {
-            if (_schedule.Count != 0 && GameScores.Count == 0)
+            if (Schedule.Count != 0 && GameScores.Count == 0)
             {
-                foreach (var game in _schedule.Where(w => w.GameDate > DateTime.Today))
+                foreach (var game in Schedule.Where(w => w.GameDate > DateTime.Today))
                     GameScores.Add(GameScoreWrapper.Create(game));
             }
             IsSelectingGameFromSchedule = true;
@@ -937,20 +1052,35 @@ namespace Scorebook
         public ICommand AddPitchCommand => new Command<PitchResult>((pitchType) =>
         {
             var pitch = Pitch.GetPitch(pitchType);
-            if (pitchType == PitchResult.InPlay)
-                IsPitchesPanelVisible = false;
             Game.AddEventToAb(pitch);
+            switch (pitchType)
+            {
+                case PitchResult.InPlay:
+                    IsPitchesPanelVisible = false;
+                    break;
+                case PitchResult.Ball:
+                    if (CurrentBalls == 4)
+                        IsPitchesPanelVisible = false;
+                    break;
+                case PitchResult.SwingingStrike:
+                case PitchResult.CalledStrike:
+                    if (CurrentStrikes >= 3)
+                        IsPitchesPanelVisible = false;
+                    break;
+                default:
+                    break;
+            }
             OnPropertyChanged(nameof(CurrentBalls));
             OnPropertyChanged(nameof(CurrentStrikes));
             ReplaceCurrentAbInLog();
-            var pitchNumber = CurrentAb.Pitches.Count();
             UpdatePitches();
-            //CurrentAbPitches.Add($"{pitchNumber}) {CurrentAb.Pitches.Last().ToString()}");
+
         });
+        public ICommand ShowCommandsCommand => new Command(() => ShowActionDialog = true);
         public ICommand CreateGameCommand => new Command(() =>
         {
-            var homeTeam = _teams.FirstOrDefault(f => f.Name == SelectedHomeTeam?.Name);
-            var awayTeam = _teams.FirstOrDefault(f => f.Name == SelectedAwayTeam?.Name);
+            var homeTeam = Teams.FirstOrDefault(f => f.Name == SelectedHomeTeam?.Name);
+            var awayTeam = Teams.FirstOrDefault(f => f.Name == SelectedAwayTeam?.Name);
             if (homeTeam == null || awayTeam == null)
                 return;
             var innings = _leagueDict.ContainsKey(SelectedHomeLeague) ? _leagueDict[SelectedHomeLeague] : 7;
@@ -963,10 +1093,10 @@ namespace Scorebook
         public ICommand CreateGameFromScheduleCommand => new Command(() =>
         {
             var homeLeague = "CMBA";
-            var homeTeam = _teams.FirstOrDefault(f => f.Name == SelectedGame?.HomeTeam?.Name);
+            var homeTeam = Teams.FirstOrDefault(f => f.Name == SelectedGame?.HomeTeam?.Name);
             if (homeTeam == null)
             {
-                var hTeam = _apiTeams.FirstOrDefault(f => f.Name == SelectedGame?.HomeTeam?.Name);
+                var hTeam = ApiTeams.FirstOrDefault(f => f.Name == SelectedGame?.HomeTeam?.Name);
 
                 if (hTeam != null)
                 {
@@ -974,10 +1104,10 @@ namespace Scorebook
                     homeTeam = CoreTeam.CreateWithUnknownRoster(hTeam.Name);
                 }
             }
-            var awayTeam = _teams.FirstOrDefault(f => f.Name == SelectedGame?.AwayTeam?.Name);
+            var awayTeam = Teams.FirstOrDefault(f => f.Name == SelectedGame?.AwayTeam?.Name);
             if (awayTeam == null)
             {
-                var aTeam = _apiTeams.FirstOrDefault(f => f.Name == SelectedGame?.AwayTeam?.Name);
+                var aTeam = ApiTeams.FirstOrDefault(f => f.Name == SelectedGame?.AwayTeam?.Name);
                 if (aTeam != null)
                     awayTeam = CoreTeam.CreateWithUnknownRoster(aTeam.Name);
             }
@@ -1150,8 +1280,8 @@ namespace Scorebook
             using (var client = new HttpClient() { BaseAddress = new Uri("https://h503cfkn-7249.usw3.devtunnels.ms/") })
             {
                 var teams = await client.GetFromJsonAsync<List<Team>>("/api/teams");
-                foreach (var team in teams)
-                    _apiTeams.Add(team);
+                foreach (var team in teams.Where(w => w.Current))
+                    ApiTeams.Add(team);
                 foreach (var league in teams.Select(t => t.Division).Distinct())
                     Leagues.Add(league);
             }
@@ -1162,7 +1292,7 @@ namespace Scorebook
             {
                 var games = await client.GetFromJsonAsync<List<GameScore>>($"/api/teams/{teamId}/games");
                 foreach (var game in games)
-                    _schedule.Add(game);
+                    Schedule.Add(game);
             }
         }
         private async Task SubstitutePlayer(bool home, LineupPosition lp)
@@ -1200,12 +1330,12 @@ namespace Scorebook
                 FilteredHomeTeams.Clear();
                 if (SelectedHomeLeague != null)
                 {
-                    foreach (var team in _apiTeams.Where(w => w.Division == SelectedHomeLeague))
+                    foreach (var team in ApiTeams.Where(w => w.Division == SelectedHomeLeague))
                         FilteredHomeTeams.Add(team);
                 }
                 else
                 {
-                    foreach (var team in _apiTeams)
+                    foreach (var team in ApiTeams)
                         FilteredHomeTeams.Add(team);
                 }
             }
@@ -1214,12 +1344,12 @@ namespace Scorebook
                 FilteredAwayTeams.Clear();
                 if (SelectedAwayLeague != null)
                 {
-                    foreach (var team in _apiTeams.Where(w => w.Division == SelectedAwayLeague))
+                    foreach (var team in ApiTeams.Where(w => w.Division == SelectedAwayLeague))
                         FilteredAwayTeams.Add(team);
                 }
                 else
                 {
-                    foreach (var team in _apiTeams)
+                    foreach (var team in ApiTeams)
                         FilteredAwayTeams.Add(team);
                 }
             }
@@ -1232,7 +1362,7 @@ namespace Scorebook
                 return;
             var leagues = League.CreateFromFile(rosterPath, out League current);
             if (leagues.Any())
-                _teams = [.. leagues.SelectMany(s => s.Teams)];
+                Teams = [.. leagues.SelectMany(s => s.Teams)];
 
         }
         public Dictionary<Position, bool> PositionOccupiedMap { get; set; } = [];
@@ -1302,21 +1432,26 @@ namespace Scorebook
         private bool _saveAwarded;
         private bool _isSideBarOpen;
         private string _saveAwardedTo = "";
-        private LineupPosition? _draggedLp;
-        private FieldLocation? _activeHitZone;
-        private PitchTotals? _currentPitchStats;
         private bool _showStats;
         private bool _gameIsOver;
         private int _totalInningCount;
         private bool _showLineScore;
+        private bool _showDesktopActionButtons = true;
+        private bool _mobileActionTrigger = false;
+        private bool _showActionDialog = false;
+        private string _inningNumber;
+        private bool _isTopHalfOfInning;
+        private bool _isBottomHalfOfInning;
         private readonly Dictionary<string, int> _leagueDict = new()
         {
             { "CMBA", 7 },
             { "BJL", 9 },
             { "CSYBL", 7 }
         };
-        private List<CoreTeam> _teams = [];
-        private List<Team> _apiTeams = [];
-        private List<GameScore> _schedule = [];
+        private LineupPosition? _draggedLp;
+        private FieldLocation? _activeHitZone;
+        private PitchTotals? _currentPitchStats;
+        private string _awayMobileText;
+        private string _homeMobileText;
     }
 }

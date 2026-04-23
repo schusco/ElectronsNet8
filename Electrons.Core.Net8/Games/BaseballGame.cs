@@ -830,7 +830,7 @@ namespace Electrons.Core.Net8.Games
                 previousAb.SetBatter(newBatter);
         }
 
-        public override string ToString() => $"{AwayTeam.Name} {AwayScore}, {HomeTeam.Name} {HomeScore} {(IsGameOver ? "Final" : CurrentInning.ToString())}";
+        public override string ToString() => $"{AwayTeam?.Name} {AwayScore}, {HomeTeam?.Name} {HomeScore} {(IsGameOver ? "Final" : CurrentInning?.ToString())}";
 
         private readonly Stack<Inning> _innings;
         private readonly Stack<Inning> _navInnings;

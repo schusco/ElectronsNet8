@@ -1,6 +1,7 @@
 ﻿
 using Electrons.Core.Net8;
 using Electrons.Core.Net8.Games;
+using Microsoft.Maui.Layouts;
 
 
 namespace Scorebook
@@ -42,35 +43,61 @@ namespace Scorebook
         {
             base.OnSizeAllocated(width, height);
 
-            base.OnSizeAllocated(width, height);
-
             // If the window is narrower than 800 pixels, hide the sidebar
-            bool shouldShowSidebar = width > 900;
+            bool IsCompact = width < 900;
 
-            // You can bind this to a property in your ViewModel
-            _vm.IsSideBarOpen = shouldShowSidebar;
-
-            // On mobile, let the user toggle it; on desktop, force it open
-           // _vm.IsSidebarToggleVisible = !shouldShowSidebar;
-        }
-        private async void OnToggleSidebar(object sender, EventArgs e)
-        {
-            if (_vm.IsSideBarOpen)
+            if (IsCompact)
             {
-                // Slide it back to the left (hidden)
-                await SideBarColumnLeft.TranslateTo(-300, 0, 250, Easing.CubicIn);
-                await SideBarColumnRight.TranslateTo(-300, 0, 250, Easing.CubicIn);
+                _vm.IsSideBarOpen = false;
+                _vm.ShowDesktopActionButtons = false;
+                _vm.MobileActionTrigger = true;
+            }
+            if (DeviceInfo.Platform == DevicePlatform.Android)
+            {
+                var isTabletLandscape = width > height;
+                if (isTabletLandscape)
+                {
+                    MainArea.Direction = FlexDirection.Row;
+                    MainArea.AlignItems = FlexAlignItems.Stretch;
+                }
+                else
+                {
+                    MainArea.Direction = FlexDirection.Column;
+                    MainArea.AlignItems = FlexAlignItems.Start;
+                }
+                WindowsLog.IsVisible = false;
+                AndroidLog.IsVisible = true;
+                InningLabel.IsVisible = false;
             }
             else
             {
-                // Slide it into view
-                await SideBarColumnLeft.TranslateTo(0, 0, 250, Easing.CubicOut);
-                await SideBarColumnRight.TranslateTo(-300, 0, 250, Easing.CubicIn);
+                WindowsLog.IsVisible = true;
+                AndroidLog.IsVisible = false;
             }
 
-            _vm.IsSideBarOpen = !_vm.IsSideBarOpen;
         }
+        private async void OnToggleSidebar(object sender, EventArgs e)
+        {
 
+            Reallocate();
+        }
+        private void Reallocate()
+        {
+            if (DeviceInfo.Platform == DevicePlatform.Android)
+            {
+                if (_vm.IsSideBarOpen)
+                {
+                    SideBarColumnLeft.Width = new GridLength(2, GridUnitType.Star);
+                    SideBarColumnRight.Width = new GridLength(2, GridUnitType.Star);
+                }
+                else
+                {
+
+                    SideBarColumnLeft.Width = new GridLength(0);
+                    SideBarColumnRight.Width = new GridLength(0);
+                }
+            }
+        }
         private async void TapGestureRecognizer_Tapped(object sender, TappedEventArgs e)
         {
             var paramString = e.Parameter as string ?? "0";
@@ -158,6 +185,9 @@ namespace Scorebook
 
         }
 
-
+        private void TapGestureRecognizer_Tapped_1(object sender, TappedEventArgs e)
+        {
+            Reallocate();
+        }
     }
 }
