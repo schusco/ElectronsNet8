@@ -354,11 +354,11 @@ namespace Electrons.Core.Net8.Games
             _gameIsStarted = true;
         }
         public static Team CreateWithUnknownRoster(string name) => new Team(name, Enumerable.Range(1, 25).Select(s => Player.Create(s, "Unknown", "Player")).ToList());
-
+        public static Team Create(string name) => new Team(name);
         public int GetLineupSpotFor(Player player)
         {
             return _order.LineupSpotOf(player);
-        }
+        }        
 
         private readonly List<Substitution> _substitutions;
         private List<Player> _roster;

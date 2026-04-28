@@ -271,7 +271,7 @@ namespace Electrons.Core.Net8.Games
                 var newPitcher = FieldingTeam.GamePitchers.Single(s => s == (Pitcher)rp.NewPlayer);
                 var isSaveSituation = CurrentInning.Number >= 5 && IsSaveSituationFor(FieldingTeam);
                 if (isSaveSituation)
-                    newPitcher.IsSaveSituation();                                
+                    newPitcher.IsSaveSituation();
             }
         }
         private void Inning_InningEnded(object sender, EventArgs e)
@@ -279,8 +279,8 @@ namespace Electrons.Core.Net8.Games
             if (!IsGameOver)
                 CheckForEndOfGame();
             InningEnded?.Invoke(this, new InningChangeEventArgs(sender as Inning));
-            if (!IsGameOver)            
-                StartNextInning();            
+            if (!IsGameOver)
+                StartNextInning();
         }
         public bool AddScoring()
         {
@@ -535,7 +535,7 @@ namespace Electrons.Core.Net8.Games
         public void SetHomeTeam(Team team)
         {
             if (HomeTeam != null)
-                throw new BaseballGameException("Home team already defined");            
+                throw new BaseballGameException("Home team already defined");
             HomeTeam = team;
         }
         [JsonIgnore]
@@ -787,6 +787,12 @@ namespace Electrons.Core.Net8.Games
             }
             return null;
         }
+        private RunningEvent GetRunningEvent(OnBase onBase, Player runner)
+        {
+            if (CurrentAb.AdvancingRunners.Any(a => a.AdvanceTo == onBase && a.Player == runner))
+                return CurrentAb.AdvancingRunners.Single(s => s.AdvanceTo == onBase && s.Player == runner);
+            return null;
+        }
         private OnBase GetCurrentBase(BaseRunner runner)
         {
             var kvp = CurrentInning.Runners.Single(s => s.Value.Equals(runner));
@@ -795,8 +801,9 @@ namespace Electrons.Core.Net8.Games
         public RunningEvent ReturnRunner(OnBase onBase)
         {
             var runner = CurrentInning.CurrentRunners[onBase];
-            var advance = RemoveRunningEvent(onBase, runner.Runner);
-            CurrentAb.Result.RemoveRunningEvent(advance);
+            var advance = GetRunningEvent(onBase, runner.Runner);
+            if (!CurrentAb.Result.RemoveRunningEvent(advance))
+                CurrentAb.RemoveRunningEvent(advance);
             return advance;
         }
         public void SetRunsBattedInForAb(int totalRbis)

@@ -191,9 +191,10 @@
         <x:Double x:Key="ActiveHitZoneOpacity">0.5</x:Double>
     </ContentPage.Resources>
     <Shell.TitleView>
-        <Grid ColumnDefinitions="*, *">
+        <Grid ColumnDefinitions="*, Auto,Auto">
             <Label Text="Baseball Scorekeeper" VerticalOptions="Center" FontAttributes="Bold" />
             <Button Grid.Column="1" Text="Save Game" Command="{Binding SaveCommand}" BackgroundColor="Transparent" TextColor="Black" Margin="0,0,10,0" />
+            <Button Grid.Column="2" Text="Select Game" Command="{Binding ToggleGameSelectionCommand}" BackgroundColor="Transparent" TextColor="Black" Margin="0,0,10,0" />
         </Grid>
     </Shell.TitleView>
     <Grid RowDefinitions="*" Padding="10" ColumnSpacing="10"  >
@@ -662,7 +663,7 @@
                 </VerticalStackLayout>
             </ScrollView>
         </Border>
-        <Grid Grid.ColumnSpan="4" Grid.RowSpan="1" IsVisible="{Binding IsGameNull}" BackgroundColor="#BB000000" ZIndex="100" >
+        <Grid Grid.ColumnSpan="4" Grid.RowSpan="1" IsVisible="{Binding ShowGameSelectionOptions}" BackgroundColor="#BB000000" ZIndex="100" >
             <Grid ColumnDefinitions="2*,1.5*,2*"  >
                 <VerticalStackLayout Grid.Column="0" Grid.ColumnSpan="2" HorizontalOptions="End"  VerticalOptions="Center" Spacing="20"  >
                     <Label Text="Electrons Baseball Scorebook" HorizontalOptions="Center" TextColor="White" FontSize="24"/>
@@ -947,6 +948,7 @@
             <Button Text="SB" Style="{StaticResource ActionButtonStyle}" Command="{Binding ScoringEnteredCommand}" CommandParameter="{x:Static games:AB.StolenBase}"  />
             <Button Text="CS" Style="{StaticResource ActionButtonStyle}" Command="{Binding ScoringEnteredCommand}" CommandParameter="{x:Static games:AB.OutStealing}"  />
             <Button Text="SAC" Style="{StaticResource ActionButtonStyle}" Command="{Binding ScoringEnteredCommand}" CommandParameter="{x:Static games:AB.Sacrifice}"  />
+            <Button Text="Close" Style="{StaticResource ActionButtonStyle}" Command="{Binding CloseActionDialogCommand}"  />
         </FlexLayout>
     </Grid>
 </ContentPage>

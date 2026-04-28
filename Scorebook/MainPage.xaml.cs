@@ -17,11 +17,10 @@ namespace Scorebook
             "Runner Advanced On Error",
             "Runner Out Advancing",
             "Courtesy Runner"];
-        public MainPage()
+        public MainPage(ScorebookViewModel vm)
         {
             InitializeComponent();
-            //
-            _vm = new ScorebookViewModel();
+            _vm = vm;
             BindingContext = _vm;
         }
         protected override async void OnAppearing()
@@ -31,8 +30,8 @@ namespace Scorebook
                 base.OnAppearing();
                 if (!_vm.TeamsAreLoaded)
                 {
-                    await _vm.LoadTeamsAndLeagues();
                     await _vm.LoadSchedule(1);
+                    await _vm.LoadTeamsAndLeagues();                    
                     _vm.LoadTeamsFromXml();
                     _vm.FilterTeams();
                 }
@@ -44,7 +43,7 @@ namespace Scorebook
             base.OnSizeAllocated(width, height);
 
             // If the window is narrower than 800 pixels, hide the sidebar
-            bool IsCompact = width < 900;
+            bool IsCompact = width < 800;
 
             if (IsCompact)
             {
