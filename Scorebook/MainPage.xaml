@@ -254,7 +254,7 @@
                 <VerticalStackLayout Grid.Column="1">
                     <Grid ColumnDefinitions="40,Auto,*,*,50,40" RowDefinitions="Auto,Auto,Auto" BackgroundColor="#F0F0F0" Padding="10" Margin="0,0,0,0" ColumnSpacing="20">
                         <Label Grid.Column="0" Text="{Binding Game.HomeScore}" FontSize="32" VerticalOptions="Center" HorizontalOptions="Center" />
-                        
+
                         <HorizontalStackLayout Spacing="15" Grid.Column="1" Grid.ColumnSpan="3" >
                             <HorizontalStackLayout Spacing="2" Grid.Column="2">
                                 <Label Text="B" VerticalOptions="Center" FontAttributes="Bold" Margin="5" />
@@ -715,19 +715,23 @@
                 </BindableLayout.ItemTemplate>
             </FlexLayout>
             <Grid ColumnDefinitions="Auto,50,Auto" Grid.Row="1" HorizontalOptions="Center"  >
-                <Border Grid.Column="0">
-                    <CollectionView  BackgroundColor="White"  WidthRequest="-1" HeightRequest="600" HorizontalOptions="End" VerticalOptions="Start" ItemsSource="{Binding TeamPlayers}" >
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="games:Player">
-                                <Grid ColumnDefinitions="*,Auto" Padding="5,0">
-                                    <Label Text="{Binding FullName}" Grid.Column="0" HorizontalTextAlignment="End" FontSize="Small" Margin="0,0,10,0" VerticalOptions="Center" />
-                                    <Button Text="+" Margin="5" Grid.Column="1" HorizontalOptions="End" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ScorebookViewModel}}, 
+                <HorizontalStackLayout>
+                    <ImageButton Source="arrow_counterclockwise.png" BackgroundColor="White" Margin="0,0,10,0" CornerRadius="15" VerticalOptions="Center" Command="{Binding RefreshRosterCommand}" />
+                    <Border Grid.Column="0">                        
+                        <CollectionView  BackgroundColor="White"  WidthRequest="-1" HeightRequest="600" HorizontalOptions="End" VerticalOptions="Start" ItemsSource="{Binding TeamPlayers}" >
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="games:Player">
+                                    <Grid ColumnDefinitions="*,Auto" Padding="5,0">
+                                        <Label Text="{Binding FullName}" Grid.Column="0" HorizontalTextAlignment="End" FontSize="Small" Margin="0,0,10,0" VerticalOptions="Center" />
+                                        <Button Text="+" Margin="5" Grid.Column="1" HorizontalOptions="End" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ScorebookViewModel}}, 
                                         Path=AddToLineupCommand}"  CommandParameter="{Binding .}" />
-                                </Grid>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </Border>
+                </HorizontalStackLayout>
+
                 <ImageButton Source="x_circle.png" CornerRadius="20" BackgroundColor="White" HeightRequest="50" WidthRequest="45" Grid.Column="1" Command="{Binding CloseSetLineupCommand}"  VerticalOptions="Center" Margin="5" />
 
                 <Border Grid.Column="2">

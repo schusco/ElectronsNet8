@@ -8,6 +8,7 @@ using Scorebook.ViewObjects;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using CoreTeam = Electrons.Core.Net8.Games.Team;
 using Team = ScoreboardApi.Models.Team;
@@ -567,7 +568,6 @@ namespace Scorebook
         public ObservableCollection<string> Leagues { get; set; } = [];
         public ObservableCollection<GameScore> Schedule { get; set; } = [];
         public ObservableCollection<Team> ApiTeams { get; set; } = [];
-        public ObservableCollection<CoreTeam> Teams { get; set; } = [];
         public ObservableCollection<Team> FilteredHomeTeams { get; set; } = [];
         public ObservableCollection<Team> FilteredAwayTeams { get; set; } = [];
         public ObservableCollection<Player> TeamPlayers { get; set; } = [];
@@ -1099,73 +1099,58 @@ namespace Scorebook
 
         });
         public ICommand ShowCommandsCommand => new Command(() => ShowActionDialog = true);
-        public ICommand CreateGameCommand => new Command(() =>
+        public ICommand CreateGameCommand => new Command(async () =>
         {
-            var homeTeam = Teams.FirstOrDefault(f => f.Name == SelectedHomeTeam?.Name);
-            var awayTeam = Teams.FirstOrDefault(f => f.Name == SelectedAwayTeam?.Name);
+            var homeTeam = ApiTeams.FirstOrDefault(f => f.Name == SelectedHomeTeam?.Name);
+            var awayTeam = ApiTeams.FirstOrDefault(f => f.Name == SelectedAwayTeam?.Name);
             if (homeTeam == null || awayTeam == null)
                 return;
             var innings = _leagueDict.ContainsKey(SelectedHomeLeague) ? _leagueDict[SelectedHomeLeague] : 7;
             Game = new BaseballGame(innings);
-            Game.SetHomeTeam(homeTeam);
-            Game.SetAwayTeam(awayTeam);
+            await SetTeamsForGame(homeTeam, awayTeam);
             IsConfiguringNewGame = false;
             GameLoaded();
         }, () => SelectedHomeTeam != null && SelectedAwayTeam != null);
+        private async Task SetTeamsForGame(Team homeTeam, Team awayTeam)
+        {
+            if (ApiRosters.TryGetValue(homeTeam.Name, out var hroster))
+                Game.SetHomeTeam(CoreTeam.Create(homeTeam.Name, hroster.Select(s => Player.Create(s.Number, s.FirstName, s.LastName)).ToList()));
+            else
+            {
+                await LoadRoster(homeTeam);
+                if (ApiRosters.TryGetValue(homeTeam.Name, out hroster))
+                    Game.SetHomeTeam(CoreTeam.Create(homeTeam.Name, hroster.Select(s => Player.Create(s.Number, s.FirstName, s.LastName)).ToList()));
+                else
+                    Game.SetHomeTeam(CoreTeam.CreateWithUnknownRoster(homeTeam.Name));
+            }
+            if (ApiRosters.TryGetValue(awayTeam.Name, out var aroster))
+                Game.SetAwayTeam(CoreTeam.Create(awayTeam.Name, aroster.Select(s => Player.Create(s.Number, s.FirstName, s.LastName)).ToList()));
+            else
+            {
+                await LoadRoster(awayTeam);
+                if (ApiRosters.TryGetValue(awayTeam.Name, out aroster))
+                    Game.SetAwayTeam(CoreTeam.Create(awayTeam.Name, aroster.Select(s => Player.Create(s.Number, s.FirstName, s.LastName)).ToList()));
+                else
+                    Game.SetAwayTeam(CoreTeam.CreateWithUnknownRoster(awayTeam.Name));
+            }
+        }
         public ICommand CreateGameFromScheduleCommand => new Command(async () =>
         {
             var homeLeague = "CMBA";
-            var homeTeam = Teams.FirstOrDefault(f => f.Name == SelectedGame?.HomeTeam?.Name);
-            var hTeam = ApiTeams.FirstOrDefault(f => f.Name == SelectedGame?.HomeTeam?.Name);
-            await LoadRoster(hTeam);
-            if (homeTeam == null)
-            {
-                if (hTeam != null)
-                {
-                    homeLeague = hTeam.Division;
-                    if (ApiRosters.TryGetValue(hTeam.Name, out var roster))
-                        homeTeam = CoreTeam.Create(hTeam.Name);
-                    else
-                        homeTeam = CoreTeam.CreateWithUnknownRoster(hTeam.Name);
-                }
-            }
-            else
-            {
-                if (hTeam is not null)
-                {
-                    if (!ApiRosters.TryGetValue(hTeam.Name, out var roster))
-                        homeTeam = CoreTeam.CreateWithUnknownRoster(hTeam.Name);
-                }
-            }
-            var awayTeam = Teams.FirstOrDefault(f => f.Name == SelectedGame?.AwayTeam?.Name);
-            var aTeam = ApiTeams.FirstOrDefault(f => f.Name == SelectedGame?.AwayTeam?.Name);
-            await LoadRoster(aTeam);
-            if (awayTeam == null)
-            {
-                if (aTeam != null)
-                {
-                    if (ApiRosters.TryGetValue(aTeam.Name, out var roster))
-                        awayTeam = CoreTeam.Create(aTeam.Name);
-                }
-                else
-                    awayTeam = CoreTeam.CreateWithUnknownRoster(aTeam.Name);
-            }
-            else
-            {
-                if (aTeam is not null)
-                {
-                    if (!ApiRosters.TryGetValue(aTeam.Name, out var roster))
-                        homeTeam = CoreTeam.CreateWithUnknownRoster(hTeam.Name);
-                }
-            }
+            var homeTeam = ApiTeams.FirstOrDefault(f => f.Name == SelectedGame?.HomeTeam?.Name);
+            var awayTeam = ApiTeams.FirstOrDefault(f => f.Name == SelectedGame?.AwayTeam?.Name);
             if (homeTeam == null || awayTeam == null)
                 return;
             var innings = _leagueDict.ContainsKey(homeLeague) ? _leagueDict[homeLeague] : 7;
             Game = new BaseballGame(innings);
-            Game.SetHomeTeam(homeTeam);
-            Game.SetAwayTeam(awayTeam);
+            await SetTeamsForGame(homeTeam, awayTeam);
             IsSelectingGameFromSchedule = false;
             GameLoaded();
+        });
+        public ICommand RefreshRosterCommand => new Command(async () =>
+        {
+            var teamId = EditingHomeLineup.Value ? ApiTeams.Single(s => s.Name == Game.HomeTeam.Name) : ApiTeams.Single(s => s.Name == Game.AwayTeam.Name);
+            await LoadRoster(teamId, true);
         });
         public ICommand ToggleGameSelectionCommand => new Command(() =>
         {
@@ -1335,12 +1320,25 @@ namespace Scorebook
             var stats = Game.CurrentInning.Half == HalfInning.Top ? _game.HomeTeamPitching : Game.AwayTeamPitching;
             return stats.First(s => s.Player == Game.CurrentInning.CurrentPitcher);
         }
-        public async Task LoadRoster(Team team)
+        public async Task LoadRoster(Team team, bool forceRefresh = false)
         {
             if (team is null)
                 return;
-            var roster = await _apiService.GetRoster(team.Id);
+            if (forceRefresh)
+                TeamPlayers.Clear();
+            var roster = await _apiService.GetRoster(team.Id, forceRefresh);
+            var newTeam = CoreTeam.Create(team.Name, [.. roster.Select(s => Player.Create(s.Number, s.FirstName, s.LastName))]);
             ApiRosters[team.Name] = roster;
+            if (forceRefresh)
+            {
+                if (team.Name == Game.AwayTeam.Name)
+                    Game.AwayTeam.SetRoster(newTeam.Roster);
+                else
+                    Game.HomeTeam.SetRoster(newTeam.Roster);
+                foreach (var player in newTeam.Roster)
+                    TeamPlayers.Add(player);
+                //OnPropertyChanged(nameof(TeamPlayers));
+            }
         }
         public async Task LoadTeamsAndLeagues()
         {
@@ -1349,13 +1347,20 @@ namespace Scorebook
                 ApiTeams.Add(team);
             foreach (var league in teams.Select(t => t.Division).Distinct())
                 Leagues.Add(league);
-
+        }
+        public void LoadRosters()
+        {
+            foreach (var team in ApiTeams)
+            {
+                var roster = _apiService.LoadCachedRoster(team.Id);
+                if (roster != null)
+                    ApiRosters.Add(team.Name, roster);
+            }
         }
         public async Task LoadSchedule(int teamId)
         {
             foreach (var game in await _apiService.GetSchedule(teamId))
                 Schedule.Add(game);
-
         }
         private async Task SubstitutePlayer(bool home, LineupPosition lp)
         {
@@ -1415,17 +1420,6 @@ namespace Scorebook
                         FilteredAwayTeams.Add(team);
                 }
             }
-        }
-        internal void LoadTeamsFromXml()
-        {
-            var scoreBookPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Scorebook");
-            var rosterPath = Path.Combine(scoreBookPath, "Rosters.xml");
-            if (!File.Exists(rosterPath))
-                return;
-            var leagues = League.CreateFromFile(rosterPath, out League current);
-            if (leagues.Any())
-                Teams = [.. leagues.SelectMany(s => s.Teams)];
-
         }
         public Dictionary<Position, bool> PositionOccupiedMap { get; set; } = [];
         internal void UpdatePositionAvailability()

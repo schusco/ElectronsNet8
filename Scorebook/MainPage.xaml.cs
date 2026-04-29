@@ -32,7 +32,7 @@ namespace Scorebook
                 {
                     await _vm.LoadSchedule(1);
                     await _vm.LoadTeamsAndLeagues();                    
-                    _vm.LoadTeamsFromXml();
+                    _vm.LoadRosters();
                     _vm.FilterTeams();
                 }
             }

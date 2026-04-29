@@ -355,6 +355,7 @@ namespace Electrons.Core.Net8.Games
         }
         public static Team CreateWithUnknownRoster(string name) => new Team(name, Enumerable.Range(1, 25).Select(s => Player.Create(s, "Unknown", "Player")).ToList());
         public static Team Create(string name) => new Team(name);
+        public static Team Create(string name, List<Player> roster) => new Team(name, roster);
         public int GetLineupSpotFor(Player player)
         {
             return _order.LineupSpotOf(player);
