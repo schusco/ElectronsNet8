@@ -2,12 +2,7 @@
 @model ScheduleModel
 @{
     ViewBag.Title = "Schedule";
-    // Ensure we have the values the logic is actually using
-    var currentYear = ViewContext.RouteData.Values["year"] ?? DateTime.Now.Year;
-    var currentMonth = ViewContext.RouteData.Values["month"] ?? DateTime.Now.Month;
-    
-    // Create a unique string for this specific month/year combination
-    string scheduleKey = $"electrons_{currentYear}_{currentMonth}";
+    string scheduleKey = $"electrons_{Model.Year}_{Model.Month}";
 }
 <div class="container-fluid">
     <div class="row">
@@ -61,7 +56,7 @@
 
         </div>
     </div>
-    <cache expires-after="@TimeSpan.FromMinutes(10)" vary-by="@scheduleKey" >
+    
     <div class="row">
         <div class="col col-xs-12">
             <table class="schedTable">
@@ -143,7 +138,7 @@
             </table>
         </div>
     </div>
-    </cache>
+    
     <div class="row">
         @foreach (var link in Model.Links)
         {
