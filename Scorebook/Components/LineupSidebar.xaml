@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:Scorebook.Converters"
+             x:Class="Scorebook.Components.LineupSidebar"
+             x:Name="Root">
+    <ContentView.Resources>
+        <converters:IntToColorConverter x:Key="BatterHighlightConverter"  ActiveColor="#40C4D527" InActiveColor="Transparent" />
+        <DataTemplate x:Key="LineupRowTemplate">
+            <Grid Padding="2" x:Name="PlayerRowContainer" BackgroundColor="{Binding IsActive, Converter={StaticResource BatterHighlightConverter}}">
+                <Label Text="{Binding Player.FullName}" LineBreakMode="NoWrap" MaxLines="1" FontSize="Small" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="PlayerRowTemplate">
+            <Grid Padding="2" x:Name="PlayerRowContainer" >
+                <Label Text="{Binding FullName}" FontSize="Small" LineBreakMode="NoWrap" MaxLines="1" />
+            </Grid>
+        </DataTemplate>
+    </ContentView.Resources>
+    <Border Grid.Column="0" BackgroundColor="White" >
+        <ScrollView Orientation="Vertical">
+            <VerticalStackLayout  Spacing="5">
+                <Border Padding="5">
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="{Binding Source={x:Reference Root}, Path=ViewModel.TeamName}" HorizontalOptions="Center" FontAttributes="Bold"/>
+                        <Button Text="{Binding Source={x:Reference Root}, Path=ViewModel.SubText}" Style="{StaticResource LineupButtonStyle}" Command="{Binding Source={x:Reference Root}, Path=ViewModel.SetLineupCommand}" />
+                    </VerticalStackLayout>
+                </Border>
+                <CollectionView ItemsSource="{Binding Source={x:Reference Root}, Path=ViewModel.Lineup}" HeightRequest="300" ItemTemplate="{StaticResource LineupRowTemplate}" SelectionMode="Single" 
+                        SelectionChangedCommand="{Binding Source={x:Reference Root}, Path=ViewModel.SubstitutePlayerCommand}" SelectionChangedCommandParameter="{Binding Source={RelativeSource Self}, Path=SelectedItem}">
+                </CollectionView>
+                <Border>
+                    <Button Text="{Binding Source={x:Reference Root}, Path=ViewModel.PitcherText}" Style="{StaticResource LineupButtonStyle}" Command="{Binding Source={x:Reference Root}, Path=ViewModel.SelectPitcherCommand}" />
+                </Border>
+                <Border>
+                    <Label Text="{Binding Source={x:Reference Root}, Path=ViewModel.PitcherName}"  FontSize="Small" Margin="5" />
+                </Border>
+                <Button Text="View Stats" Command="{Binding Source={x:Reference Root}, Path=ViewModel.SetStatsCommand}" Style="{StaticResource LineupButtonStyle}" />
+                <Border>
+                    <Label FontSize="Small" Text="Bench" Margin="10,10,0,0"/>
+                </Border>
+                <Border MaximumHeightRequest="150">
+                    <CollectionView ItemsSource="{Binding Source={x:Reference Root}, Path=ViewModel.Bench}" ItemTemplate="{StaticResource PlayerRowTemplate}" />
+                </Border>
+                <Border>
+                    <Label FontSize="Small" Text="Replaced" Margin="10,10,0,0"/>
+                </Border>
+                <Border MaximumHeightRequest="150">
+                    <CollectionView ItemsSource="{Binding Source={x:Reference Root}, Path=ViewModel.Replaced}" ItemTemplate="{StaticResource PlayerRowTemplate}" BackgroundColor="#f0f0f0" />
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Border>
+</ContentView>

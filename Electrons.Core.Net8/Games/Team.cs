@@ -93,10 +93,11 @@ namespace Electrons.Core.Net8.Games
                 }
                 return null;
             }
-            internal void RemoveFromLineup(Player player)
+            internal int RemoveFromLineup(Player player)
             {
-                var spot = _battingOrder.Values.ToList().IndexOf(player) + 1;
+                var spot = _battingOrder.Single(s => s.Value == player).Key;
                 _battingOrder.Remove(spot);
+                return spot;
             }
             public IList<Player> Order => _battingOrder.OrderBy(o => o.Key).Select(s => s.Value).ToList();
             internal Player Next(bool noAdvance)
@@ -147,10 +148,7 @@ namespace Electrons.Core.Net8.Games
         {
             if (!spot.HasValue)
                 spot = Lineup.Count(c => !string.IsNullOrEmpty(c.FirstName)) + 1;
-            var replaced = _order.AddToLineup(spot.Value, player);
-            //if (_order.Order.Count(c => !string.IsNullOrEmpty(c.FirstName)) >= 9)
-            //    OrderIsSet = true;
-            return replaced;
+            return _order.AddToLineup(spot.Value, player);             
         }
         [JsonIgnore]
         public Pitcher PitcherOfRecord => GamePitchers.Single(s => s.IsPitcherOfRecord);
@@ -159,6 +157,16 @@ namespace Electrons.Core.Net8.Games
             if (!OrderIsSet)
                 _order.RemoveFromLineup(player);
             return !OrderIsSet;
+        }
+        public void ReplaceUnknown(Player replaced, Player newPlayer, bool remove = false)
+        {
+            if (replaced.IsUnknown)
+            {
+                var spot = _order.RemoveFromLineup(replaced);
+                _order.AddToLineup(spot, newPlayer);
+                if (remove)
+                    _roster.Remove(replaced);
+            }
         }
         internal List<Pitcher> GamePitchers { get; }
         public void AddPlayer(Player player)
@@ -173,6 +181,14 @@ namespace Electrons.Core.Net8.Games
                 return;
             foreach (var p in player)
                 _roster.Remove(p);
+        }
+        public void SetStartingPitcher(Pitcher starter)
+        {
+            if (GamePitchers.Any())
+                GamePitchers.Clear();
+            GamePitchers.Add(starter);
+            starter.SetPitcherOfRecord();
+            PitcherChanged?.Invoke(this, new EventArgs());
         }
         private void OnPlayerAdded() => PlayerAdded?.Invoke(this, new EventArgs());
         internal static Team Load(XElement teamEl)
@@ -244,15 +260,7 @@ namespace Electrons.Core.Net8.Games
             GamePitchers.Add(pitcher);
             PitcherChanged?.Invoke(this, new EventArgs());
             return sub;
-        }
-        public void SetStartingPitcher(Pitcher starter)
-        {
-            if (GamePitchers.Any())
-                GamePitchers.Clear();
-            GamePitchers.Add(starter);
-            starter.SetPitcherOfRecord();
-            PitcherChanged?.Invoke(this, new EventArgs());
-        }
+        }        
         internal Substitution Substitute(Inning inning, Player bench, Player lineup)
         {
             var index = Lineup.IndexOf(lineup);
@@ -285,8 +293,8 @@ namespace Electrons.Core.Net8.Games
                 prevScore -= runsInAb;
             else
                 prevOppSc -= runsInAb;
-            var leading = TeamIsLeading(teamScore, oppoScore);
-            var leadingPrev = TeamIsLeading(prevScore, prevOppSc);
+            var leading = Team.TeamIsLeading(teamScore, oppoScore);
+            var leadingPrev = Team.TeamIsLeading(prevScore, prevOppSc);
             var leadChange = leading.GetValueOrDefault() != leadingPrev.GetValueOrDefault();
             var tmpScore = !isBatting ? prevScore : prevOppSc;
             var cngScore = isBatting ? prevScore : prevOppSc;
@@ -306,11 +314,11 @@ namespace Electrons.Core.Net8.Games
             if (leadChange && leading.GetValueOrDefault())
                 SetPitcherOfRecordTo(CurrentPitcher);
             else if (leadChange && !leading.GetValueOrDefault())
-                Test(e.AtBat, tmpScore, cngScore);
+                UpdatePitcherOfRecord(e.AtBat, tmpScore, cngScore);
             if (!leading.GetValueOrDefault() && leadingPrev.GetValueOrDefault())
                 CurrentPitcher.BlewLead();
         }
-        private void Test(AtBat ab, int tmpScore, int cngScore)
+        private void UpdatePitcherOfRecord(AtBat ab, int tmpScore, int cngScore)
         {
             var runs = ab.AdvancingRunners.OfType<RunScored>().ToList();
             foreach (var run in runs)
@@ -323,7 +331,7 @@ namespace Electrons.Core.Net8.Games
                 }
             }
         }
-        private bool? TeamIsLeading(int teamScore, int oppScore)
+        private static bool? TeamIsLeading(int teamScore, int oppScore)
         {
             bool? leading = null;
             if (teamScore > oppScore)
@@ -348,18 +356,17 @@ namespace Electrons.Core.Net8.Games
             return !(player is null);
         }
         public Player GetPlayer(string text, int num) => _roster.SingleOrDefault(s => s.LastName == text.Trim() && s.Number == num);
-
+        public int GetLineupSpotFor(Player player)
+        {
+            return _order.LineupSpotOf(player);
+        }
         internal void GameStarted()
         {
             _gameIsStarted = true;
         }
-        public static Team CreateWithUnknownRoster(string name) => new Team(name, Enumerable.Range(1, 25).Select(s => Player.Create(s, "Unknown", "Player")).ToList());
+        public static Team CreateWithUnknownRoster(string name) => new Team(name, Enumerable.Range(1, 25).Select(Player.Unknown).ToList());
         public static Team Create(string name) => new Team(name);
-        public static Team Create(string name, List<Player> roster) => new Team(name, roster);
-        public int GetLineupSpotFor(Player player)
-        {
-            return _order.LineupSpotOf(player);
-        }        
+        public static Team Create(string name, List<Player> roster) => new Team(name, roster);        
 
         private readonly List<Substitution> _substitutions;
         private List<Player> _roster;

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:core="clr-namespace:Electrons.Core.Net8;assembly=Electrons.Core.Net8"
+             x:Class="Scorebook.Components.CommandArea">
+    <VerticalStackLayout  >
+        <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" Padding="5" ColumnSpacing="5" RowSpacing="5" >
+            <Label Grid.Column="1" Grid.Row="0" Text="Scoring" Padding="2" FontSize="16" VerticalOptions="Center" HorizontalOptions="End" />
+            <Border Padding="5" Grid.Column="1" Grid.Row="0">
+                <Label Text="{Binding CurrentAb.Scoring}" FontSize="16" VerticalOptions="Center"/>
+            </Border>
+            <Button Text="Back" Grid.Row="0" Grid.Column="2" Command="{Binding UndoCommand}" Style="{StaticResource ScoringButtonStyle}"  />
+            <Button Text="Pitches" Grid.Column="0" Grid.Row="0" Style="{StaticResource ScoringButtonStyle}" Command="{Binding TogglePitchesCommand}" />
+            <Button Text="View Def" Style="{StaticResource ScoringButtonStyle}" Grid.Column="2" Grid.Row="1"  Command="{Binding ViewDefenseCommand}" />
+            <ImageButton Grid.Column="0" Padding="10" Grid.Row="3" BackgroundColor="BurlyWood" HeightRequest="50" WidthRequest="50" Command="{Binding PrevBatterNavigationCommmand}" HorizontalOptions="Start" Source="back_arrow.png" />
+            <Button Grid.Column="1" Grid.Row="1" Text="Score AB" Command="{Binding ShowCommandsCommand}" IsVisible="{OnPlatform Android=True, WinUI=False}" Style="{StaticResource ActionButtonStyle}" />
+            <Button Grid.Column="1" Grid.Row="3" Text="{Binding NextBatterText}" Style="{StaticResource NextBatterStyle}"  Command="{Binding NextBatterCommand}" />
+            <Button Grid.Column="2" Grid.Row="3" Text="Lineups"  TextColor="White" IsVisible="{OnPlatform Android=True, WinUI=False}" Clicked="ToggleSidebarButton_Clicked" Command="{Binding ToggleSidebarCommand}" />
+            <Grid Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="4" RowDefinitions="*,*,*" ColumnDefinitions="140,140" IsVisible="{Binding IsPitchesPanelVisible}" >
+                <BoxView Grid.ColumnSpan="2" Grid.RowSpan="3"  BackgroundColor="LightGray"></BoxView>
+                <Button Grid.Row="0" Grid.Column="0" Text="Ball" Style="{StaticResource PitchButtonStyle}" Command="{Binding AddPitchCommand}" CommandParameter="{x:Static core:PitchResult.Ball}"/>
+                <Button Grid.Row="0" Grid.Column="1" Text="Strike Looking" Style="{StaticResource PitchButtonStyle}" Command="{Binding AddPitchCommand}" CommandParameter="{x:Static core:PitchResult.CalledStrike}" />
+                <Button Grid.Row="1" Grid.Column="0" Text="Foul" Style="{StaticResource PitchButtonStyle}" Command="{Binding AddPitchCommand}" CommandParameter="{x:Static core:PitchResult.Foul}" />
+                <Button Grid.Row="1" Grid.Column="1" Text="Strike Swinging" Style="{StaticResource PitchButtonStyle}" Command="{Binding AddPitchCommand}" CommandParameter="{x:Static core:PitchResult.SwingingStrike}" />
+                <Button Grid.Row="2" Grid.Column="0" Text="In Play" Style="{StaticResource PitchButtonStyle}" Command="{Binding AddPitchCommand}" CommandParameter="{x:Static core:PitchResult.InPlay}" />
+                <Button Grid.Row="2" Grid.Column="1" Text="Close" Style="{StaticResource PitchButtonStyle}" Command="{Binding TogglePitchesCommand}" />
+            </Grid>
+        </Grid>
+        <HorizontalStackLayout x:Name="AndroidLog" Spacing="10">
+            <Button  Text="Inning Log" Style="{StaticResource ActionButtonStyle}" Command="{Binding ShowInningLogCommand}" />
+            <Button  Text="Current AB" Style="{StaticResource ActionButtonStyle}" Command="{Binding ShowCurrentAbCommand}" />
+            <Button Text="Prev Abs" Style="{StaticResource ActionButtonStyle}" Command="{Binding ShowPreviousAbsCommand}" />
+            <Button Text="Pitch Total" Style="{StaticResource ActionButtonStyle}" Command="{Binding ShowPitchTotalsCommand}" />
+        </HorizontalStackLayout>
+    </VerticalStackLayout>
+</ContentView>

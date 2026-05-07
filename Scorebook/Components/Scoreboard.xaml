@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:Scorebook.Converters"
+             x:Class="Scorebook.Components.Scoreboard">
+    <ContentView.Resources>
+        <converters:IntToColorConverter x:Key="BallConverter" ActiveColor="Green" InActiveColor="DarkGray" />
+        <converters:IntToColorConverter x:Key="StrikeConverter" ActiveColor="Red" InActiveColor="DarkGray" />
+        <converters:IntToColorConverter x:Key="OutConverter" ActiveColor="Blue" InActiveColor="DarkGray" />
+    </ContentView.Resources>
+    <VerticalStackLayout >
+        <Grid ColumnDefinitions="70,*,40,30" RowDefinitions="Auto,Auto,Auto" BackgroundColor="#F0F0F0" Margin="0,0,0,0" ColumnSpacing="10">
+            <Label Grid.Column="0" Text="{Binding Game.HomeScore}" FontSize="32" Padding="5,0,0,0" VerticalOptions="Center" HorizontalOptions="Center" />
+            <HorizontalStackLayout Spacing="15" Grid.Column="1" HorizontalOptions="Center" >
+                <HorizontalStackLayout Spacing="2" >
+                    <Label Text="B" VerticalOptions="Center" FontAttributes="Bold" Margin="5" />
+                    <BoxView WidthRequest="15" HeightRequest="15" Color="{Binding CurrentBalls, Converter={StaticResource BallConverter}, ConverterParameter=1}" />
+                    <BoxView WidthRequest="15" HeightRequest="15" Color="{Binding CurrentBalls, Converter={StaticResource BallConverter}, ConverterParameter=2}" />
+                    <BoxView WidthRequest="15" HeightRequest="15" Color="{Binding CurrentBalls, Converter={StaticResource BallConverter}, ConverterParameter=3}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="2">
+                    <Label Text="S" VerticalOptions="Center" FontAttributes="Bold" />
+                    <BoxView WidthRequest="15" HeightRequest="15" Color="{Binding CurrentStrikes, Converter={StaticResource StrikeConverter}, ConverterParameter=1}" />
+                    <BoxView WidthRequest="15" HeightRequest="15" Color="{Binding CurrentStrikes, Converter={StaticResource StrikeConverter}, ConverterParameter=2}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="2">
+                    <Label Text="O" VerticalOptions="Center" FontAttributes="Bold" />
+                    <BoxView WidthRequest="15" HeightRequest="15" Color="{Binding CurrentOuts, Converter={StaticResource OutConverter},ConverterParameter=1}" />
+                    <BoxView WidthRequest="15" HeightRequest="15" Color="{Binding CurrentOuts, Converter={StaticResource OutConverter},ConverterParameter=2}" />
+                </HorizontalStackLayout>
+            </HorizontalStackLayout>
+            <HorizontalStackLayout Spacing="2" Grid.Column="2">
+                <Image  IsVisible="{Binding IsTopHalfOfInning}" Source="caret_up_fill.png"  WidthRequest="20" HeightRequest="20" BackgroundColor="#F0F0F0" />
+                <Image IsVisible="{Binding IsBottomHalfOfInning}" Source="caret_down_fill.png"  WidthRequest="20" HeightRequest="20" BackgroundColor="#F0F0F0" />
+                <Label Text="{Binding InningNumber}" FontSize="Medium" VerticalOptions="Center" HorizontalOptions="Center" />
+            </HorizontalStackLayout>
+            <Label Grid.Column="3" Text="{Binding Game.AwayScore}" Padding="0,0,5,0" FontSize="32" VerticalOptions="Center" HorizontalOptions="Center" />
+            <Grid Grid.ColumnSpan="4" Grid.Row="1" ColumnDefinitions=".4*,.2*,.4*">
+                <FlexLayout  Wrap="Wrap" Grid.Column="0" Padding="0,0,0,0">
+                    <Label  HorizontalOptions="Start" VerticalOptions="Start" Text="{Binding Game.HomeTeam.Name}" Padding="10,0,0,0"  FontSize="12"  IsVisible="{Binding MobileActionTrigger}" />
+                    <Label Text="{Binding HomeTeam.MobileText}" IsVisible="{Binding MobileActionTrigger}" Padding="10,0,0,0" Grid.ColumnSpan="3" HorizontalOptions="Start" FontSize="12" TextColor="Black" />
+                </FlexLayout>
+                <FlexLayout  FlowDirection="RightToLeft" Grid.Column="2" Wrap="Wrap" Padding="0,0,0,5" HorizontalOptions="End">
+                    <Label  HorizontalOptions="End" VerticalOptions="Start" Text="{Binding Game.AwayTeam.Name}" Padding="0,0,10,0"  IsVisible="{Binding MobileActionTrigger}" FontSize="12" />
+                    <Label Text="{Binding AwayTeam.MobileText}" IsVisible="{Binding MobileActionTrigger}" Padding="0,0,10,0" Grid.ColumnSpan="3" HorizontalOptions="End" FontSize="12" TextColor="Black"  />
+                </FlexLayout>
+            </Grid>
+        </Grid>
+    </VerticalStackLayout>
+</ContentView>

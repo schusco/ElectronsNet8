@@ -2,20 +2,14 @@
 
 namespace Scorebook.ViewObjects
 {
-    public class GameScoreWrapper
+    public class GameScoreWrapper(GameScore game)
     {
-        public GameScoreWrapper(GameScore game)
-        {
-            HomeTeam = game.HomeTeam;
-            AwayTeam = game.AwayTeam;
-            GameDate = game.GameDate;
-        }
-
-        public Team? HomeTeam { get; private set; }
-        public Team? AwayTeam { get; private set; }
-        public DateTime GameDate { get; private set; }
+        public Team? HomeTeam { get; private set; } = game.HomeTeam;
+        public Team? AwayTeam { get; private set; } = game.AwayTeam;
+        public DateTime GameDate { get; private set; } = game.GameDate;
+        public DateTime? EndDateTime { get; private set; } = game.EndDateTime;
+        public DateTime? StartDateTime { get; private set; } = game.StartDateTime;
         public string DisplayString => $"{AwayTeam?.Name} @ {HomeTeam?.Name}  {GameDate:g}";
-
         public static GameScoreWrapper Create(GameScore game) => new(game);
     }
 }

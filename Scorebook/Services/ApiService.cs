@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using ScoreboardApi.Models;
+using Scorebook.ViewObjects;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -10,6 +11,7 @@ namespace Scorebook.Services
     {
         private readonly IConfiguration _config;
         private readonly Uri _apiBaseUrl;
+        internal static readonly IDictionary<string, List<CmbaPlayer>> ApiRosters = new Dictionary<string, List<CmbaPlayer>>();
         public ApiService(IConfiguration config)
         {
             _config = config;
@@ -58,6 +60,15 @@ namespace Scorebook.Services
                     Preferences.Default.Set($"RosterNextSync_{teamId}", DateTime.Now.AddDays(7));
                 }
             }
+            return roster;
+        }
+        internal async Task<List<CmbaPlayer>> GetRosterFromApi(Team team, bool forceRefresh = false)
+        {
+            if (ApiRosters.TryGetValue(team.Name, out var hroster))
+                return hroster;
+            await GetRoster(team.Id, forceRefresh);
+            if (ApiRosters.TryGetValue(team.Name, out var roster) && roster.Any())
+                ApiRosters[team.Name] = roster;
             return roster;
         }
         private static T LoadFromLocalDisk<T>(string path)

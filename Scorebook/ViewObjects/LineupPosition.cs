@@ -10,10 +10,12 @@ namespace Scorebook.ViewObjects
     {
         public LineupPosition(Player player, int spot)
         {
-            Player = player;
+            _player = player;
             LineupNumber = spot;
             if (player.Position != null)
                 Position = player.Position;
+            if (player.IsUnknown)
+                CanReplace = true;
         }
         public bool IsActive
         {
@@ -48,8 +50,28 @@ namespace Scorebook.ViewObjects
                 }
             }
         }
-        public Player Player { get; set; }
-
+        public bool CanReplace
+        {
+            get => _canReplace; 
+            set
+            {
+                _canReplace = value;
+                OnPropertyChanged(nameof(CanReplace));
+            }
+        }
+        public Player Player
+        {
+            get => _player;
+            set
+            {
+                if (CanReplace)
+                {
+                    _player = value;
+                    OnPropertyChanged(nameof(Player));
+                    CanReplace = false;
+                }
+            }
+        }
         public Position Position
         {
             get => _position;
@@ -68,7 +90,7 @@ namespace Scorebook.ViewObjects
         public string HittingForText => HasDH ? $"{HittingFor.Position.PositionString} - {HittingFor.LastName}" : "";
         public Player HittingFor
         {
-            get => _hittingFor; 
+            get => _hittingFor;
             internal set
             {
                 _hittingFor = value;
@@ -84,7 +106,9 @@ namespace Scorebook.ViewObjects
         private Position _position = Position.EH;
         private bool _isConflict = false;
         private bool _isActive = false;
-        private Player _hittingFor;
+        private Player? _hittingFor;
+        private bool _canReplace;
+        private Player _player;
         private void OnPropertyChanged([CallerMemberName] string name = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

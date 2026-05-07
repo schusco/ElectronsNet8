@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.Logging;
+using Scorebook.Components;
+using Scorebook.Coordinators;
 using Scorebook.Services;
 using System.Reflection;
 
@@ -22,6 +24,12 @@ namespace Scorebook
             builder.Services.AddSingleton<ApiService>();
             builder.Services.AddTransient<ScorebookViewModel>();
             builder.Services.AddTransient<MainPage>();
+            builder.Services.AddTransient<FieldView>();
+            builder.Services.AddTransient<Scoreboard>();
+            builder.Services.AddTransient<CommandArea>();
+            builder.Services.AddTransient<LineupSidebar>();
+            builder.Services.AddTransient<RosterCoordinator>();
+            builder.Services.AddTransient<GameCoordinator>();
             var assembly = Assembly.GetExecutingAssembly();
             var assemblyName = assembly.GetName().Name;
             using var stream = assembly.GetManifestResourceStream($"{assemblyName}.appsettings.json");

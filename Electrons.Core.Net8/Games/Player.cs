@@ -21,7 +21,7 @@ namespace Electrons.Core.Net8.Games
         [ComponentProperty]
         public string LastName { get; set; }
         [JsonIgnore]
-        public string FullName => string.IsNullOrEmpty(FirstName) ? LastName : $"{DisplayNumber} - {LastName}, {(_duplicate && FirstName.Length > 1 ? FirstName.Substring(0, 2) : FirstName[0].ToString())}";
+        public string FullName => string.IsNullOrEmpty(FirstName) ? $"{DisplayNumber} - {LastName}" : $"{DisplayNumber} - {LastName}, {(_duplicate && FirstName.Length > 1 ? FirstName.Substring(0, 2) : FirstName[0].ToString())}";
         [JsonIgnore]
         public string FullNameWithPos => $"{DisplayNumber} - {LastName} {(!string.IsNullOrEmpty(FirstName) ? $", {FirstName[0]}" : "")} - {Position?.PositionString}";
         public abstract Position Position { get; protected set; }
@@ -77,6 +77,8 @@ namespace Electrons.Core.Net8.Games
                     sb.Append($"{LastName} #{DisplayNumber}");
                 else
                     sb.Append(LastName);
+                if (string.IsNullOrEmpty(FirstName))
+                    sb.Append($" - {Number}");
                 return sb.ToString();
 
             }

@@ -49,7 +49,7 @@ namespace Electrons.Net8.Models
             AwayName = fullGame.AwayTeam.Name;
             LocationText = location?.Field ?? "";
             CityText = location?.CityAndState ?? "";
-
+            LengthOfGame = fullGame.LengthOfGameString;
             AwayLogo = fullGame.AwayTeam.Name.GetLogo();
             HomeLogo = fullGame.HomeTeam.Name.GetLogo();
             if (!fullGame.IsStarted)
@@ -139,6 +139,7 @@ namespace Electrons.Net8.Models
         public string AwayName { get; private set; }
         public string LocationText { get; private set; }
         public string CityText { get; private set; }
+        public string LengthOfGame { get; private set; }
         public string AwayLogo { get; private set; }
         public string HomeLogo { get; private set; }
         public string PitcherLogo { get; private set; }

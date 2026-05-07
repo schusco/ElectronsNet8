@@ -79,6 +79,13 @@ namespace Electrons.Core.Net8.Games
             AwayTeam.GameStarted();
             return StartNextInning();
         }
+        public Inning StartGame(DateTime gameDate, DateTime startTime)
+        {
+            var inning = StartGame();
+            GameDate = gameDate;
+            _StartTime = startTime;
+            return inning;
+        }
         public void DelayGame()
         {
             if (!(_gameDelays.LastOrDefault()?.End.HasValue ?? false))
@@ -337,9 +344,9 @@ namespace Electrons.Core.Net8.Games
             return sub;
         }
         public Substitution Substitute(Team team, Player bench, Player lineup) => team.Substitute(CurrentInning, bench, lineup);
-        private void OnGameEnded(bool walkOff = false)
+        private void OnGameEnded(bool walkOff = false, DateTime? endTime = null)
         {
-            _EndTime = DateTime.Now;
+            _EndTime = endTime ?? DateTime.Now;
             if (walkOff)
                 CurrentInning.EndedOnWalkOff();
             SetPitchersOfRecord();
@@ -808,7 +815,7 @@ namespace Electrons.Core.Net8.Games
         }
         public void SetRunsBattedInForAb(int totalRbis)
         {
-            CurrentAb.SetRunsBattedIn(totalRbis);
+            CurrentAb?.SetRunsBattedIn(totalRbis);
         }
         public void AddRunnerOutEvent(BaseRunner runner, OnBase onBase)
         {
@@ -821,11 +828,11 @@ namespace Electrons.Core.Net8.Games
         {
             CurrentAb.UndoScoring(CurrentInning);
         }
-        public void EndGame()
+        public void EndGame(DateTime? endTime = null)
         {
             if (CurrentAb.Result is null || CurrentAb.Result.GetType() == typeof(UnfinshedAb))
                 CurrentInning.RemoveLastAb();
-            OnGameEnded();
+            OnGameEnded(endTime: endTime);
         }
         public void UpdateUnknownHitter(Player newBatter, HalfInning half)
         {
@@ -836,8 +843,25 @@ namespace Electrons.Core.Net8.Games
             foreach (var previousAb in previousAbs)
                 previousAb.SetBatter(newBatter);
         }
-
+        public void UpdatePlayer(Player replaced, Player newPlayer)
+        {
+            foreach (var inning in Innings)
+            {
+                foreach (var ab in inning.Events.Where(w => w.Pitcher != null && w.Pitcher.Equals(replaced)))
+                    ab.SetPitcher(newPlayer);
+                foreach (var ab in inning.Events.Where(w => w.Batter != null && w.Batter.Equals(replaced)))
+                    ab.SetBatter(newPlayer);
+                foreach (var ab in inning.Events.Where(w => w.AdvancingRunners.Any(a => a.Player.Equals(replaced))))
+                {
+                    var advances = ab.AdvancingRunners.Where(w => w.Player.Equals(replaced)).ToList();
+                    foreach (var advance in advances)
+                        advance.SetPlayer(newPlayer);
+                }
+            }
+        }
         public override string ToString() => $"{AwayTeam?.Name} {AwayScore}, {HomeTeam?.Name} {HomeScore} {(IsGameOver ? "Final" : CurrentInning?.ToString())}";
+
+       
 
         private readonly Stack<Inning> _innings;
         private readonly Stack<Inning> _navInnings;

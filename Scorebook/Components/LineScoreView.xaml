@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Scorebook.Components.LineScoreView">
+    <Grid  BackgroundColor="#AA000000" InputTransparent="False"  RowDefinitions="2*, 2*,2*, 1*,1*"
+      ColumnDefinitions="1*,3*,1*">
+        <Border Grid.Column="1" Grid.Row="1" Padding="10" BackgroundColor="White" >
+
+            <Grid ColumnDefinitions="200,*,80,80,80" RowDefinitions="Auto">
+
+                <VerticalStackLayout Grid.Column="0">
+                    <Label Text="Final" FontSize="Large" HeightRequest="50" BackgroundColor="#EEE" />
+                    <Label Text="{Binding Game.AwayTeam.Name}" FontSize="Large" HeightRequest="50" />
+                    <Label Text="{Binding Game.HomeTeam.Name}" FontSize="Large" HeightRequest="50" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="2">
+                    <Label Text="R" FontSize="Large" BackgroundColor="#EEE" Style="{StaticResource LineScoreStyle}" />
+                    <Label Text="{Binding Game.AwayScore}" Style="{StaticResource LineScoreStyle}" />
+                    <Label Text="{Binding Game.HomeScore}" Style="{StaticResource LineScoreStyle}" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="3">
+                    <Label Text="H" FontSize="Large" BackgroundColor="#EEE" Style="{StaticResource LineScoreStyle}" />
+                    <Label Text="{Binding Game.AwayHits}" FontSize="Large" Style="{StaticResource LineScoreStyle}" />
+                    <Label Text="{Binding Game.HomeHits}" FontSize="Large" Style="{StaticResource LineScoreStyle}" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="4">
+                    <Label Text="E" FontSize="Large" BackgroundColor="#EEE" Style="{StaticResource LineScoreStyle}" />
+                    <Label Text="{Binding Game.AwayErrors}" FontSize="Large" Style="{StaticResource LineScoreStyle}" />
+                    <Label Text="{Binding Game.HomeErrors}" FontSize="Large" Style="{StaticResource LineScoreStyle}" />
+                </VerticalStackLayout>
+
+                <FlexLayout Grid.Column="1" BindableLayout.ItemsSource="{Binding LineScore}" Direction="Row" JustifyContent="Start" AlignItems="Stretch" AlignContent="Stretch">
+
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Grid RowDefinitions="50,50,50" FlexLayout.Grow="1" ColumnSpacing="0" RowSpacing="0" Margin="0,0,-1,0">
+                                <BoxView Grid.Row="0" Color="#EEE" HorizontalOptions="Fill" VerticalOptions="Fill" />
+                                <Label Grid.Row="0" Text="{Binding InningNumber}" Style="{StaticResource LineScoreStyle}" />
+                                <Label Grid.Row="1" Text="{Binding AwayRuns}" Style="{StaticResource LineScoreStyle}" />
+                                <Label Grid.Row="2" Text="{Binding HomeRuns}" Style="{StaticResource LineScoreStyle}" />
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </Grid>
+        </Border>
+        <Border Grid.Column="1" Grid.Row="2" BackgroundColor="White" >
+            <VerticalStackLayout >
+                <HorizontalStackLayout>
+                    <Label Text="WP:" Margin="5" FontSize="Large" VerticalTextAlignment="Center" />
+                    <Label Text="{Binding Game.WinningPitcher.FullName}" Margin="5" FontSize="Large" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout>
+                    <Label Text="LP:" Margin="5"  FontSize="Large" />
+                    <Label Text="{Binding Game.LosingPitcher.FullName}" Margin="5" FontSize="Large" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout>
+                    <Label Text="SV:" IsVisible="{Binding SaveAwarded}" Margin="5" FontSize="Large" />
+                    <Label Text="{Binding SaveAwardedTo}" IsVisible="{Binding SaveAwarded}" Margin="5" FontSize="Large" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+        <Button Text="Close" Grid.Column="1" Grid.Row="3" FontSize="Medium" Command="{Binding CloseLineScoreCommand}" />
+    </Grid>
+</ContentView>

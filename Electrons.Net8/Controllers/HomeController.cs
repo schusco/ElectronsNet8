@@ -14,18 +14,26 @@ using System.Threading.Tasks;
 
 namespace Electrons.Net8.Controllers
 {
-    public class HomeController(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env,
-        IOptionsSnapshot<GameSettings> settings, HttpClient client)
-        : ControllerBase(session, cache, httpContextAccessor, env, settings)
+    public class HomeController(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor context, IWebHostEnvironment env,
+        IOptionsSnapshot<GameSettings> settings, HttpClient client) : ControllerBase(session, cache, context, env, settings)
     {
         private readonly HttpClient _client = client;
         public async Task<ActionResult> Index()
         {
             List<StandingsRow> standings = null;
             List<GameScore> apiData = await _client.GetFromJsonAsync<List<GameScore>>($"{GameSettings.BaseApiUrl}api/Games/getbydate/{DateTime.Now:yyyy-MM-dd}");
-            if (GameSettings.UseApiForStandings)
-                standings = await _client.GetFromJsonAsync<List<StandingsRow>>($"{GameSettings.BaseApiUrl}api/Standings/CMBA");
-
+            try
+            {
+                if (GameSettings.UseApiForStandings)
+                    standings = await _client.GetFromJsonAsync<List<StandingsRow>>($"{GameSettings.BaseApiUrl}api/Standings/CMBA");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (you can use a logging framework like Serilog, NLog, etc.)
+                Console.WriteLine($"Error fetching standings: {ex.Message}");
+                // Optionally, you can set standings to an empty list or null to handle it gracefully in the view
+                standings = new List<StandingsRow>();
+            }
             var currentGame = apiData?.FirstOrDefault(w => w.HomeTeamId == 1 || w.AwayTeamId == 1);
             return View(new MainModel(Repository, GameSettings, WebHostEnvironment, currentGame, standings));
         }

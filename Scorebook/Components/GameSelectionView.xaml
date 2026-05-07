@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Scorebook.Components.GameSelectionView">
+    <Grid  BackgroundColor="#BB000000" ZIndex="100" >
+        <Grid ColumnDefinitions="2*,1.5*,2*"  >
+            <VerticalStackLayout x:Name="GameSelectionOptions"  Grid.Column="0" Grid.ColumnSpan="2" HorizontalOptions="End"  VerticalOptions="Center" Spacing="20"  >
+                <Label Text="Electrons Baseball Scorebook" HorizontalOptions="Center" TextColor="White" FontSize="24"/>
+                <Button Text="Start New Game" Command="{Binding ConfigureGameCommand}" />
+                <Button Text="Select From Schedule" Command="{Binding SelectFromScheduleCommand}" />
+                <Button Text="Load Game from File" Command="{Binding LoadGameCommand}" />
+            </VerticalStackLayout>
+            <VerticalStackLayout x:Name="GameConfiguration" ZIndex="110" Spacing="15" Grid.Column="2" IsVisible="{Binding IsConfiguringNewGame}" Padding="10,0,25,10" BackgroundColor="White">
+                <Label Text="New Game Setup" FontSize="20" HorizontalOptions="Center"/>
+                <HorizontalStackLayout Spacing="15">
+                    <Label MinimumWidthRequest="100" Text="League" />
+                    <Label MinimumWidthRequest="100" Text="Away Team:"/>
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="15">
+                    <Picker MinimumWidthRequest="100" ItemsSource="{Binding Leagues}" ItemDisplayBinding="{Binding .}" SelectedItem="{Binding SelectedAwayLeague}" />
+                    <Picker MinimumWidthRequest="100" ItemsSource="{Binding FilteredAwayTeams}" ItemDisplayBinding="{Binding Name}" SelectedItem="{Binding SelectedAwayTeam}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="15">
+                    <Label MinimumWidthRequest="100" Text="League" />
+                    <Label Text="Home Team:"/>
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="15">
+                    <Picker MinimumWidthRequest="100" ItemsSource="{Binding Leagues}" ItemDisplayBinding="{Binding .}" SelectedItem="{Binding SelectedHomeLeague}" />
+                    <Picker MinimumWidthRequest="100" ItemsSource="{Binding FilteredHomeTeams}" ItemDisplayBinding="{Binding Name}" SelectedItem="{Binding SelectedHomeTeam}" />
+                </HorizontalStackLayout>
+
+                <Button Text="Play Ball!" Command="{Binding CreateGameCommand}" IsEnabled="{Binding CanStartGame}" />
+            </VerticalStackLayout>
+            <BoxView Grid.Column="0" Grid.ColumnSpan="2" BackgroundColor="#AA000000" IsVisible="{Binding ShowCancelSelectionBox}" >
+                <BoxView.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding CloseGameSelectionCommand}"   />
+                </BoxView.GestureRecognizers>
+            </BoxView>
+            <VerticalStackLayout x:Name="GameScheduleSelector" ZIndex="110" Spacing="15" Grid.Column="2" IsVisible="{Binding IsSelectingGameFromSchedule}" Padding="15" BackgroundColor="White">
+                <Label Text="Select Game" FontSize="20" HorizontalOptions="Center"/>
+                <Picker ItemsSource="{Binding GameScores}" ItemDisplayBinding="{Binding DisplayString}" SelectedItem="{Binding SelectedGame}" />
+                <Button Text="Start Game" Command="{Binding CreateGameFromScheduleCommand}" />
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+</ContentView>
