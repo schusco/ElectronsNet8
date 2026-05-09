@@ -1,5 +1,10 @@
-﻿@model IList<string>
-@foreach (var s in Model)
+﻿@using Electrons.Net8.Models
+@model DcList
+@foreach (var s in Model.Players)
 {
     <h5>@s</h5>
+}
+@if (ViewData.ContainsKey("admin") && (bool)ViewData["admin"] == true)
+{
+    <a href="DepthChart/Edit/@((int)Model.Position)">Edit</a>
 }

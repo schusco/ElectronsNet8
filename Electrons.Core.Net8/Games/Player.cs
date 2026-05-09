@@ -308,6 +308,7 @@ namespace Electrons.Core.Net8.Games
             }
         }
         public static explicit operator Position(int pos) => All.SingleOrDefault(s => s.PositionNumber == pos);
+        public static explicit operator int(Position pos) => pos.PositionNumber;
         public static Position FromString(string value)
         {
             if (string.IsNullOrEmpty(value))

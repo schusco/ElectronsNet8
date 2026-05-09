@@ -78,9 +78,9 @@ namespace Scorebook.ViewObjects
                 _isEditing = value;
                 OnPropertyChanged(nameof(IsEditing));
                 if (_isHome)
-                    _vm.EditingHomeLineup = value;
+                    _vm.OnPropertyChanged(nameof(ScorebookViewModel.EditingHomeLineup));
                 else
-                    _vm.EditingAwayLineup = value;
+                    _vm.OnPropertyChanged(nameof(ScorebookViewModel.EditingAwayLineup));
             }
         }
         internal void OnPropertyChanged([CallerMemberName] string name = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -181,7 +181,7 @@ namespace Scorebook.ViewObjects
         public ICommand SetStatsCommand => new Command(() => _vm.GameCoordinator.SetStats(_isHome));
         public ICommand RefreshRosterCommand => new Command(async () =>
         {
-            var team = _vm.ApiTeams.Single(s => s.Name == CoreTeam.Name);
+            var team = ApiService.ApiTeams.Single(s => s.Name == CoreTeam.Name);
             await LoadRoster(team);
         });
 

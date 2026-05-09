@@ -1,0 +1,70 @@
+﻿@using Electrons.Net8.Models
+@model DepthChartEditModel
+@section Sortable {
+    <script>
+        var sort = $("#sortable");
+        if (sort)
+        {
+            var el=sort[0];
+            this.sortable = Sortable.create(el, {
+                animation: 150,
+                onEnd: function (event) {
+                  const rows = el.querySelectorAll("tr")
+
+                  rows.forEach((row, index) => {
+                      // Find the rank field inside this specific row
+                      const rankInput = row.querySelector(".rank-input")
+                      if (rankInput) {
+                      // index starts at 0, so we use index + 1 for Rank 1, 2, 3...
+                      rankInput.value = index + 1
+                      console.log(`Updated Row ID ${row.dataset.id} to Rank ${index + 1}`)
+                      }
+                  })
+                  fetch(el.closest("form").action, {
+                    method: "POST",
+                    body: new FormData(el.closest("form")),
+                    headers: {
+                      //"X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
+                      "Accept": "application/json"
+                    }
+                  })
+                  .then(response => {
+                    if (response.ok) { console.log("Saved!") }
+                  })
+                }
+            });
+        }
+    </script>
+}
+<h3>Editing @Model.PositionString Depth Chart</h3>
+<form asp-controller="DepthChart" asp-action="Update" asp-route-id="@((int)Model.Position)" method="post">
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Player</th>
+            </tr>
+        </thead>
+        <tbody id="sortable" class="sortable">
+            @for (int i = 0; i < Model.DepthChart.Count; i++)
+            {
+                <tr data-id="@Model.DepthChart[i].PlayerId">
+                    <td><input asp-for="@Model.DepthChart[i].Rank" class="form-control rank-input" /></td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <select asp-for="@Model.DepthChart[i].PlayerId" asp-items="@Model.Players" class="form-control">
+                                <option value="">-- Select --</option>
+                            </select>
+                            <span class="handle me-2" style="cursor: grab;">☰</span>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="mt-2">
+        <input type="submit" value="Update All" class="btn-primary p-1" />
+        <a href="@Url.Action("Index", "DepthChart")" class="btn-secondary ms-2 p-2">Cancel</a>
+        <input type="submit" name="Add" value="Add New" class="btn-secondary ms-2 p-1" />
+    </div>
+</form>

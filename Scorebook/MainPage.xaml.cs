@@ -1,13 +1,16 @@
-﻿namespace Scorebook
+﻿using Scorebook.Services;
+
+namespace Scorebook
 {
     public partial class MainPage : ContentPage
     {
         private ScorebookViewModel _vm;
-
-        public MainPage(ScorebookViewModel vm)
+        private ApiService _apiService;
+        public MainPage(ScorebookViewModel vm, ApiService apiService)
         {
             InitializeComponent();
             _vm = vm;
+            _apiService = apiService;
             BindingContext = _vm;
         }
         protected override async void OnAppearing()
@@ -15,12 +18,12 @@
             try
             {
                 base.OnAppearing();
-                if (!_vm.TeamsAreLoaded)
+                if (!ScorebookViewModel.TeamsAreLoaded)
                 {
                     await _vm.LoadSchedule(1);
                     await _vm.LoadTeamsAndLeagues();
-                    _vm.LoadRosters();
-                    _vm.FilterTeams();
+                    ApiService.LoadRosters();
+                    _vm.GameSelection.FilterTeams();
                 }
             }
             catch (Exception ex) { }
@@ -31,7 +34,7 @@
 
             // If the window is narrower than 800 pixels, hide the sidebar
             bool IsCompact = width < 900;
-            
+
             if (IsCompact)
             {
                 _vm.IsSideBarOpen = false;
@@ -50,7 +53,7 @@
                 var isTabletLandscape = width > height;
                 CommandArea.HorizontalOptions = LayoutOptions.Fill;
                 FieldArea.HorizontalOptions = LayoutOptions.Fill;
-                var displayWidth = width-10;
+                var displayWidth = width - 10;
                 var maxHeight = 500;
                 var displayHeight = height > maxHeight ? maxHeight : height;
                 CommandArea.Padding = new Thickness(5, 10, 0, 0);

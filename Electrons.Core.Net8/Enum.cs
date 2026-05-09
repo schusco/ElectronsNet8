@@ -179,15 +179,25 @@ namespace Electrons.Core.Net8
 
     public enum DcPosition
     {
+        [Description("Starting Pitcher")]
         SP = 1,
+        [Description("Relief Pitcher")]
         RP = 10,
+        [Description("Catcher")]
         C = 2,
+        [Description("First Base")]
         _1B = 3,
+        [Description("Second Base")]
         _2B = 4,
+        [Description("Third Base")]
         _3B = 5,
+        [Description("Shortstop")]
         SS = 6,
+        [Description("Left Field")]
         LF = 7,
+        [Description("Center Field")]
         CF = 8,
+        [Description("Right Field")]
         RF = 9
     }
 }

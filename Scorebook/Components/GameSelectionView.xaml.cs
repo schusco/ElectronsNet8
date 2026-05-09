@@ -1,4 +1,6 @@
 
+using Scorebook.ViewObjects;
+
 namespace Scorebook.Components;
 
 public partial class GameSelectionView : ContentView
@@ -6,6 +8,13 @@ public partial class GameSelectionView : ContentView
     public GameSelectionView()
     {
         InitializeComponent();
+    }
+    public static readonly BindableProperty SelectionProperty=BindableProperty.Create(nameof(Selection), typeof(GameSelection), typeof(GameSelectionView), default(GameSelection));
+
+    public GameSelection Selection
+    {
+        get => (GameSelection)GetValue(SelectionProperty);
+        set => SetValue(SelectionProperty, value);
     }
     protected override void OnSizeAllocated(double width, double height)
     {

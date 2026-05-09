@@ -1,5 +1,6 @@
 ﻿using Electrons.Core.Net8.Entities;
 using Electrons.Core.Net8.Games;
+using Electrons.Core.Net8.Infrastructure.Dto;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Primitives;
 using NHibernate;
@@ -671,31 +672,23 @@ namespace Electrons.Core.Net8.Infrastructure
                 .OrderBy(NhProjections.Year<GameData>(o => o.GameDate)).Desc
                 .List<int>().Distinct();
         }
-        public IDictionary<DcPosition, List<string>> GetDepthChart()
+        public IDictionary<DcPosition, List<DepthChart>> GetDepthChart(int? pos = null)
         {
             DepthChart model = null;
             PlayerProfile player = null;
             DepthChartRow dc = null;
 
-            return Session.QueryOver(() => dc)
+            var query = Session.QueryOver(() => dc)
                 .JoinAlias(j => j.Player, () => player)
                 .SelectList(s => s.Select(() => dc.Position).WithAlias(() => model.Position)
                 .Select(() => dc.Rank).WithAlias(() => model.Rank)
-                .Select(NhProjections.NameLastFirstInital(() => player).WithAlias(() => model.PlayerName)))
-                .TransformUsing(Transformers.AliasToBean<DepthChart>())
-                .List<DepthChart>().GroupBy(g => g.Position).ToDictionary(k => k.Key, v => v.OrderBy(o => o.Rank).Select(s => s.PlayerName).ToList());
-
-            //                    string commandstring = @"select Position,(select concat_ws(', ',p.last_name,left(p.first_name,1)) from players p where player_id=starter) as Starter,
-            //(select concat_ws(', ',p1.last_name,left(p1.first_name,1)) from players p1 where player_id=`2nd String`) ,
-            //(select concat_ws(', ',p2.last_name,left(p2.first_name,1)) from players p2 where player_id=`3rd String`) ,
-            //(select concat_ws(', ',p3.last_name,left(p3.first_name,1)) from players p3 where player_id=`4th String`) ,
-            //(select concat_ws(', ',p4.last_name,left(p4.first_name,1)) from players p4 where player_id=`5th String`) ,
-            //(select concat_ws(', ',p5.last_name,left(p5.first_name,1)) from players p5 where player_id=`6th String`)
-
-            // from depthchart";
-
-            //return list.ToDictionary(k => k.Position, v => v);
-
+                .Select(() => player.Id).WithAlias(() => model.PlayerId)
+                .Select(NhProjections.NameLastFirstInital(() => player).WithAlias(() => model.PlayerName)));
+            if (pos.HasValue)
+                query = query.Where(w => (int)w.Position == pos.Value);
+            return query.TransformUsing(Transformers.AliasToBean<DepthChart>())
+                .List<DepthChart>().GroupBy(g => g.Position)
+                .ToDictionary(k => k.Key, v => v.OrderBy(o => o.Rank).ToList());
         }
         public IList<T> GetHistory<T>() where T : HistoryRow => Session.QueryOver<T>().OrderBy(o => o.Id).Asc.List();
 
@@ -796,11 +789,11 @@ namespace Electrons.Core.Net8.Infrastructure
             var summaries = await _session.QueryOver(() => h).JoinAlias(() => h.Game, () => game)
                 .Where(Restrictions.Gt(NhProjections.Year(() => game.GameDate), startYear))
                 .Where(() => game.Playoff == false)
-                .SelectList(s => s.Select(Projections.GroupProperty(NhProjections.Year(() => game.GameDate)).WithAlias(()=> model.Year))
+                .SelectList(s => s.Select(Projections.GroupProperty(NhProjections.Year(() => game.GameDate)).WithAlias(() => model.Year))
                     .SelectSum(() => h.Hits).WithAlias(() => model.TotalHits)
                     .SelectSum(() => h.Runs).WithAlias(() => model.TotalRuns)
                     .SelectSum(() => h.HomeRuns).WithAlias(() => model.TotalHomeRuns)
-                    .SelectSum(()=>h.StrikeOuts).WithAlias(()=> model.TotalStrikeOuts)
+                    .SelectSum(() => h.StrikeOuts).WithAlias(() => model.TotalStrikeOuts)
                     .SelectSum(() => h.Doubles).WithAlias(() => model.TotalDoubles)
                     .SelectSum(() => h.Triples).WithAlias(() => model.TotalTriples)
                     ).TransformUsing(Transformers.AliasToBean<YearlySummary>())
@@ -818,11 +811,47 @@ namespace Electrons.Core.Net8.Infrastructure
                 .Where(() => game.Playoff == false)
                 .SelectList(s => s.Select(Projections.GroupProperty(NhProjections.Year(() => game.GameDate)).WithAlias(() => model.Year))
                     .SelectSum(() => h.Hits).WithAlias(() => model.TotalHits)
-                    .SelectSum(() => h.Runs).WithAlias(() => model.TotalRuns)                    
-                    .SelectSum(() => h.StrikeOuts).WithAlias(() => model.TotalStrikeOuts)                    
+                    .SelectSum(() => h.Runs).WithAlias(() => model.TotalRuns)
+                    .SelectSum(() => h.StrikeOuts).WithAlias(() => model.TotalStrikeOuts)
                     ).TransformUsing(Transformers.AliasToBean<YearlySummary>())
                 .ListAsync<YearlySummary>();
             return summaries;
+        }
+
+        public bool CreateDepthChart(DepthChartDto dto)
+        {
+            return WrapInTryCatch(() =>
+            {
+                var dc = DepthChartRow.Create(dto.Position, dto.Rank, Session.Load<PlayerProfile>(dto.PlayerId));
+                Session.Save(dc);
+            });
+        }
+
+        public bool UpdateDepthChart(List<DepthChartDto> dtos)
+        {
+            return WrapInTryCatch(() =>
+            {
+                var dtoDict = dtos.ToDictionary(k => k.Rank, v => v);
+                var existing = Session.QueryOver<DepthChartRow>().Where(w => (int)w.Position == dtos.First().Position).List();
+                foreach (var dto in existing)
+                {
+                    if (dtoDict.TryGetValue(dto.Rank, out var newDto))
+                    {
+                        dto.Update(Session.Load<PlayerProfile>(newDto.PlayerId));
+                        Session.SaveOrUpdate(dto);
+                    }
+                }
+            });
+        }
+
+        public bool DeleteDepthChart(int id)
+        {
+            return WrapInTryCatch(() =>
+            {
+                var entity = Session.Get<DepthChartRow>(id);
+                if (entity != null)
+                    Session.Delete(entity);
+            });
         }
     }
 }

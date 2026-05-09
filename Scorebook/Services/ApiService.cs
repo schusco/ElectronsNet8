@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using ScoreboardApi.Models;
 using Scorebook.ViewObjects;
+using System.Collections.ObjectModel;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -12,6 +13,7 @@ namespace Scorebook.Services
         private readonly IConfiguration _config;
         private readonly Uri _apiBaseUrl;
         internal static readonly IDictionary<string, List<CmbaPlayer>> ApiRosters = new Dictionary<string, List<CmbaPlayer>>();
+        public static ObservableCollection<Team> ApiTeams { get; set; } = [];
         public ApiService(IConfiguration config)
         {
             _config = config;
@@ -25,7 +27,8 @@ namespace Scorebook.Services
                 games = LoadFromLocalDisk<List<GameScore>>($"schedule_cache_{teamId}.json");
             else
             {
-                games = await LoadFromApi<List<GameScore>>($"/api/teams/{teamId}/games");
+                var response = await LoadFromApi<List<GameScore>>($"/api/teams/{teamId}/games");
+                games = response.Success ? response.Data : new List<GameScore>();
                 SaveToLocalDisk(games, $"schedule_cache_{teamId}.json");
                 Preferences.Default.Set($"ScheduleNextSync_{teamId}", DateTime.Now.AddDays(1));
             }
@@ -39,7 +42,8 @@ namespace Scorebook.Services
                 teams = LoadFromLocalDisk<List<Team>>("teams_cache.json");
             else
             {
-                teams = await LoadFromApi<List<Team>>($"/api/teams");
+                var response = await LoadFromApi<List<Team>>($"/api/teams");
+                teams = response.Success ? response.Data : new List<Team>();
                 SaveToLocalDisk(teams, "teams_cache.json");
                 Preferences.Default.Set("TeamsNextSync", DateTime.Now.AddYears(1));
             }
@@ -53,7 +57,9 @@ namespace Scorebook.Services
                 roster = LoadFromLocalDisk<List<CmbaPlayer>>($"roster_cache_{teamId}.json");
             else
             {
-                roster = await LoadFromApi<List<CmbaPlayer>>($"/api/teams/{teamId}/roster");
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                var response = await LoadFromApi<List<CmbaPlayer>>($"/api/teams/{teamId}/roster", cts.Token);
+                roster = response.Success ? response.Data : new List<CmbaPlayer>();
                 if (roster.Any())
                 {
                     SaveToLocalDisk(roster, $"roster_cache_{teamId}.json");
@@ -64,11 +70,10 @@ namespace Scorebook.Services
         }
         internal async Task<List<CmbaPlayer>> GetRosterFromApi(Team team, bool forceRefresh = false)
         {
-            if (ApiRosters.TryGetValue(team.Name, out var hroster))
+            if (ApiRosters.TryGetValue(team.Name, out var hroster) && !forceRefresh)
                 return hroster;
-            await GetRoster(team.Id, forceRefresh);
-            if (ApiRosters.TryGetValue(team.Name, out var roster) && roster.Any())
-                ApiRosters[team.Name] = roster;
+            var roster = await GetRoster(team.Id, forceRefresh);
+            ApiRosters[team.Name] = roster;
             return roster;
         }
         private static T LoadFromLocalDisk<T>(string path)
@@ -79,21 +84,47 @@ namespace Scorebook.Services
             var json = File.ReadAllText(localPath);
             return JsonSerializer.Deserialize<T>(json);
         }
-        private async Task<T> LoadFromApi<T>(string endpoint)
+        private async Task<ApiResponse<T>> LoadFromApi<T>(string endpoint, CancellationToken cancellationToken = default)
         {
-            using (var client = new HttpClient() { BaseAddress = _apiBaseUrl })
+            try
             {
-                return await client.GetFromJsonAsync<T>(endpoint);
+                using (var client = new HttpClient() { BaseAddress = _apiBaseUrl })
+                {
+                    var response = await client.GetAsync(endpoint, cancellationToken);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var data = await response.Content.ReadFromJsonAsync<T>(cancellationToken);
+                        return new ApiResponse<T> { Success = true, Data = data };
+                    }
+                    return new ApiResponse<T> { Success = false, Message = "Request failed" };
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Handle timeout or cancellation gracefully
+                return new ApiResponse<T> { Success = false, Message = "Request timed out" };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<T> { Success = false, Message = ex.Message };
             }
         }
-        private void SaveToLocalDisk<T>(List<T> teams, string path)
+        public static void LoadRosters()
+        {
+            foreach (var team in ApiTeams)
+            {
+                var roster = LoadCachedRoster(team.Id);
+                if (roster != null && roster.Any())
+                    ApiRosters.Add(team.Name, roster);
+            }
+        }
+        private static void SaveToLocalDisk<T>(List<T> teams, string path)
         {
             string localPath = Path.Combine(FileSystem.Current.AppDataDirectory, path);
             var json = JsonSerializer.Serialize(teams);
             File.WriteAllText(localPath, json);
         }
-
-        internal List<CmbaPlayer> LoadCachedRoster(int teamId)
+        internal static List<CmbaPlayer> LoadCachedRoster(int teamId)
         {
             try
             {
@@ -106,4 +137,11 @@ namespace Scorebook.Services
             }
         }
     }
+    internal class ApiResponse<T>
+    {
+        public T Data { get; set; }
+        public string? Message { get; set; }
+        public bool Success { get; set; }
+    }
+
 }

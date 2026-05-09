@@ -3,8 +3,8 @@
     public class DepthChart
     {
         public DcPosition Position { get; internal set; }
-        public int Rank { get; internal set; }
+        public int Rank { get; set; }
         public string PlayerName { get; set; }
-
+        public int PlayerId { get; set; }
     }
 }

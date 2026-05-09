@@ -3,6 +3,7 @@
 
 @{
     ViewBag.Title = "DepthChart";
+    ViewData.Add("admin", Model.IsAdmin);
 }
 
 <style>
@@ -11,49 +12,49 @@
     }
 </style>
 <div class="row ">
-    <div class="col col-auto ml-auto mr-auto">
+    <div class="col col-auto mx-auto">
         <h2>@string.Format("{0} Electrons Depth Chart", Model.CurrentYear)</h2>
     </div>
 </div>
 <div class="row">
-    <div class="col col-sm-10 ml-auto mr-auto">
+    <div class="col col-sm-10 mx-auto">
         <div class="depthChartImg">
             <div class="row">
                 <div class="col-4 dcforeColor " style="margin-top:35px;margin-left:80px">
-                    @Html.DisplayFor(m => m.LF, "DcPosition")
+                    @Html.DisplayFor(m => m.LF, "DcPosition", ViewData)
                 </div>
                 <div class="col-3 dcforeColor" style="margin-top:15px">
-                    @Html.DisplayFor(m => m.CF, "DcPosition")
+                    @Html.DisplayFor(m => m.CF, "DcPosition", ViewData)
                 </div>
                 <div class="col-3 dcforeColor" style="margin-top:35px;margin-left:25px">
-                    @Html.DisplayFor(m => m.RF, "DcPosition")
+                    @Html.DisplayFor(m => m.RF, "DcPosition", ViewData)
                 </div>
             </div>
             <div class="row">
                 <div class="col-3 dcforeColor" style="margin-top:25px;margin-left:40px">
-                    @Html.DisplayFor(m => m._3B, "DcPosition")
+                    @Html.DisplayFor(m => m._3B, "DcPosition", ViewData)
                 </div>
                 <div class="col-3 dcforeColor" style="margin-top:-5px">
-                    @Html.DisplayFor(m => m.SS, "DcPosition")
+                    @Html.DisplayFor(m => m.SS, "DcPosition", ViewData)
                 </div>
                 <div class="col-3 dcforeColor" style="margin-top:-5px;margin-left:20px">
-                    @Html.DisplayFor(m => m._2B, "DcPosition")
+                    @Html.DisplayFor(m => m._2B, "DcPosition", ViewData)
                 </div>
                 <div class="col-2 dcforeColor" style="margin-top:25px">
-                    @Html.DisplayFor(m => m._1B, "DcPosition")
+                    @Html.DisplayFor(m => m._1B, "DcPosition", ViewData)
                 </div>
             </div>
             <div class="row">
-                <div class="col-2 dcforeColor ml-auto mr-auto" style="margin-top:-25px">
-                    @Html.DisplayFor(m => m.SP, "DcPosition")
+                <div class="col-3 dcforeColor mx-auto text-center" style="margin-top:-25px">
+                    @Html.DisplayFor(m => m.SP, "DcPosition", null, ViewData)
                 </div>
             </div>
             <div class="row">
                 <div class="col-3 dcforeColor ml-5" style="margin-top:5px">
-                    @Html.DisplayFor(m => m.RP, "DcPosition")
+                    @Html.DisplayFor(m => m.RP, "DcPosition", ViewData)
                 </div>
                 <div class="col-7 dcforeColor ml-5" style="margin-top:55px;padding-left:100px">
-                    @Html.DisplayFor(m => m.C, "DcPosition")
+                    @Html.DisplayFor(m => m.C, "DcPosition", ViewData)
                 </div>
 
             </div>

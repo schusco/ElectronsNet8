@@ -19,6 +19,7 @@ namespace Electrons.Net8
         public string CarouselImagesVirtualPath { get; set; }
         public string BaseApiUrl { get; set; }
         public ThresholdSettings ThresholdSettings { get; set; }
+        public string AdminKey { get; set; }
     }
     public class ThresholdSettings
     {

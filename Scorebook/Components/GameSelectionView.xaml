@@ -1,45 +1,52 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Scorebook.Components.GameSelectionView">
+             x:Name="Root"
+             x:Class="Scorebook.Components.GameSelectionView">    
     <Grid  BackgroundColor="#BB000000" ZIndex="100" >
         <Grid ColumnDefinitions="2*,1.5*,2*"  >
             <VerticalStackLayout x:Name="GameSelectionOptions"  Grid.Column="0" Grid.ColumnSpan="2" HorizontalOptions="End"  VerticalOptions="Center" Spacing="20"  >
                 <Label Text="Electrons Baseball Scorebook" HorizontalOptions="Center" TextColor="White" FontSize="24"/>
-                <Button Text="Start New Game" Command="{Binding ConfigureGameCommand}" />
-                <Button Text="Select From Schedule" Command="{Binding SelectFromScheduleCommand}" />
-                <Button Text="Load Game from File" Command="{Binding LoadGameCommand}" />
+                <Button Text="Start New Game" Command="{Binding Source={x:Reference Root}, Path=Selection.ConfigureGameCommand}" />
+                <Button Text="Select From Schedule" Command="{Binding Source={x:Reference Root}, Path=Selection.SelectFromScheduleCommand}" />
+                <Button Text="Load Game from File" Command="{Binding Source={x:Reference Root}, Path=Selection.LoadGameCommand}" />
             </VerticalStackLayout>
-            <VerticalStackLayout x:Name="GameConfiguration" ZIndex="110" Spacing="15" Grid.Column="2" IsVisible="{Binding IsConfiguringNewGame}" Padding="10,0,25,10" BackgroundColor="White">
+            <VerticalStackLayout x:Name="GameConfiguration" ZIndex="110" Spacing="15" Grid.Column="2"  Padding="10,0,25,10"
+                                 IsVisible="{Binding Source={x:Reference Root}, Path=Selection.IsConfiguringNewGame}" BackgroundColor="White">
                 <Label Text="New Game Setup" FontSize="20" HorizontalOptions="Center"/>
                 <HorizontalStackLayout Spacing="15">
                     <Label MinimumWidthRequest="100" Text="League" />
                     <Label MinimumWidthRequest="100" Text="Away Team:"/>
                 </HorizontalStackLayout>
                 <HorizontalStackLayout Spacing="15">
-                    <Picker MinimumWidthRequest="100" ItemsSource="{Binding Leagues}" ItemDisplayBinding="{Binding .}" SelectedItem="{Binding SelectedAwayLeague}" />
-                    <Picker MinimumWidthRequest="100" ItemsSource="{Binding FilteredAwayTeams}" ItemDisplayBinding="{Binding Name}" SelectedItem="{Binding SelectedAwayTeam}" />
+                    <Picker MinimumWidthRequest="100" ItemsSource="{Binding Source={x:Reference Root}, Path=Selection.Leagues}" ItemDisplayBinding="{Binding .}" 
+                            SelectedItem="{Binding Source={x:Reference Root}, Path=Selection.SelectedAwayLeague}" />
+                    <Picker MinimumWidthRequest="100" ItemsSource="{Binding Source={x:Reference Root}, Path=Selection.FilteredAwayTeams}" ItemDisplayBinding="{Binding Name}" 
+                            SelectedItem="{Binding Source={x:Reference Root}, Path=Selection.SelectedAwayTeam}" />
                 </HorizontalStackLayout>
                 <HorizontalStackLayout Spacing="15">
                     <Label MinimumWidthRequest="100" Text="League" />
                     <Label Text="Home Team:"/>
                 </HorizontalStackLayout>
                 <HorizontalStackLayout Spacing="15">
-                    <Picker MinimumWidthRequest="100" ItemsSource="{Binding Leagues}" ItemDisplayBinding="{Binding .}" SelectedItem="{Binding SelectedHomeLeague}" />
-                    <Picker MinimumWidthRequest="100" ItemsSource="{Binding FilteredHomeTeams}" ItemDisplayBinding="{Binding Name}" SelectedItem="{Binding SelectedHomeTeam}" />
+                    <Picker MinimumWidthRequest="100" ItemsSource="{Binding Source={x:Reference Root}, Path=Selection.Leagues}" ItemDisplayBinding="{Binding .}" 
+                            SelectedItem="{Binding  Source={x:Reference Root}, Path=Selection.SelectedHomeLeague}" />
+                    <Picker MinimumWidthRequest="100" ItemsSource="{Binding Source={x:Reference Root}, Path=Selection.FilteredHomeTeams}" ItemDisplayBinding="{Binding Name}" 
+                            SelectedItem="{Binding Source={x:Reference Root}, Path=Selection.SelectedHomeTeam}" />
                 </HorizontalStackLayout>
 
-                <Button Text="Play Ball!" Command="{Binding CreateGameCommand}" IsEnabled="{Binding CanStartGame}" />
+                <Button Text="Play Ball!" Command="{Binding Source={x:Reference Root}, Path=Selection.CreateGameCommand}" IsEnabled="{Binding Source={x:Reference Root}, Path=Selection.CanStartGame}" />
             </VerticalStackLayout>
-            <BoxView Grid.Column="0" Grid.ColumnSpan="2" BackgroundColor="#AA000000" IsVisible="{Binding ShowCancelSelectionBox}" >
+            <BoxView Grid.Column="0" Grid.ColumnSpan="2" BackgroundColor="#AA000000" IsVisible="{Binding Source={x:Reference Root}, Path=Selection.ShowCancelSelectionBox}" >
                 <BoxView.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding CloseGameSelectionCommand}"   />
+                    <TapGestureRecognizer Command="{Binding Source={x:Reference Root}, Path=Selection.CloseGameSelectionCommand}"   />
                 </BoxView.GestureRecognizers>
             </BoxView>
-            <VerticalStackLayout x:Name="GameScheduleSelector" ZIndex="110" Spacing="15" Grid.Column="2" IsVisible="{Binding IsSelectingGameFromSchedule}" Padding="15" BackgroundColor="White">
+            <VerticalStackLayout x:Name="GameScheduleSelector" ZIndex="110" Spacing="15" Grid.Column="2" IsVisible="{Binding Source={x:Reference Root}, Path=Selection.IsSelectingGameFromSchedule}" Padding="15" BackgroundColor="White">
                 <Label Text="Select Game" FontSize="20" HorizontalOptions="Center"/>
-                <Picker ItemsSource="{Binding GameScores}" ItemDisplayBinding="{Binding DisplayString}" SelectedItem="{Binding SelectedGame}" />
-                <Button Text="Start Game" Command="{Binding CreateGameFromScheduleCommand}" />
+                <Picker ItemsSource="{Binding  Source={x:Reference Root}, Path=Selection.GameScores}" ItemDisplayBinding="{Binding DisplayString}" 
+                        SelectedItem="{Binding Source={x:Reference Root}, Path=Selection.SelectedGame}" />
+                <Button Text="Start Game" Command="{Binding Source={x:Reference Root}, Path=Selection.CreateGameFromScheduleCommand}" />
             </VerticalStackLayout>
         </Grid>
     </Grid>

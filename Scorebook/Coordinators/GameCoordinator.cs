@@ -14,7 +14,7 @@ namespace Scorebook.Coordinators
             ViewModel.GameIsOver = true;
             ViewModel.IsGameStarted = false;
             ViewModel.LineScore.Clear();
-            ViewModel.Game.EndGame(ViewModel.SelectedGame?.EndDateTime);
+            ViewModel.Game.EndGame(ViewModel.GameSelection.SelectedGame?.EndDateTime);
             ViewModel.TotalInningCount = new int[] { 7, ViewModel.Game.Innings.Max(m => m.Number) }.Max();
             var grps = ViewModel.Game?.Innings.GroupBy(g => g.Number);
             for (int i = 1; i <= ViewModel.TotalInningCount; i++)
@@ -242,7 +242,7 @@ namespace Scorebook.Coordinators
                     await Shell.Current.DisplayAlert("Error", "Select teams before starting game", "OK");
                     return;
                 }
-                game?.StartGame(ViewModel.SelectedGame?.GameDate ?? DateTime.Today, ViewModel.SelectedGame?.StartDateTime ?? DateTime.Now);
+                game?.StartGame(ViewModel.GameSelection.SelectedGame?.GameDate ?? DateTime.Today, ViewModel.GameSelection.SelectedGame?.StartDateTime ?? DateTime.Now);
                 ViewModel.IsGameStarted = true;
                 ViewModel.OnPropertyChanged(nameof(ViewModel.Game));
                 ViewModel.OnPropertyChanged(nameof(ViewModel.Defense));

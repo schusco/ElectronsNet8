@@ -40,5 +40,14 @@ namespace Electrons.Net8.Controllers
         public ActionResult Download() => View();
         public ActionResult Electrons20() => View();
         public ActionResult Whining() => View();
+        public ActionResult Login(string key)
+        {
+            if (key == GameSettings.AdminKey)
+            {
+                SetSessionObject("IsAdmin", true);
+                return RedirectToAction("Index");
+            }
+            return RedirectToAction("Index");
+        }
     }
 }

@@ -21,11 +21,10 @@ namespace Scorebook
         public ScorebookViewModel(ApiService apiService, RosterCoordinator rosterCoordinator, GameCoordinator gameCoordinator)
         {
             WeakReferenceMessenger.Default.Register<PositionChangedMessage>(this, rosterCoordinator.HandlePositionChangedMesage);
-            _selectedHomeLeague = "CMBA";
-            _selectedAwayLeague = "CMBA";
             _apiService = apiService;
             _rosterCoordinator = rosterCoordinator;
             _gameCoordinator = gameCoordinator;
+            GameSelection = new GameSelection(this);
             ShowGameSelectionOptions = true;
             IsSideBarOpen = true;
         }
@@ -60,36 +59,7 @@ namespace Scorebook
         public GameCoordinator GameCoordinator => _gameCoordinator;
         public RosterCoordinator RosterCoordinator => _rosterCoordinator;
         public ApiService ApiService => _apiService;
-        internal void OnPropertyChanged([CallerMemberName] string name = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        internal void UpdatePitches()
-        {
-            if (CurrentAb != null)
-            {
-                CurrentAbPitches.Clear();
-                CurrentAbPitches.Add($"{CurrentAb.Pitcher.LastName} pitching to {CurrentAb.Batter.LastName}");
-                foreach (var pitch in CurrentAb.Pitches)
-                    CurrentAbPitches.Add($"{pitch.Sequence}) {pitch}");
-                var stats = _gameCoordinator.GetCurrentPitcherStats();
-                CurrentPitchStats = new PitchTotals(stats);
-            }
-        }
-        public void LoadGame(string loadPath)
-        {
-            var game = BaseballGame.Load(loadPath);
-            Game = game;
-            GameLoaded();
-            IsGameStarted = game.IsStarted;
-            HomeTeam?.FillLineup();
-            AwayTeam?.FillLineup();
-        }
-        private void GameLoaded()
-        {
-            OnPropertyChanged(nameof(Game));
-            OnPropertyChanged(nameof(IsGameNull));
-            //   OnPropertyChanged(nameof(HomeTeamName));
-            //   OnPropertyChanged(nameof(AwayTeamName));
-            UpdateRunners();
-        }
+        public GameSelection GameSelection { get; set; }        
         public DefensiveAlignment Defense
         {
             get => _defense;
@@ -328,27 +298,7 @@ namespace Scorebook
                 _gameIsOver = value;
                 OnPropertyChanged(nameof(GameIsOver));
             }
-        }
-        public bool IsConfiguringNewGame
-        {
-            get => _isConfiguringNewGame;
-            set
-            {
-                _isConfiguringNewGame = value;
-                OnPropertyChanged(nameof(IsConfiguringNewGame));
-                OnPropertyChanged(nameof(ShowCancelSelectionBox));
-            }
-        }
-        public bool IsSelectingGameFromSchedule
-        {
-            get => _isSelectingGameFromSchedule;
-            set
-            {
-                _isSelectingGameFromSchedule = value;
-                OnPropertyChanged(nameof(IsSelectingGameFromSchedule));
-                OnPropertyChanged(nameof(ShowCancelSelectionBox));
-            }
-        }
+        }        
         public bool ShowGameSelectionOptions
         {
             get => _showGameSelectionOptions;
@@ -357,9 +307,7 @@ namespace Scorebook
                 _showGameSelectionOptions = value;
                 OnPropertyChanged(nameof(ShowGameSelectionOptions));
             }
-        }
-        public bool ShowCancelSelectionBox => IsSelectingGameFromSchedule || IsConfiguringNewGame;
-        public GameScoreWrapper? SelectedGame { get; set; }
+        }        
         public TeamWrapper? AwayTeam
         {
             get => _awayTeam;
@@ -378,72 +326,8 @@ namespace Scorebook
                 OnPropertyChanged(nameof(HomeTeam));
             }
         }
-        public bool EditingHomeLineup
-        {
-            get => _editingHomeLineup;
-            set
-            {
-                _editingHomeLineup = value;
-                OnPropertyChanged(nameof(EditingHomeLineup));
-            }
-        }
-        public bool EditingAwayLineup
-        {
-            get => _editingAwayLineup;
-            set
-            {
-                _editingAwayLineup = value;
-                OnPropertyChanged(nameof(EditingAwayLineup));
-            }
-        }
-        public Team? SelectedHomeTeam
-        {
-            get => _selectedHomeTeam;
-            set
-            {
-                _selectedHomeTeam = value;
-                OnPropertyChanged(nameof(SelectedHomeTeam));
-                OnPropertyChanged(nameof(CanStartGame));
-                ((Command)CreateGameCommand).ChangeCanExecute();
-            }
-        }
-        public Team? SelectedAwayTeam
-        {
-            get => _selectedAwayTeam;
-            set
-            {
-                _selectedAwayTeam = value;
-                OnPropertyChanged(nameof(SelectedAwayTeam));
-                OnPropertyChanged(nameof(CanStartGame));
-                ((Command)CreateGameCommand).ChangeCanExecute();
-            }
-        }
-        public string SelectedHomeLeague
-        {
-            get => _selectedHomeLeague;
-            set
-            {
-                if (_selectedHomeLeague != value)
-                {
-                    _selectedHomeLeague = value;
-                    OnPropertyChanged(nameof(SelectedHomeLeague));
-                    FilterTeams(true);
-                }
-            }
-        }
-        public string SelectedAwayLeague
-        {
-            get => _selectedAwayLeague;
-            set
-            {
-                if (_selectedAwayLeague != value)
-                {
-                    _selectedAwayLeague = value;
-                    OnPropertyChanged(nameof(SelectedAwayLeague));
-                    FilterTeams(false);
-                }
-            }
-        }
+        public bool EditingHomeLineup => HomeTeam?.IsEditing ?? false;
+        public bool EditingAwayLineup => AwayTeam?.IsEditing ?? false;
         public bool ShowDesktopActionButtons
         {
             get => _showDesktopActionButtons;
@@ -514,19 +398,40 @@ namespace Scorebook
             }
         }
         public ObservableCollection<string> InningEvents { get; set; } = [];
-        public ObservableCollection<string> CurrentAbPitches { get; set; } = [];
-        public ObservableCollection<string> Leagues { get; set; } = [];
-        public ObservableCollection<GameScore> Schedule { get; set; } = [];
-        public ObservableCollection<Team> ApiTeams { get; set; } = [];
-        public ObservableCollection<Team> FilteredHomeTeams { get; set; } = [];
-        public ObservableCollection<Team> FilteredAwayTeams { get; set; } = [];
-        public ObservableCollection<GameScoreWrapper> GameScores { get; set; } = [];
+        public ObservableCollection<string> CurrentAbPitches { get; set; } = [];              
         public ObservableCollection<StatsRow<HStats>> GameHittingStats { get; set; } = [];
         public ObservableCollection<StatsRow<PStats>> GamePitchingStats { get; set; } = [];
         public ObservableCollection<LineScoreData> LineScore { get; set; } = [];
         public ObservableCollection<string> PreviousAtBats { get; set; } = [];
-        public bool TeamsAreLoaded => ApiTeams?.Count != 0;
-        public bool CanStartGame => SelectedHomeTeam != null && SelectedAwayTeam != null;
+        public static bool TeamsAreLoaded => ApiService.ApiTeams?.Count != 0;
+        internal void OnPropertyChanged([CallerMemberName] string name = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        internal void UpdatePitches()
+        {
+            if (CurrentAb != null)
+            {
+                CurrentAbPitches.Clear();
+                CurrentAbPitches.Add($"{CurrentAb.Pitcher.LastName} pitching to {CurrentAb.Batter.LastName}");
+                foreach (var pitch in CurrentAb.Pitches)
+                    CurrentAbPitches.Add($"{pitch.Sequence}) {pitch}");
+                var stats = _gameCoordinator.GetCurrentPitcherStats();
+                CurrentPitchStats = new PitchTotals(stats);
+            }
+        }
+        internal void LoadGame(string loadPath)
+        {
+            var game = BaseballGame.Load(loadPath);
+            Game = game;
+            GameLoaded();
+            IsGameStarted = game.IsStarted;
+            HomeTeam?.FillLineup();
+            AwayTeam?.FillLineup();
+        }
+        internal void GameLoaded()
+        {
+            OnPropertyChanged(nameof(Game));
+            OnPropertyChanged(nameof(IsGameNull));            
+            UpdateRunners();
+        }
         internal void UpdateRunners()
         {
             var oobs = CurrentAb?.Result?.Events?.OfType<OutOnBases>() ?? new List<OutOnBases>();
@@ -581,7 +486,6 @@ namespace Scorebook
             InningEvents.RemoveAt(0);
             InningEvents.Insert(0, $"{CurrentAb?.ToString()}");
         }
-
         public ICommand ShowInningLogCommand => new Command(async () =>
         {
             await Application.Current?.MainPage?.DisplayAlert("Inning Log", string.Join("\n\n", InningEvents), "OK");
@@ -607,34 +511,7 @@ namespace Scorebook
             Game.PreviousAtBat();
             CurrentAb = Game.CurrentAb;
             InningEvents.RemoveAt(0);
-        });
-        public ICommand ConfigureGameCommand => new Command(() => IsConfiguringNewGame = true);
-        public ICommand LoadGameCommand => new Command(async () =>
-        {
-            try
-            {
-                var customFileType = new FilePickerFileType(
-                    new Dictionary<DevicePlatform, IEnumerable<string>>
-                    {
-                        {DevicePlatform.Android, new[] {"application.json","application.xml"} },
-                        { DevicePlatform.WinUI,new[]{".json",".xml",".sbg"} }
-                    });
-                var result = await FilePicker.Default.PickAsync(new PickOptions
-                {
-                    PickerTitle = "Select Electrons Game File",
-                    FileTypes = customFileType
-                });
-
-                if (result != null)
-                {
-                    LoadGame(result.FullPath);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        });
+        });        
         public ICommand TogglePitchesCommand => new RelayCommand(() => IsPitchesPanelVisible = !IsPitchesPanelVisible);
         public ICommand NextBatterCommand => new Command(async () => await _gameCoordinator.NextBatter(Game));
         public ICommand ShowOtherMenuCommand => new Command(async () => await _gameCoordinator.ShowOtherMenu(Game));
@@ -687,42 +564,8 @@ namespace Scorebook
             CurrentAb.UndoRunScored();
             UpdateRunners();
             SendRunnerBackButtonVisible = false;
-        });
-        public ICommand SelectFromScheduleCommand => new Command(() =>
-        {
-            if (Schedule.Count != 0 && GameScores.Count == 0)
-            {
-                foreach (var game in Schedule.Where(w => w.GameDate > DateTime.Today))
-                    GameScores.Add(GameScoreWrapper.Create(game));
-            }
-            IsSelectingGameFromSchedule = true;
-        });
-        public ICommand ShowCommandsCommand => new Command(() => ShowActionDialog = true);
-        public ICommand CreateGameCommand => new Command(async () =>
-        {
-            var homeTeam = ApiTeams.FirstOrDefault(f => f.Name == SelectedHomeTeam?.Name);
-            var awayTeam = ApiTeams.FirstOrDefault(f => f.Name == SelectedAwayTeam?.Name);
-            if (homeTeam == null || awayTeam == null)
-                return;
-            var innings = _leagueDict.ContainsKey(SelectedHomeLeague) ? _leagueDict[SelectedHomeLeague] : 7;
-            Game = new BaseballGame(innings);
-            await SetTeamsForGame(homeTeam, awayTeam);
-            IsConfiguringNewGame = false;
-            GameLoaded();
-        }, () => SelectedHomeTeam != null && SelectedAwayTeam != null);
-        public ICommand CreateGameFromScheduleCommand => new Command(async () =>
-        {
-            var homeLeague = "CMBA";
-            var homeTeam = ApiTeams.FirstOrDefault(f => f.Name == SelectedGame?.HomeTeam?.Name);
-            var awayTeam = ApiTeams.FirstOrDefault(f => f.Name == SelectedGame?.AwayTeam?.Name);
-            if (homeTeam == null || awayTeam == null)
-                return;
-            var innings = _leagueDict.ContainsKey(homeLeague) ? _leagueDict[homeLeague] : 7;
-            Game = new BaseballGame(innings);
-            await SetTeamsForGame(homeTeam, awayTeam);
-            IsSelectingGameFromSchedule = false;
-            GameLoaded();
-        });
+        });        
+        public ICommand ShowCommandsCommand => new Command(() => ShowActionDialog = true);        
         public ICommand CloseActionDialogCommand => new Command(() => ShowActionDialog = false);
         public ICommand RecordHitCommand => new Command<FieldLocation>(async (loc) =>
         {
@@ -737,8 +580,7 @@ namespace Scorebook
             });
         });
         public ICommand CloseStatsViewCommand => new Command(() => { ShowStats = false; });
-        public ICommand CloseLineScoreCommand => new Command(() => { ShowLineScore = false; });
-        public ICommand CloseGameSelectionCommand => new Command(() => IsSelectingGameFromSchedule = IsConfiguringNewGame = false);
+        public ICommand CloseLineScoreCommand => new Command(() => { ShowLineScore = false; });        
         public ICommand ToggleGameSelectionCommand => new Command(() => { ShowGameSelectionOptions = !ShowGameSelectionOptions; });
         private string GetRunner(OnBase onBase)
         {
@@ -751,7 +593,7 @@ namespace Scorebook
             }
             return "";
         }
-        private async Task SetTeamsForGame(Team homeTeam, Team awayTeam)
+        internal async Task SetTeamsForGame(Team homeTeam, Team awayTeam)
         {
             var roster = await ApiService.GetRosterFromApi(homeTeam);
             if (roster != null && roster.Any())
@@ -786,54 +628,14 @@ namespace Scorebook
         {
             var teams = await _apiService.GetTeams();
             foreach (var team in teams)
-                ApiTeams.Add(team);
+                ApiService.ApiTeams.Add(team);
             foreach (var league in teams.Select(t => t.Division).Distinct())
-                Leagues.Add(league);
-        }
-        public void LoadRosters()
-        {
-            foreach (var team in ApiTeams)
-            {
-                var roster = _apiService.LoadCachedRoster(team.Id);
-                if (roster != null && roster.Any())
-                    ApiService.ApiRosters.Add(team.Name, roster);
-            }
+                GameSelection.Leagues.Add(league);
         }
         public async Task LoadSchedule(int teamId)
         {
             foreach (var game in await _apiService.GetSchedule(teamId))
-                Schedule.Add(game);
-        }
-        internal void FilterTeams(bool? home = null)
-        {
-            if (!home.HasValue || home.Value)
-            {
-                FilteredHomeTeams.Clear();
-                if (SelectedHomeLeague != null)
-                {
-                    foreach (var team in ApiTeams.Where(w => w.Division == SelectedHomeLeague))
-                        FilteredHomeTeams.Add(team);
-                }
-                else
-                {
-                    foreach (var team in ApiTeams)
-                        FilteredHomeTeams.Add(team);
-                }
-            }
-            if (!home.HasValue || !home.Value)
-            {
-                FilteredAwayTeams.Clear();
-                if (SelectedAwayLeague != null)
-                {
-                    foreach (var team in ApiTeams.Where(w => w.Division == SelectedAwayLeague))
-                        FilteredAwayTeams.Add(team);
-                }
-                else
-                {
-                    foreach (var team in ApiTeams)
-                        FilteredAwayTeams.Add(team);
-                }
-            }
+                GameSelection.Schedule.Add(game);
         }
 
         private BaseballGame? _game;
@@ -843,16 +645,8 @@ namespace Scorebook
         private GameCoordinator _gameCoordinator;
         private TeamWrapper? _homeTeam;
         private TeamWrapper? _awayTeam;
-        private bool _isPitchesPanelVisible;
-        private bool _isConfiguringNewGame;
-        private bool _isSelectingGameFromSchedule;
+        private bool _isPitchesPanelVisible;                
         private bool _showGameSelectionOptions;
-        private string _selectedHomeLeague;
-        private string _selectedAwayLeague;
-        private Team? _selectedHomeTeam;
-        private Team? _selectedAwayTeam;
-        private bool _editingHomeLineup;
-        private bool _editingAwayLineup;
         private bool _isGameStarted;
         private int _currentRbis;
         private bool _scoringIsRequired;
@@ -874,15 +668,9 @@ namespace Scorebook
         private bool _showActionDialog = false;
         private string? _inningNumber;
         private bool _isTopHalfOfInning;
-        private bool _isBottomHalfOfInning;
-        private readonly Dictionary<string, int> _leagueDict = new()
-        {
-            { "CMBA", 7 },
-            { "BJL", 9 },
-            { "CSYBL", 7 }
-        };
+        private bool _isBottomHalfOfInning;        
         private FieldLocation? _activeHitZone;
         private PitchTotals? _currentPitchStats;
-        private DefensiveAlignment _defense;
+        private DefensiveAlignment? _defense;
     }
 }

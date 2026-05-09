@@ -34,6 +34,7 @@ namespace Electrons.Net8.Controllers
             var output = json != null ? JsonSerializer.Deserialize<T>(json) : null;
             return output;
         }
+        protected bool IsAdmin => _httpContextAccessor.HttpContext?.Session?.GetString("IsAdmin") == "true";
         protected void SetSessionObject<T>(string key, T val)
         {
             var json = JsonSerializer.Serialize(val);
