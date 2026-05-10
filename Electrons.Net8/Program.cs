@@ -1,13 +1,15 @@
-using Microsoft.AspNetCore.StaticFiles;
 using Electrons.Core.Net8.Infrastructure;
 using Electrons.Net8;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NHibernate;
 using System;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +20,17 @@ if (string.IsNullOrEmpty(pwd))
 {
     Console.WriteLine("CRITICAL: Database Password is missing!");
 }
+var keysFolder = Path.Combine(builder.Environment.ContentRootPath, "DataProtectionKeys");
+
+if (!Directory.Exists(keysFolder))
+{
+    Directory.CreateDirectory(keysFolder);
+}
+
+// 2. Configure Data Protection
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(keysFolder))
+    .SetApplicationName("ElectronsBaseballApp"); // Hardcoding this prevents key mismatch if the environment name changes
 builder.Services.AddDistributedMemoryCache(); // Required for Session
 builder.Services.AddSession(options =>
 {
