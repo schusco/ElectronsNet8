@@ -54,6 +54,12 @@ builder.Services.AddSignalR(options =>
 {
     options.KeepAliveInterval = TimeSpan.FromSeconds(15);
 });
+builder.Services.AddSession(o =>
+{
+    o.IdleTimeout = TimeSpan.FromMinutes(20);
+    o.Cookie.HttpOnly = true;
+    o.Cookie.IsEssential = true;
+});
 var app = builder.Build();
 var provider = new FileExtensionContentTypeProvider();
 
@@ -78,12 +84,12 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
     app.UsePathBase("/electronsnet8");
     app.UseDeveloperExceptionPage();
 }
-
+app.UseSession();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseSession();
+
 app.UseAuthorization();
 
 app.MapDefaultControllerRoute();
