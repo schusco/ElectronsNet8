@@ -1,5 +1,6 @@
 ﻿@using Elecredesign
 @using Electrons.Net8
+@using Microsoft.AspNetCore.Http
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -67,7 +68,10 @@
         </div>
     </nav>
 
-
+    <div style="background:yellow; color:black; position:fixed; bottom:0; right:0; padding:10px;">
+        Session ID: @Context.Session.Id <br />
+        Is Admin: @Context.Session.GetString("IsAdmin")
+    </div>
     @RenderBody()
     <!-- Bootstrap core JavaScript
     ================================================== -->
