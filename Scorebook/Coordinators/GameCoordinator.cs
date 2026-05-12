@@ -14,7 +14,7 @@ namespace Scorebook.Coordinators
             ViewModel.GameIsOver = true;
             ViewModel.IsGameStarted = false;
             ViewModel.LineScore.Clear();
-            ViewModel.Game.EndGame(ViewModel.GameSelection.SelectedGame?.EndDateTime);
+            ViewModel.Game.SetGameEndTime(ViewModel.GameSelection.EndDateTime);
             ViewModel.TotalInningCount = new int[] { 7, ViewModel.Game.Innings.Max(m => m.Number) }.Max();
             var grps = ViewModel.Game?.Innings.GroupBy(g => g.Number);
             for (int i = 1; i <= ViewModel.TotalInningCount; i++)
@@ -26,7 +26,7 @@ namespace Scorebook.Coordinators
             }
             ViewModel.OnPropertyChanged(nameof(ViewModel.Game));
             ViewModel.ShowLineScore = true;
-            ViewModel.InningNumber = "Final";
+            ViewModel.InningNumber = ScorebookViewModel.FinalText;
             ViewModel.IsTopHalfOfInning = false;
             ViewModel.IsBottomHalfOfInning = false;
         }
@@ -54,8 +54,6 @@ namespace Scorebook.Coordinators
         }
         internal void ScoreChanged(object? sender, ScoreChangedEventArgs e)
         {
-            var runs = e.RunnerAdvances?.Sum(s => s.Runs) ?? 0;
-            ViewModel.CurrentRbis = runs;
             ViewModel.OnPropertyChanged(nameof(ViewModel.Game.HomeScore));
             ViewModel.OnPropertyChanged(nameof(ViewModel.Game.AwayScore));
         }
@@ -162,6 +160,8 @@ namespace Scorebook.Coordinators
             }
             if (add)
                 Game?.UpdateCurrentAbResult(ab, advances);
+            var rbis = advances.OfType<RunScored>().Count();
+            ViewModel.CurrentRbis = rbis;
             ViewModel.OnPropertyChanged(nameof(ViewModel.CurrentAb));
             ViewModel.OnPropertyChanged(nameof(ViewModel.CurrentOuts));
             ViewModel.OnPropertyChanged(nameof(ViewModel.NextBatterText));
@@ -247,9 +247,9 @@ namespace Scorebook.Coordinators
                 ViewModel.OnPropertyChanged(nameof(ViewModel.Game));
                 ViewModel.OnPropertyChanged(nameof(ViewModel.Defense));
                 if (!ViewModel.HomeTeam.Lineup.Any())
-                    ViewModel.HomeTeam.FillLineup();
+                    ViewModel.HomeTeam.FillLineup(false);
                 if (!ViewModel.AwayTeam.Lineup.Any())
-                    ViewModel.AwayTeam.FillLineup();
+                    ViewModel.AwayTeam.FillLineup(false);
                 ViewModel.LinkAb();
             }
             else
@@ -304,7 +304,7 @@ namespace Scorebook.Coordinators
         }
         internal void SetStats(bool home)
         {
-            if (!ViewModel.IsGameStarted && !ViewModel.Game.IsGameOver)
+            if (!ViewModel.IsGameStarted && !ViewModel.GameIsOver)
                 return;
             ViewModel.ShowStats = true;
             if (home)
@@ -319,7 +319,7 @@ namespace Scorebook.Coordinators
             }
         }
         internal async Task HandleRunningEvents(OnBase onBase)
-        {            
+        {
             string header = "";
             var runners = ViewModel.Game.CurrentInning.CurrentRunners;
             switch (onBase)

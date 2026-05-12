@@ -8,12 +8,12 @@ namespace Scorebook.ViewObjects
 {
     public class LineupPosition : INotifyPropertyChanged
     {
-        public LineupPosition(Player player, int spot)
+        public LineupPosition(Player player, int spot, bool loading = false)
         {
             _player = player;
             LineupNumber = spot;
             if (player.Position != null)
-                Position = player.Position;
+                SetPosition(player.Position, loading);
             if (player.IsUnknown)
                 CanReplace = true;
         }
@@ -52,7 +52,7 @@ namespace Scorebook.ViewObjects
         }
         public bool CanReplace
         {
-            get => _canReplace; 
+            get => _canReplace;
             set
             {
                 _canReplace = value;
@@ -84,6 +84,13 @@ namespace Scorebook.ViewObjects
                 Player.SetPosition(_position);
                 WeakReferenceMessenger.Default.Send(new PositionChangedMessage(_position));
             }
+        }
+        public void SetPosition(Position position, bool loading = false)
+        {
+            _position = position;
+            if (!loading)
+                WeakReferenceMessenger.Default.Send(new PositionChangedMessage(_position));
+            OnPropertyChanged(nameof(Position));
         }
         public static List<Position> Positions => [.. Position.All];
         public bool HasDH => HittingFor is not null;

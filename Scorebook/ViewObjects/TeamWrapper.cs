@@ -10,7 +10,7 @@ namespace Scorebook.ViewObjects
 {
     public class TeamWrapper : INotifyPropertyChanged
     {
-        public TeamWrapper(ScorebookViewModel vm, Team coreTeam, bool isHome, bool unknown)
+        public TeamWrapper(ScorebookViewModel vm, Team coreTeam, bool isHome, bool unknown = false)
         {
             _vm = vm;
             CoreTeam = coreTeam;
@@ -18,7 +18,13 @@ namespace Scorebook.ViewObjects
             _isUnknownRoster = unknown;
             IsEditing = false;
             foreach (var player in CoreTeam.Roster)
-                Bench.Add(player);
+            {
+                if (!CoreTeam.Lineup.Contains(player))
+                {
+                    TeamPlayers.Add(player);
+                    Bench.Add(player);
+                }
+            }
             vm.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == nameof(ScorebookViewModel.MobileActionTrigger))
@@ -90,11 +96,16 @@ namespace Scorebook.ViewObjects
             Lineup.RemoveAt(index);
             Lineup.Insert(index, new LineupPosition(newPlayer, index + 1));
         }
-        internal void FillLineup()
+        internal void FillLineup(bool loading)
         {
             var lp = 1;
             foreach (var player in CoreTeam.Lineup)
-                Lineup.Add(new LineupPosition(player, lp++));
+            {
+                var lineupPos = new LineupPosition(player, lp++, loading);
+                if (player.HittingFor is not null)
+                    lineupPos.HittingFor = player.HittingFor;
+                Lineup.Add(lineupPos);
+            }
             _vm.RosterCoordinator.UpdatePitcherUI(this);
         }
         internal void UpdatePositionAvailability()
@@ -137,7 +148,7 @@ namespace Scorebook.ViewObjects
         }
         public void UpdatePositionLists()
         {
-            if (CoreTeam is null)
+            if (CoreTeam is null || TeamPlayers.Any())
                 return;
             var roster = new List<Player>();
             if (ApiService.ApiRosters.TryGetValue(CoreTeam.Name, out var apiRoster))
@@ -164,12 +175,10 @@ namespace Scorebook.ViewObjects
             foreach (var player in newTeam.Roster)
                 TeamPlayers.Add(player);
         }
-
         public ICommand SubstitutePlayerCommand => new Command<LineupPosition>(async (replaced) => await _vm.RosterCoordinator.SubstitutePlayer(_isHome, replaced));
         public ICommand SetLineupCommand => new RelayCommand(() =>
         {
             IsEditing = true;
-            TeamPlayers.Clear();
             UpdatePositionLists();
             UpdatePositionAvailability();
         });
@@ -184,7 +193,6 @@ namespace Scorebook.ViewObjects
             var team = ApiService.ApiTeams.Single(s => s.Name == CoreTeam.Name);
             await LoadRoster(team);
         });
-
         public ICommand CloseSetLineupCommand => new RelayCommand(() => _vm.RosterCoordinator.CloseSetLineup(this));
         public ICommand AddToLineupCommand => new RelayCommand<Player>(async (player) => await _vm.RosterCoordinator.AddToLineup(this, player));
         public ICommand RemoveFromLineupCommand => new Command<LineupPosition>((lp) => _vm.RosterCoordinator.RemoveFromLineup(this, lp));

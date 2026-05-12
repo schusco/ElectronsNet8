@@ -75,10 +75,10 @@ namespace Electrons.Core.Net8.Games
             if (pitcherEl != null)
                 pitcher = Player.Load(pitcherEl.Descendants().Single(s => s.Name == "Player"));
             var advBase = ev.OutAt != null ? OnBase.None : ob;
-            var originalRunnerEl = el.Descendants().SingleOrDefault(s => s.Name == "OriginalRunner" && s.Parent.Name == ev.GetType().Name);
+            var originalRunnerEl = el.Descendants().FirstOrDefault(s => s.Name == "OriginalRunner" && s.Parent.Name == ev.GetType().Name);
             Player original = null;
             if (originalRunnerEl != null)
-                original = Player.Load(originalRunnerEl.Descendants().Single(s => s.Name == "Player"));
+                original = Player.Load(originalRunnerEl.Descendants().First(s => s.Name == "Player"));
             if (!(player is null))
                 ev.AdvanceRunner(BaseRunner.Create(player, pitcher, original), advBase);
             return ev;

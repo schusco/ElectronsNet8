@@ -16,7 +16,7 @@
             <Button Grid.Column="2" Text="Select Game" Command="{Binding ToggleGameSelectionCommand}" BackgroundColor="Transparent" TextColor="Black" Margin="0,0,10,0" />
         </Grid>
     </Shell.TitleView>
-    <Grid RowDefinitions="*" ColumnSpacing="10"  >
+    <Grid RowDefinitions="*" ColumnSpacing="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition x:Name="SideBarColumnLeft" Width="{OnPlatform WinUI=.125*, Android=0}" />
             <ColumnDefinition Width="{OnPlatform WinUI=.75*, Android=*}" />

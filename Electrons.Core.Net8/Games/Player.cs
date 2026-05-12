@@ -150,7 +150,7 @@ namespace Electrons.Core.Net8.Games
             DisplayNumber = xel.Element("Number").Value;
             Position = Position.FromString(xel.Element("Position")?.Value);
             if (xel.Descendants().Any(a => a.Name == "HittingFor"))
-                HittingFor = Load(xel.Descendants().Single(a => a.Name == "HittingFor"));
+                HittingFor = Load(xel.Descendants("HittingFor").Descendants("Player").Single());
 
             IsUnknown = string.IsNullOrEmpty(LastName) || FirstName == "Unknown" && LastName == "Player";
             return this;
@@ -161,7 +161,7 @@ namespace Electrons.Core.Net8.Games
             {
                 var xel = base.Xml;
                 if (!(HittingFor is null))
-                    xel.Add(HittingFor?.Xml);
+                    xel.Add(new XElement("HittingFor", HittingFor?.Xml));
                 return xel;
             }
         }

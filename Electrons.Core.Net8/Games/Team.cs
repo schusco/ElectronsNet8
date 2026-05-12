@@ -148,15 +148,16 @@ namespace Electrons.Core.Net8.Games
         {
             if (!spot.HasValue)
                 spot = Lineup.Count(c => !string.IsNullOrEmpty(c.FirstName)) + 1;
-            return _order.AddToLineup(spot.Value, player);             
+            return _order.AddToLineup(spot.Value, player);
         }
         [JsonIgnore]
         public Pitcher PitcherOfRecord => GamePitchers.Single(s => s.IsPitcherOfRecord);
-        public bool RemoveFromLineup(Player player)
+        public bool RemoveFromLineup(Player player, bool force =false)
         {
-            if (!OrderIsSet)
+            var canRemove = !OrderIsSet || force;
+            if (canRemove)
                 _order.RemoveFromLineup(player);
-            return !OrderIsSet;
+            return canRemove;
         }
         public void ReplaceUnknown(Player replaced, Player newPlayer, bool remove = false)
         {
@@ -200,6 +201,8 @@ namespace Electrons.Core.Net8.Games
             foreach (var player in teamEl.Descendants("Lineup").Descendants("Player"))
             {
                 var p = Player.Load(player);
+                if (lineup.Any(a => a.HittingFor == p))
+                    continue;
                 lineup.Add(p);
                 if (p.IsUnknown && string.IsNullOrEmpty(p.DisplayNumber))
                     p.DisplayNumber = lineup.Count.ToString();
@@ -260,7 +263,7 @@ namespace Electrons.Core.Net8.Games
             GamePitchers.Add(pitcher);
             PitcherChanged?.Invoke(this, new EventArgs());
             return sub;
-        }        
+        }
         internal Substitution Substitute(Inning inning, Player bench, Player lineup)
         {
             var index = Lineup.IndexOf(lineup);
@@ -366,7 +369,7 @@ namespace Electrons.Core.Net8.Games
         }
         public static Team CreateWithUnknownRoster(string name) => new Team(name, Enumerable.Range(1, 25).Select(Player.Unknown).ToList());
         public static Team Create(string name) => new Team(name);
-        public static Team Create(string name, List<Player> roster) => new Team(name, roster);        
+        public static Team Create(string name, List<Player> roster) => new Team(name, roster);
 
         private readonly List<Substitution> _substitutions;
         private List<Player> _roster;

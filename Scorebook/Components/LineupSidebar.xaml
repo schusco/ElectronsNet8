@@ -33,7 +33,7 @@
                     <Button Text="{Binding Source={x:Reference Root}, Path=ViewModel.PitcherText}" Style="{StaticResource LineupButtonStyle}" Command="{Binding Source={x:Reference Root}, Path=ViewModel.SelectPitcherCommand}" />
                 </Border>
                 <Border>
-                    <Label Text="{Binding Source={x:Reference Root}, Path=ViewModel.PitcherName}"  FontSize="Small" Margin="5" />
+                    <Label Text="{Binding Source={x:Reference Root}, Path=ViewModel.PitcherName}" LineBreakMode="NoWrap" FontSize="Small" Margin="5" />
                 </Border>
                 <Button Text="View Stats" Command="{Binding Source={x:Reference Root}, Path=ViewModel.SetStatsCommand}" Style="{StaticResource LineupButtonStyle}" />
                 <Border>

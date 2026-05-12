@@ -200,7 +200,7 @@ namespace Electrons.Core.Net8.Games
             return result;
         }
         [JsonIgnore]
-        public int Balls => Pitches.Where(w => w.Result == PitchResult.Ball).Count(); 
+        public int Balls => Pitches.Where(w => w.Result == PitchResult.Ball).Count();
         [JsonIgnore]
         public IEnumerable<Pitch> Pitches => _events.OfType<Pitch>();
         [JsonIgnore]
@@ -308,8 +308,8 @@ namespace Electrons.Core.Net8.Games
         private static Player GetPlayer(XElement el, string key, Team team)
         {
             var playerEl = el.Descendants().Single(s => s.Name == key);
-            int playerNum = int.Parse(playerEl.Descendants().Single(s => s.Name == "Number").Value);
-            var playerName = playerEl.Descendants().Single(s => s.Name == "LastName").Value;
+            int playerNum = int.Parse(playerEl.Descendants().First(s => s.Name == "Number").Value);
+            var playerName = playerEl.Descendants().First(s => s.Name == "LastName").Value;
             var player = team.Roster.FirstOrDefault(s => s.Number == playerNum && s.LastName == playerName);
             return player ?? Player.Unknown(playerNum);
         }
@@ -352,8 +352,6 @@ namespace Electrons.Core.Net8.Games
             else
             {
                 var actualEvent = _events.SingleOrDefault(s => s.RunningEvents.Contains(rev));
-                if (actualEvent is RunnerAdvanceOnBatteryError)
-                    return;
                 actualEvent?.RemoveRunningEvent(rev);
             }
             OnRunningEventChanged(rev);

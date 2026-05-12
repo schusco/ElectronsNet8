@@ -9,11 +9,17 @@
         <converters:IntToColorConverter x:Key="OutConverter" ActiveColor="Blue" InActiveColor="DarkGray" />
     </ContentView.Resources>
     <VerticalStackLayout >
-        <Grid ColumnDefinitions="70,*,40,30" RowDefinitions="Auto,Auto,Auto" BackgroundColor="#F0F0F0" Margin="0,0,0,0" ColumnSpacing="10">
-            <Label Grid.Column="0" Text="{Binding Game.HomeScore}" FontSize="32" Padding="5,0,0,0" VerticalOptions="Center" HorizontalOptions="Center" />
+        <Grid RowDefinitions="Auto,Auto,Auto" BackgroundColor="#F0F0F0" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="Auto" ></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Text="{Binding Game.HomeScore}" FontSize="32" Padding="0,0,0,0" TranslationX="5" VerticalOptions="Center" HorizontalOptions="Start" />
             <HorizontalStackLayout Spacing="15" Grid.Column="1" HorizontalOptions="Center" >
                 <HorizontalStackLayout Spacing="2" >
-                    <Label Text="B" VerticalOptions="Center" FontAttributes="Bold" Margin="5" />
+                    <Label Text="B" VerticalOptions="Center" FontAttributes="Bold" />
                     <BoxView WidthRequest="15" HeightRequest="15" Color="{Binding CurrentBalls, Converter={StaticResource BallConverter}, ConverterParameter=1}" />
                     <BoxView WidthRequest="15" HeightRequest="15" Color="{Binding CurrentBalls, Converter={StaticResource BallConverter}, ConverterParameter=2}" />
                     <BoxView WidthRequest="15" HeightRequest="15" Color="{Binding CurrentBalls, Converter={StaticResource BallConverter}, ConverterParameter=3}" />
@@ -30,11 +36,11 @@
                 </HorizontalStackLayout>
             </HorizontalStackLayout>
             <HorizontalStackLayout Spacing="2" Grid.Column="2">
-                <Image  IsVisible="{Binding IsTopHalfOfInning}" Source="caret_up_fill.png"  WidthRequest="20" HeightRequest="20" BackgroundColor="#F0F0F0" />
+                <Image IsVisible="{Binding IsTopHalfOfInning}" Source="caret_up_fill.png"  WidthRequest="20" HeightRequest="20" BackgroundColor="#F0F0F0" />
                 <Image IsVisible="{Binding IsBottomHalfOfInning}" Source="caret_down_fill.png"  WidthRequest="20" HeightRequest="20" BackgroundColor="#F0F0F0" />
-                <Label Text="{Binding InningNumber}" FontSize="Medium" VerticalOptions="Center" HorizontalOptions="Center" />
+                <Label Text="{Binding InningNumber}" FontSize="Medium" VerticalOptions="Center" Padding="0,0,15,0" HorizontalOptions="End" />
             </HorizontalStackLayout>
-            <Label Grid.Column="3" Text="{Binding Game.AwayScore}" Padding="0,0,5,0" FontSize="32" VerticalOptions="Center" HorizontalOptions="Center" />
+            <Label Grid.Column="3" Text="{Binding Game.AwayScore}" TranslationX="-5" FontSize="32" VerticalOptions="Center" HorizontalOptions="End" />
             <Grid Grid.ColumnSpan="4" Grid.Row="1" ColumnDefinitions=".4*,.2*,.4*">
                 <FlexLayout  Wrap="Wrap" Grid.Column="0" Padding="0,0,0,0">
                     <Label  HorizontalOptions="Start" VerticalOptions="Start" Text="{Binding Game.HomeTeam.Name}" Padding="10,0,0,0"  FontSize="12"  IsVisible="{Binding MobileActionTrigger}" />

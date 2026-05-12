@@ -861,7 +861,10 @@ namespace Electrons.Core.Net8.Games
         }
         public override string ToString() => $"{AwayTeam?.Name} {AwayScore}, {HomeTeam?.Name} {HomeScore} {(IsGameOver ? "Final" : CurrentInning?.ToString())}";
 
-       
+        public void SetGameEndTime(DateTime? endDateTime)
+        {
+            _EndTime = endDateTime ?? DateTime.Now;
+        }
 
         private readonly Stack<Inning> _innings;
         private readonly Stack<Inning> _navInnings;
@@ -873,8 +876,6 @@ namespace Electrons.Core.Net8.Games
         private Pitcher _winningPitcher;
         private Pitcher _losingPitcher;
         internal readonly int LastInningNumber;
-
-
     }
     public class Risp
     {

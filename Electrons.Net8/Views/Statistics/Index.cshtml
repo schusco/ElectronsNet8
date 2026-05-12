@@ -3,7 +3,10 @@
 @using Electrons.Net8
 @using Electrons.Net8.Models
 @{
+    var playoff = string.IsNullOrEmpty(ViewContext.RouteData.Values["type"] as string) ? "0" : "1";
     ViewBag.Title = "Statistics";
+    var pitStatkey = $"pstats_{Model.Year}_{playoff}";
+    var hitStatkey = $"hstats_{Model.Year}_{playoff}";
 }
 
 <div>
@@ -67,7 +70,7 @@
         </div>
     </div>
     <div class="row">
-        <cache vary-by="@Model.StatsLastUpdated" expires-after="@TimeSpan.FromHours(1)" vary-by-route="id,type">
+        <cache vary-by="@Model.StatsLastUpdated,@pitStatkey" expires-after="@TimeSpan.FromHours(1)" >
             <div class="col-sm-12">@Html.Table(Model.PitchingStats, new { @class = "tronTable tablesorter" }, true)</div>
         </cache>
     </div>
@@ -75,7 +78,7 @@
         <div class="col-sm-12" style="text-align:center"><h2>Hitting Stats</h2></div>
     </div>
     <div class="row">
-        <cache vary-by="@Model.StatsLastUpdated" expires-after="@TimeSpan.FromHours(1)" vary-by-route="id,type">
+        <cache vary-by="@Model.StatsLastUpdated,@hitStatkey" expires-after="@TimeSpan.FromHours(1)" >
             <div class="col-sm-12">@Html.Table(Model.HittingStats, new { @class = "tronTable tablesorter" }, true)</div>
         </cache>
     </div>

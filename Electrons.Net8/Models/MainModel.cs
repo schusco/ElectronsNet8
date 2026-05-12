@@ -40,7 +40,20 @@ namespace Electrons.Net8.Models
                     {
                         HomeScore = apiData?.HomeRuns.ToString() ?? "0";
                         AwayScore = apiData?.AwayRuns.ToString() ?? "0";
-                        LiveInning = apiData?.Status == "Scheduled" ? apiData.GameDate.ToShortTimeString() : apiData.Status ?? "";
+                        if (apiData?.Status == "Scheduled")
+                            LiveInning = apiData.GameDate.ToShortTimeString();
+                        else if (apiData?.Status.Contains("Top") ?? false)
+                        {
+                            IsTopHalfOfInning = true;
+                            LiveInning = apiData.Status.Replace("Top of", "").Trim();
+                        }
+                        else if (apiData?.Status.Contains("Bottom") ?? false)
+                        {
+                            IsTopHalfOfInning = false;
+                            LiveInning = apiData.Status.Replace("Bottom of", "").Trim();
+                        }
+                        else
+                            LiveInning = apiData?.Status ?? "";
                     }
                     else
                         LiveInning = nextOuting.GameDate.ToShortTimeString();
@@ -78,5 +91,6 @@ namespace Electrons.Net8.Models
         public bool NextGameRecap { get; set; }
         public bool DisplayLastGame { get; set; }
         public IEnumerable<StandingsModel> Standings { get; set; }
+        public bool? IsTopHalfOfInning { get; set; }
     }
 }

@@ -46,13 +46,24 @@
                     @if (Model.NextGameInProgress || Model.DisplayLastGame)
                     {
                         <div class="nextOutingText col col-xs-3 center score-box">
-                            <h1 id="score-away-@Model.GameId">  @Model.AwayScore</h1>
+                            <h1 id="score-home-@Model.GameId">  @Model.HomeScore</h1>
                         </div>
                         <div class="nextOutingText col col-xs-6 center score-box">
-                            <span style="font-size:.8em" id="score-inning-@Model.GameId">@Model.LiveInning</span>
+                            @if (Model.IsTopHalfOfInning.HasValue) 
+                            {
+                                @if (Model.IsTopHalfOfInning.Value)
+                                {
+                                    <i class="bi bi-caret-up-fill"></i>
+                                }
+                                        else
+                                {
+                                    <i class="bi bi-caret-down-fill"></i>
+                                }
+                            }
+                            <span id="score-inning-@Model.GameId">@Model.LiveInning</span>
                         </div>
                         <div class="nextOutingText col col-xs-3 center score-box">
-                            <h1 id="score-home-@Model.GameId">@Model.HomeScore</h1>
+                            <h1 id="score-away-@Model.GameId">@Model.AwayScore</h1>
                         </div>
                     }
                     else

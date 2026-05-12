@@ -148,7 +148,7 @@ namespace Scorebook.ViewObjects
         {
             if (Schedule.Count != 0 && GameScores.Count == 0)
             {
-                foreach (var game in Schedule.Where(w => w.GameDate > DateTime.Today))
+                foreach (var game in Schedule)
                     GameScores.Add(GameScoreWrapper.Create(game));
             }
             IsSelectingGameFromSchedule = true;
@@ -160,8 +160,9 @@ namespace Scorebook.ViewObjects
                 var customFileType = new FilePickerFileType(
                     new Dictionary<DevicePlatform, IEnumerable<string>>
                     {
-                        { DevicePlatform.Android, new[] {"application.json","application.xml"} },
-                        { DevicePlatform.WinUI,new[]{".json",".xml",".sbg"} }
+                        { DevicePlatform.iOS, new[] { "public.xml" } },
+                        { DevicePlatform.Android, new[] {"text/xml","application/xml"} },
+                        { DevicePlatform.WinUI,new[]{".xml",".sbg"} }
                     });
                 var result = await FilePicker.Default.PickAsync(new PickOptions
                 {
@@ -181,6 +182,20 @@ namespace Scorebook.ViewObjects
         });
         public ICommand ConfigureGameCommand => new Command(() => IsConfiguringNewGame = true);
         public ICommand CloseGameSelectionCommand => new Command(() => IsSelectingGameFromSchedule = IsConfiguringNewGame = false);
+
+        public DateTime? EndDateTime
+        {
+            get
+            {
+                if (SelectedGame is not null)
+                    return SelectedGame.EndDateTime;
+                var game = Schedule.FirstOrDefault(s => s.HomeTeam?.Name == _vm.Game.HomeTeam.Name && s.AwayTeam.Name == _vm.Game?.AwayTeam.Name);
+                if (game is not null)
+                    return game.EndDateTime;
+                return null;
+
+            }
+        }
 
         private readonly ScorebookViewModel _vm = vm;
         private string? _selectedHomeLeague = "CMBA";

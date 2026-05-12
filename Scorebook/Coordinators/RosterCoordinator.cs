@@ -127,19 +127,24 @@ namespace Scorebook.Coordinators
                 position.LineupNumber = val;
                 val++;
             }
+            team.CoreTeam.SetBattingOrder(lineup.Select(s => s.Player).ToList());
             _draggedLp = null;
         }
-        internal void RemoveFromLineup(TeamWrapper team, LineupPosition lp)
+        internal async Task RemoveFromLineup(TeamWrapper team, LineupPosition lp)
         {
-            if (lp == null) return;
-            if (team?.CoreTeam.RemoveFromLineup(lp.Player) ?? false)
+            if (lp == null || team is null) return;
+            if (!team.CoreTeam.RemoveFromLineup(lp.Player))
             {
-                team.TeamPlayers.Add(lp.Player);
-                team.Lineup.Remove(lp);
-                foreach (var spot in team.Lineup)
-                    spot.LineupNumber = team.Lineup.IndexOf(spot) + 1;
-                team.UpdatePositionAvailability();
+                var result = await Application.Current.MainPage.DisplayAlert("Confirm", "Game is started, remove anyway?", "ok", "cancel");
+                if (!result) return;
             }
+            if (!team.CoreTeam.RemoveFromLineup(lp.Player, true))
+                return;
+            team.TeamPlayers.Add(lp.Player);
+            team.Lineup.Remove(lp);
+            foreach (var spot in team.Lineup)
+                spot.LineupNumber = team.Lineup.IndexOf(spot) + 1;
+            team.UpdatePositionAvailability();
         }
         internal void UpdatePitcherUI(TeamWrapper team)
         {

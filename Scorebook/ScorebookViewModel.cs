@@ -18,6 +18,7 @@ namespace Scorebook
 {
     public class ScorebookViewModel : INotifyPropertyChanged
     {
+        public const string FinalText = "Final";
         public ScorebookViewModel(ApiService apiService, RosterCoordinator rosterCoordinator, GameCoordinator gameCoordinator)
         {
             WeakReferenceMessenger.Default.Register<PositionChangedMessage>(this, rosterCoordinator.HandlePositionChangedMesage);
@@ -37,6 +38,8 @@ namespace Scorebook
                     return;
                 _game = value;
                 _game.ScoreChanged += _gameCoordinator.ScoreChanged;
+                _rosterCoordinator.ViewModel = this;
+                _gameCoordinator.ViewModel = this;
                 if (_game.CurrentInning != null)
                     foreach (var ev in _game.CurrentInning.Events.Reverse())
                         InningEvents.Add(ev.ToString());
@@ -49,17 +52,19 @@ namespace Scorebook
                 _game.GameEnded += _gameCoordinator.GameEnded;
                 HomeTeam?.UpdatePositionLists();
                 AwayTeam?.UpdatePositionLists();
+                IsBottomHalfOfInning = !_game.IsGameOver && _game.CurrentInning?.Half == HalfInning.Bottom;
+                IsTopHalfOfInning = !_game.IsGameOver && _game.CurrentInning?.Half == HalfInning.Top;
+                InningNumber = _game.IsGameOver ? FinalText : _game.CurrentInning?.Number.ToString() ?? "";
                 OnPropertyChanged(nameof(Game));
                 ShowGameSelectionOptions = false;
-                _rosterCoordinator.ViewModel = this;
-                _gameCoordinator.ViewModel = this;
+
             }
         }
         public event PropertyChangedEventHandler? PropertyChanged;
         public GameCoordinator GameCoordinator => _gameCoordinator;
         public RosterCoordinator RosterCoordinator => _rosterCoordinator;
         public ApiService ApiService => _apiService;
-        public GameSelection GameSelection { get; set; }        
+        public GameSelection GameSelection { get; set; }
         public DefensiveAlignment Defense
         {
             get => _defense;
@@ -298,7 +303,7 @@ namespace Scorebook
                 _gameIsOver = value;
                 OnPropertyChanged(nameof(GameIsOver));
             }
-        }        
+        }
         public bool ShowGameSelectionOptions
         {
             get => _showGameSelectionOptions;
@@ -307,7 +312,7 @@ namespace Scorebook
                 _showGameSelectionOptions = value;
                 OnPropertyChanged(nameof(ShowGameSelectionOptions));
             }
-        }        
+        }
         public TeamWrapper? AwayTeam
         {
             get => _awayTeam;
@@ -398,7 +403,7 @@ namespace Scorebook
             }
         }
         public ObservableCollection<string> InningEvents { get; set; } = [];
-        public ObservableCollection<string> CurrentAbPitches { get; set; } = [];              
+        public ObservableCollection<string> CurrentAbPitches { get; set; } = [];
         public ObservableCollection<StatsRow<HStats>> GameHittingStats { get; set; } = [];
         public ObservableCollection<StatsRow<PStats>> GamePitchingStats { get; set; } = [];
         public ObservableCollection<LineScoreData> LineScore { get; set; } = [];
@@ -423,13 +428,15 @@ namespace Scorebook
             Game = game;
             GameLoaded();
             IsGameStarted = game.IsStarted;
-            HomeTeam?.FillLineup();
-            AwayTeam?.FillLineup();
+            HomeTeam = new TeamWrapper(this, game.HomeTeam, true);
+            AwayTeam = new TeamWrapper(this, game.AwayTeam, false);
+            HomeTeam.FillLineup(true);
+            AwayTeam.FillLineup(true);
         }
         internal void GameLoaded()
         {
             OnPropertyChanged(nameof(Game));
-            OnPropertyChanged(nameof(IsGameNull));            
+            OnPropertyChanged(nameof(IsGameNull));
             UpdateRunners();
         }
         internal void UpdateRunners()
@@ -511,7 +518,7 @@ namespace Scorebook
             Game.PreviousAtBat();
             CurrentAb = Game.CurrentAb;
             InningEvents.RemoveAt(0);
-        });        
+        });
         public ICommand TogglePitchesCommand => new RelayCommand(() => IsPitchesPanelVisible = !IsPitchesPanelVisible);
         public ICommand NextBatterCommand => new Command(async () => await _gameCoordinator.NextBatter(Game));
         public ICommand ShowOtherMenuCommand => new Command(async () => await _gameCoordinator.ShowOtherMenu(Game));
@@ -545,7 +552,7 @@ namespace Scorebook
                 string localPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                     "Baseball", DateTime.Now.Year.ToString(), "Game Files", fileName);
                 Game.SaveAs(localPath);
-                await Application.Current?.Windows[0]?.Page?.DisplayAlert("Saved", "Game progress saved to device.", "OK");
+                await Application.Current.MainPage.DisplayAlert("Saved", "Game progress saved to device.", "OK");
             }
             else
             {
@@ -564,8 +571,8 @@ namespace Scorebook
             CurrentAb.UndoRunScored();
             UpdateRunners();
             SendRunnerBackButtonVisible = false;
-        });        
-        public ICommand ShowCommandsCommand => new Command(() => ShowActionDialog = true);        
+        });
+        public ICommand ShowCommandsCommand => new Command(() => ShowActionDialog = true);
         public ICommand CloseActionDialogCommand => new Command(() => ShowActionDialog = false);
         public ICommand RecordHitCommand => new Command<FieldLocation>(async (loc) =>
         {
@@ -580,7 +587,7 @@ namespace Scorebook
             });
         });
         public ICommand CloseStatsViewCommand => new Command(() => { ShowStats = false; });
-        public ICommand CloseLineScoreCommand => new Command(() => { ShowLineScore = false; });        
+        public ICommand CloseLineScoreCommand => new Command(() => { ShowLineScore = false; });
         public ICommand ToggleGameSelectionCommand => new Command(() => { ShowGameSelectionOptions = !ShowGameSelectionOptions; });
         private string GetRunner(OnBase onBase)
         {
@@ -645,7 +652,7 @@ namespace Scorebook
         private GameCoordinator _gameCoordinator;
         private TeamWrapper? _homeTeam;
         private TeamWrapper? _awayTeam;
-        private bool _isPitchesPanelVisible;                
+        private bool _isPitchesPanelVisible;
         private bool _showGameSelectionOptions;
         private bool _isGameStarted;
         private int _currentRbis;
@@ -668,7 +675,7 @@ namespace Scorebook
         private bool _showActionDialog = false;
         private string? _inningNumber;
         private bool _isTopHalfOfInning;
-        private bool _isBottomHalfOfInning;        
+        private bool _isBottomHalfOfInning;
         private FieldLocation? _activeHitZone;
         private PitchTotals? _currentPitchStats;
         private DefensiveAlignment? _defense;

@@ -25,7 +25,8 @@ namespace Scorebook.Services
             var games = new List<GameScore>();
             if (DateTime.Now < nextSync)
                 games = LoadFromLocalDisk<List<GameScore>>($"schedule_cache_{teamId}.json");
-            else
+
+            if (games.Count == 0)
             {
                 var response = await LoadFromApi<List<GameScore>>($"/api/teams/{teamId}/games");
                 games = response.Success ? response.Data : new List<GameScore>();
@@ -118,11 +119,14 @@ namespace Scorebook.Services
                     ApiRosters.Add(team.Name, roster);
             }
         }
-        private static void SaveToLocalDisk<T>(List<T> teams, string path)
+        private static void SaveToLocalDisk<T>(List<T> data, string path)
         {
             string localPath = Path.Combine(FileSystem.Current.AppDataDirectory, path);
-            var json = JsonSerializer.Serialize(teams);
-            File.WriteAllText(localPath, json);
+            if (data.Count > 0)
+            {
+                var json = JsonSerializer.Serialize(data);
+                File.WriteAllText(localPath, json);
+            }
         }
         internal static List<CmbaPlayer> LoadCachedRoster(int teamId)
         {
