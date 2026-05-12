@@ -198,6 +198,11 @@ namespace Scorebook.Coordinators
                     team.Bench.Remove(newPlayer);
                     team.Replaced.Add(replaced);
                     ViewModel.Game.AddEventToAb(sub);
+                    ViewModel.ReplaceCurrentAbInLog();
+                    ViewModel.CurrentAb = ViewModel.Game.CurrentAb;
+                    ViewModel.InningEvents.Insert(0, ViewModel.CurrentAb.ToString());
+                    ViewModel.LinkAb();
+                    ViewModel.OnPropertyChanged(nameof(ViewModel.CurrentAb));
                 }
                 team.UpdatePositionAvailability(); // Re-run your strikethrough logic
                 ViewModel.OnPropertyChanged(nameof(ViewModel.Game));
