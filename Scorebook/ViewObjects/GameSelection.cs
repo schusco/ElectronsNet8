@@ -82,6 +82,16 @@ namespace Scorebook.ViewObjects
             }
         }
         public bool CanStartGame => SelectedHomeTeam != null && SelectedAwayTeam != null;
+        public bool SendGameUpdates
+        {
+            get => _sendGameUpdates;
+            set
+            {
+                _sendGameUpdates = value;
+                OnPropertyChanged(nameof(SendGameUpdates));
+            }
+        }
+        public int? GameUpdateId => !SendGameUpdates ? null : SelectedGame?.GameId;
         public ObservableCollection<Team> FilteredHomeTeams { get; set; } = [];
         public ObservableCollection<Team> FilteredAwayTeams { get; set; } = [];
         public ObservableCollection<string> Leagues { get; set; } = [];
@@ -131,6 +141,8 @@ namespace Scorebook.ViewObjects
             await _vm.SetTeamsForGame(homeTeam, awayTeam);
             IsSelectingGameFromSchedule = false;
             _vm.GameLoaded();
+            if (GameUpdateId.HasValue)
+                SelectedGame.GameScoreUpdated += _vm.ApiService.SendGameUpdate;
         });
         public ICommand CreateGameCommand => new Command(async () =>
         {
@@ -161,7 +173,7 @@ namespace Scorebook.ViewObjects
                     new Dictionary<DevicePlatform, IEnumerable<string>>
                     {
                         { DevicePlatform.iOS, new[] { "public.xml" } },
-                        { DevicePlatform.Android, new[] {"text/xml","application/xml"} },
+                        { DevicePlatform.Android, new[] {"*/*"} },
                         { DevicePlatform.WinUI,new[]{".xml",".sbg"} }
                     });
                 var result = await FilePicker.Default.PickAsync(new PickOptions
@@ -172,12 +184,20 @@ namespace Scorebook.ViewObjects
 
                 if (result != null)
                 {
-                    _vm.LoadGame(result.FullPath);
+                    var fNameSplit=result.FileName.Split('.');
+                    if (fNameSplit.Length > 1 && fNameSplit[1] == "sbg")
+                    {
+                        _vm.LoadGame(result.FullPath);
+                    }
+                    else
+                    {
+                        await Application.Current.MainPage.DisplayAlert("Error", "Please select a valid sbg file.", "Ok");
+                    }
                 }
             }
             catch (Exception ex)
             {
-                throw;
+                await Application.Current.MainPage.DisplayAlert("Error", "An internal error has occurred", "Ok");
             }
         });
         public ICommand ConfigureGameCommand => new Command(() => IsConfiguringNewGame = true);
@@ -204,6 +224,7 @@ namespace Scorebook.ViewObjects
         private Team? _selectedAwayTeam;
         private bool _isSelectingGameFromSchedule;
         private bool _isConfiguringNewGame;
+        private bool _sendGameUpdates;
         private readonly Dictionary<string, int> _leagueDict = new()
         {
             { "CMBA", 7 },

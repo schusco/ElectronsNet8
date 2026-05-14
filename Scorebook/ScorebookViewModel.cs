@@ -57,7 +57,7 @@ namespace Scorebook
                 InningNumber = _game.IsGameOver ? FinalText : _game.CurrentInning?.Number.ToString() ?? "";
                 OnPropertyChanged(nameof(Game));
                 ShowGameSelectionOptions = false;
-
+                UpdateScoreBoard();
             }
         }
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -422,6 +422,12 @@ namespace Scorebook
                 CurrentPitchStats = new PitchTotals(stats);
             }
         }
+        private void UpdateScoreBoard()
+        {
+            OnPropertyChanged(nameof(CurrentBalls));
+            OnPropertyChanged(nameof(CurrentStrikes));
+            OnPropertyChanged(nameof(CurrentOuts));
+        }
         internal void LoadGame(string loadPath)
         {
             var game = BaseballGame.Load(loadPath);
@@ -481,10 +487,9 @@ namespace Scorebook
                 HomeTeam.MobileText = pitcherText;
                 AwayTeam.MobileText = hitterText;
             }
+            CurrentRbis = 0;
             UpdatePitches();
-            OnPropertyChanged(nameof(CurrentBalls));
-            OnPropertyChanged(nameof(CurrentStrikes));
-            OnPropertyChanged(nameof(CurrentOuts));
+            UpdateScoreBoard();
             OnPropertyChanged(nameof(Game));
             UpdateRunners();
         }
@@ -537,9 +542,7 @@ namespace Scorebook
             ReplaceCurrentAbInLog();
             UpdatePitches();
             OnPropertyChanged(nameof(CurrentAb));
-            OnPropertyChanged(nameof(CurrentBalls));
-            OnPropertyChanged(nameof(CurrentStrikes));
-            OnPropertyChanged(nameof(CurrentOuts));
+            UpdateScoreBoard();
             IsFieldOverlayVisible = false;
         });
         public ICommand SaveCommand => new Command(async () =>
@@ -644,7 +647,7 @@ namespace Scorebook
             foreach (var game in await _apiService.GetSchedule(teamId))
                 GameSelection.Schedule.Add(game);
         }
-
+        
         private BaseballGame? _game;
         private AtBat? _currentAb;
         private ApiService _apiService;

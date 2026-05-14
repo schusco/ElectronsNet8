@@ -160,7 +160,7 @@ namespace Scorebook.Coordinators
             }
             if (add)
                 Game?.UpdateCurrentAbResult(ab, advances);
-            var rbis = advances.OfType<RunScored>().Count();
+            var rbis = advances?.OfType<RunScored>()?.Count() ?? 0;
             ViewModel.CurrentRbis = rbis;
             ViewModel.OnPropertyChanged(nameof(ViewModel.CurrentAb));
             ViewModel.OnPropertyChanged(nameof(ViewModel.CurrentOuts));
@@ -244,6 +244,8 @@ namespace Scorebook.Coordinators
                 }
                 game?.StartGame(ViewModel.GameSelection.SelectedGame?.GameDate ?? DateTime.Today, ViewModel.GameSelection.SelectedGame?.StartDateTime ?? DateTime.Now);
                 ViewModel.IsGameStarted = true;
+                if (ViewModel.GameSelection.SelectedGame is not null)
+                    ViewModel.GameSelection.SelectedGame.SetStartDateTime(game?.StartTime);
                 ViewModel.OnPropertyChanged(nameof(ViewModel.Game));
                 ViewModel.OnPropertyChanged(nameof(ViewModel.Defense));
                 if (!ViewModel.HomeTeam.Lineup.Any())

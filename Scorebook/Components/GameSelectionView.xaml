@@ -47,6 +47,10 @@
                 <Picker ItemsSource="{Binding  Source={x:Reference Root}, Path=Selection.GameScores}" ItemDisplayBinding="{Binding DisplayString}" 
                         SelectedItem="{Binding Source={x:Reference Root}, Path=Selection.SelectedGame}" />
                 <Button Text="Start Game" Command="{Binding Source={x:Reference Root}, Path=Selection.CreateGameFromScheduleCommand}" />
+                <HorizontalStackLayout>
+                    <Label Text="Send Game Updates" Padding="5" VerticalOptions="Center"/>
+                    <CheckBox IsChecked="{Binding Source={x:Reference Root}, Path=Selection.SendGameUpdates}" VerticalOptions="Center" />
+                </HorizontalStackLayout>
             </VerticalStackLayout>
         </Grid>
     </Grid>

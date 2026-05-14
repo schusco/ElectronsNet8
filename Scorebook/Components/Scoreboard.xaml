@@ -16,7 +16,7 @@
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="Auto" ></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <Label Grid.Column="0" Text="{Binding Game.HomeScore}" FontSize="32" Padding="0,0,0,0" TranslationX="5" VerticalOptions="Center" HorizontalOptions="Start" />
+            <Label Grid.Column="0" Text="{Binding Game.HomeScore}" FontSize="32" Padding="0,0,0,0" TranslationX="10" VerticalOptions="Center" HorizontalOptions="Start" />
             <HorizontalStackLayout Spacing="15" Grid.Column="1" HorizontalOptions="Center" >
                 <HorizontalStackLayout Spacing="2" >
                     <Label Text="B" VerticalOptions="Center" FontAttributes="Bold" />
@@ -40,7 +40,7 @@
                 <Image IsVisible="{Binding IsBottomHalfOfInning}" Source="caret_down_fill.png"  WidthRequest="20" HeightRequest="20" BackgroundColor="#F0F0F0" />
                 <Label Text="{Binding InningNumber}" FontSize="Medium" VerticalOptions="Center" Padding="0,0,15,0" HorizontalOptions="End" />
             </HorizontalStackLayout>
-            <Label Grid.Column="3" Text="{Binding Game.AwayScore}" TranslationX="-5" FontSize="32" VerticalOptions="Center" HorizontalOptions="End" />
+            <Label Grid.Column="3" Text="{Binding Game.AwayScore}" TranslationX="-10" FontSize="32" VerticalOptions="Center" HorizontalOptions="End" />
             <Grid Grid.ColumnSpan="4" Grid.Row="1" ColumnDefinitions=".4*,.2*,.4*">
                 <FlexLayout  Wrap="Wrap" Grid.Column="0" Padding="0,0,0,0">
                     <Label  HorizontalOptions="Start" VerticalOptions="Start" Text="{Binding Game.HomeTeam.Name}" Padding="10,0,0,0"  FontSize="12"  IsVisible="{Binding MobileActionTrigger}" />

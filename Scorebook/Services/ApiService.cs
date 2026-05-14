@@ -26,7 +26,7 @@ namespace Scorebook.Services
             if (DateTime.Now < nextSync)
                 games = LoadFromLocalDisk<List<GameScore>>($"schedule_cache_{teamId}.json");
 
-            if (games.Count == 0)
+            if (games is null || games.Count == 0)
             {
                 var response = await LoadFromApi<List<GameScore>>($"/api/teams/{teamId}/games");
                 games = response.Success ? response.Data : new List<GameScore>();
@@ -41,7 +41,8 @@ namespace Scorebook.Services
             var teams = new List<Team>();
             if (DateTime.Now < nextSync)
                 teams = LoadFromLocalDisk<List<Team>>("teams_cache.json");
-            else
+
+            if (teams is null || teams.Count == 0)
             {
                 var response = await LoadFromApi<List<Team>>($"/api/teams");
                 teams = response.Success ? response.Data : new List<Team>();
@@ -68,6 +69,10 @@ namespace Scorebook.Services
                 }
             }
             return roster;
+        }
+        public async Task SendGameUpdate(object sender, GameScoreEventArgs e)
+        {
+            await Task.Delay(500);
         }
         internal async Task<List<CmbaPlayer>> GetRosterFromApi(Team team, bool forceRefresh = false)
         {
