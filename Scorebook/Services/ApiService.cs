@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using ScoreboardApi.Client.Services;
 using ScoreboardApi.Models;
 using Scorebook.ViewObjects;
 using System.Collections.ObjectModel;
@@ -8,17 +10,11 @@ using System.Text.Json;
 
 namespace Scorebook.Services
 {
-    public class ApiService
+    public class ApiService : ServiceBase
     {
-        private readonly IConfiguration _config;
-        private readonly Uri _apiBaseUrl;
         internal static readonly IDictionary<string, List<CmbaPlayer>> ApiRosters = new Dictionary<string, List<CmbaPlayer>>();
         public static ObservableCollection<Team> ApiTeams { get; set; } = [];
-        public ApiService(IConfiguration config)
-        {
-            _config = config;
-            _apiBaseUrl = new Uri(_config.GetValue<string>("ApiBaseUrl"));
-        }
+        public ApiService(IHttpClientFactory factory, IApiService apiService) : base(factory) { }
         public async Task<List<GameScore>> GetSchedule(int teamId)
         {
             DateTime nextSync = Preferences.Default.Get($"ScheduleNextSync_{teamId}", DateTime.MinValue);
@@ -72,7 +68,20 @@ namespace Scorebook.Services
         }
         public async Task SendGameUpdate(object sender, GameScoreEventArgs e)
         {
-            await Task.Delay(500);
+            var client = GetAuthClient();
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            try
+            {
+                var response = await client.PatchAsJsonAsync($"api/games/{e.Game.GameId}", e.Game);
+            }
+            catch (OperationCanceledException)
+            {
+                // Handle timeout or cancellation gracefully            
+            }
+            catch (Exception ex)
+            {
+                var test = 1;
+            }
         }
         internal async Task<List<CmbaPlayer>> GetRosterFromApi(Team team, bool forceRefresh = false)
         {
@@ -94,16 +103,16 @@ namespace Scorebook.Services
         {
             try
             {
-                using (var client = new HttpClient() { BaseAddress = _apiBaseUrl })
+                var client = GetPublicClient();
+
+                var response = await client.GetAsync(endpoint, cancellationToken);
+                if (response.IsSuccessStatusCode)
                 {
-                    var response = await client.GetAsync(endpoint, cancellationToken);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var data = await response.Content.ReadFromJsonAsync<T>(cancellationToken);
-                        return new ApiResponse<T> { Success = true, Data = data };
-                    }
-                    return new ApiResponse<T> { Success = false, Message = "Request failed" };
+                    var data = await response.Content.ReadFromJsonAsync<T>(cancellationToken);
+                    return new ApiResponse<T> { Success = true, Data = data };
                 }
+                return new ApiResponse<T> { Success = false, Message = "Request failed" };
+
             }
             catch (OperationCanceledException)
             {

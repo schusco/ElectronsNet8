@@ -19,7 +19,8 @@ namespace Scorebook
     public class ScorebookViewModel : INotifyPropertyChanged
     {
         public const string FinalText = "Final";
-        public ScorebookViewModel(ApiService apiService, RosterCoordinator rosterCoordinator, GameCoordinator gameCoordinator)
+        private GameUpdateManager _gameManager;
+        public ScorebookViewModel(ApiService apiService, RosterCoordinator rosterCoordinator, GameCoordinator gameCoordinator, GameUpdateManager gameManager)
         {
             WeakReferenceMessenger.Default.Register<PositionChangedMessage>(this, rosterCoordinator.HandlePositionChangedMesage);
             _apiService = apiService;
@@ -28,6 +29,7 @@ namespace Scorebook
             GameSelection = new GameSelection(this);
             ShowGameSelectionOptions = true;
             IsSideBarOpen = true;
+            _gameManager = gameManager;
         }
         public BaseballGame? Game
         {
@@ -62,6 +64,7 @@ namespace Scorebook
         }
         public event PropertyChangedEventHandler? PropertyChanged;
         public GameCoordinator GameCoordinator => _gameCoordinator;
+        public GameUpdateManager GameManager => _gameManager;
         public RosterCoordinator RosterCoordinator => _rosterCoordinator;
         public ApiService ApiService => _apiService;
         public GameSelection GameSelection { get; set; }
@@ -431,7 +434,7 @@ namespace Scorebook
         internal void LoadGame(string loadPath)
         {
             var game = BaseballGame.Load(loadPath);
-            Game = game;
+            Game = game;            
             GameLoaded();
             IsGameStarted = game.IsStarted;
             HomeTeam = new TeamWrapper(this, game.HomeTeam, true);
@@ -552,8 +555,7 @@ namespace Scorebook
             string fileName = $"{Game.HomeTeam.Name}{Game.AwayTeam.Name}{Game.GameDate.ToString("Md")}.sbg";
             if (DeviceInfo.Current.Platform == DevicePlatform.WinUI)
             {
-                string localPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                    "Baseball", DateTime.Now.Year.ToString(), "Game Files", fileName);
+                string localPath = Path.Combine(LocalSavePath, fileName);
                 Game.SaveAs(localPath);
                 await Application.Current.MainPage.DisplayAlert("Saved", "Game progress saved to device.", "OK");
             }
@@ -647,7 +649,7 @@ namespace Scorebook
             foreach (var game in await _apiService.GetSchedule(teamId))
                 GameSelection.Schedule.Add(game);
         }
-        
+        public string LocalSavePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Baseball", DateTime.Now.Year.ToString(), "Game Files");
         private BaseballGame? _game;
         private AtBat? _currentAb;
         private ApiService _apiService;

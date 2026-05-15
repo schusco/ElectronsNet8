@@ -83,6 +83,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Electrons.Core.Net8\Electrons.Core.Net8.csproj" />
+	  <ProjectReference Include="..\External\CmbaLeagueApp\ScoreboardApi.Client\ScoreboardApi.Client.csproj" />
 	  <ProjectReference Include="..\External\CmbaLeagueApp\ScoreboardApi.Models\ScoreboardApi.Models.csproj" />
 	</ItemGroup>
 

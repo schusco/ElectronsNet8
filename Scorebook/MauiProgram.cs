@@ -1,10 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.Logging;
+using ScoreboardApi.Client.Services;
 using Scorebook.Components;
 using Scorebook.Coordinators;
 using Scorebook.Services;
 using System.Reflection;
+using ApiService = Scorebook.Services.ApiService;
 
 namespace Scorebook
 {
@@ -21,6 +23,12 @@ namespace Scorebook
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                     fonts.AddFont("Segoe MDL2 Assets", "SegoeIcon");
                 });
+#if DEBUG
+            string baseAddress = "https://h503cfkn-7249.usw3.devtunnels.ms/";
+#else
+            string baseAddress = "https://webservices.electronsbaseball.com/";
+#endif      
+            builder.Services.AddElectronsApiClients<LocalStorageService>(baseAddress);
             builder.Services.AddSingleton<ApiService>();
             builder.Services.AddTransient<ScorebookViewModel>();
             builder.Services.AddTransient<MainPage>();
@@ -30,22 +38,14 @@ namespace Scorebook
             builder.Services.AddTransient<LineupSidebar>();
             builder.Services.AddTransient<RosterCoordinator>();
             builder.Services.AddTransient<GameCoordinator>();
-            var assembly = Assembly.GetExecutingAssembly();
-            var assemblyName = assembly.GetName().Name;
-            using var stream = assembly.GetManifestResourceStream($"{assemblyName}.appsettings.json");
-            var configBuilder = new ConfigurationBuilder().AddJsonStream(stream);
-                
+            builder.Services.AddSingleton<GameUpdateManager>();
+            var info = new UserInfo { DeviceInfo = $"Game_Engine_{DeviceInfo.Platform}_{DeviceInfo.DeviceType}", PlayerId = Constants.PlayerId };
+            builder.Services.AddSingleton<IUserInfo>(info);            
+
 #if DEBUG
             builder.Logging.AddDebug();
-            using var devStream = assembly.GetManifestResourceStream($"{assemblyName}.appsettings.Development.json");
-            if (devStream != null)
-            {
-                configBuilder.AddJsonStream(devStream);
-            }
-
 #endif
-            var configuration = configBuilder.Build();
-            builder.Configuration.AddConfiguration(configuration);
+            
             return builder.Build();
         }
     }

@@ -1,4 +1,5 @@
-﻿using ScoreboardApi.Models;
+﻿using Electrons.Core.Net8;
+using ScoreboardApi.Models;
 
 namespace Scorebook.ViewObjects
 {
@@ -17,6 +18,9 @@ namespace Scorebook.ViewObjects
         {
             if (startTime.HasValue && !_game.StartDateTime.HasValue)
             {
+                _inningNumber = 1;
+                _halfInning = HalfInning.Top;
+                SetInningStatus();
                 StartDateTime = startTime.Value;
                 _game.StartDateTime = StartDateTime;
                 OnGameScoreUpdated();
@@ -26,8 +30,40 @@ namespace Scorebook.ViewObjects
         {
             GameScoreUpdated?.Invoke(this, new GameScoreEventArgs(_game));
         }
+        private void SetInningStatus()
+        {
+            _game.Status = $"{_halfInning} of {_inningNumber}";
+        }
+        internal void SetNextInning()
+        {
+            if (_halfInning == HalfInning.Top)
+            {
+                _halfInning = HalfInning.Bottom;
+            }
+            else
+            {
+                _halfInning = HalfInning.Top;
+                _inningNumber++;
+            }
+            SetInningStatus();
+            OnGameScoreUpdated();
+        }
+        internal void SetScore(int homeScore, int awayScore)
+        {
+            _game.HomeRuns = homeScore;
+            _game.AwayRuns = awayScore;
+            OnGameScoreUpdated();
+        }
+        internal void SetGameEnded(DateTime? endTime)
+        {
+            _game.Status = "Final";
+            _game.EndDateTime = endTime;
+            OnGameScoreUpdated();
+        }
 
         private readonly GameScore _game = game;
+        private HalfInning _halfInning;
+        private int _inningNumber;
     }
 
     public delegate Task GameScoreUpdateEventHandler(object sender, GameScoreEventArgs e);

@@ -91,7 +91,7 @@ namespace Scorebook.ViewObjects
                 OnPropertyChanged(nameof(SendGameUpdates));
             }
         }
-        public int? GameUpdateId => !SendGameUpdates ? null : SelectedGame?.GameId;
+        public int? GameUpdateId => !SendGameUpdates || !_vm.GameManager.IsLoggedIn ? null : SelectedGame?.GameId;
         public ObservableCollection<Team> FilteredHomeTeams { get; set; } = [];
         public ObservableCollection<Team> FilteredAwayTeams { get; set; } = [];
         public ObservableCollection<string> Leagues { get; set; } = [];
@@ -128,7 +128,7 @@ namespace Scorebook.ViewObjects
                         FilteredAwayTeams.Add(team);
                 }
             }
-        }
+        }        
         public ICommand CreateGameFromScheduleCommand => new Command(async () =>
         {
             var homeLeague = "CMBA";
@@ -141,8 +141,13 @@ namespace Scorebook.ViewObjects
             await _vm.SetTeamsForGame(homeTeam, awayTeam);
             IsSelectingGameFromSchedule = false;
             _vm.GameLoaded();
+            if (SendGameUpdates && !_vm.GameManager.IsLoggedIn)
+                await _vm.GameManager.StartAsync();
             if (GameUpdateId.HasValue)
+            {
                 SelectedGame.GameScoreUpdated += _vm.ApiService.SendGameUpdate;
+                _vm.GameManager.SetSelectedGame(SelectedGame);
+            }
         });
         public ICommand CreateGameCommand => new Command(async () =>
         {
@@ -178,13 +183,13 @@ namespace Scorebook.ViewObjects
                     });
                 var result = await FilePicker.Default.PickAsync(new PickOptions
                 {
-                    PickerTitle = "Select Electrons Game File",
+                    PickerTitle = "Select Game File",
                     FileTypes = customFileType
                 });
 
                 if (result != null)
                 {
-                    var fNameSplit=result.FileName.Split('.');
+                    var fNameSplit = result.FileName.Split('.');
                     if (fNameSplit.Length > 1 && fNameSplit[1] == "sbg")
                     {
                         _vm.LoadGame(result.FullPath);
@@ -197,12 +202,17 @@ namespace Scorebook.ViewObjects
             }
             catch (Exception ex)
             {
-                await Application.Current.MainPage.DisplayAlert("Error", "An internal error has occurred", "Ok");
+                var dInfo = Directory.EnumerateFiles(_vm.LocalSavePath).Where(w => w.EndsWith(".sbg")).ToArray();
+                var displayNames = dInfo.Select(s => Path.GetFileName(s)).ToArray();
+                var fName = await Application.Current.MainPage.DisplayActionSheet("Select File", "Cancel", null, displayNames);
+                if (fName == "Cancel")
+                    return;
+                var index = displayNames.ToList().IndexOf(fName);
+                _vm.LoadGame(dInfo[index]);
             }
         });
         public ICommand ConfigureGameCommand => new Command(() => IsConfiguringNewGame = true);
         public ICommand CloseGameSelectionCommand => new Command(() => IsSelectingGameFromSchedule = IsConfiguringNewGame = false);
-
         public DateTime? EndDateTime
         {
             get

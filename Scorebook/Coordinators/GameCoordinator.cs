@@ -1,4 +1,5 @@
 ﻿using Electrons.Core.Net8;
+using Electrons.Core.Net8.Entities;
 using Electrons.Core.Net8.Games;
 using Scorebook.ViewObjects;
 using System.Collections.ObjectModel;
@@ -29,6 +30,7 @@ namespace Scorebook.Coordinators
             ViewModel.InningNumber = ScorebookViewModel.FinalText;
             ViewModel.IsTopHalfOfInning = false;
             ViewModel.IsBottomHalfOfInning = false;
+            ViewModel.GameManager.SetGameEnded(ViewModel.Game.EndTime);
         }
         internal void InningEnded(object? sender, InningChangeEventArgs e)
         {
@@ -51,11 +53,13 @@ namespace Scorebook.Coordinators
                 ViewModel.AwayTeam.Defense.RefreshPositions(ViewModel.AwayTeam.Lineup);
                 ViewModel.Defense = ViewModel.AwayTeam.Defense;
             }
+            ViewModel.GameManager.SetNextInning();
         }
         internal void ScoreChanged(object? sender, ScoreChangedEventArgs e)
         {
             ViewModel.OnPropertyChanged(nameof(ViewModel.Game.HomeScore));
             ViewModel.OnPropertyChanged(nameof(ViewModel.Game.AwayScore));
+            ViewModel.GameManager.UpdateScore(ViewModel.Game.HomeScore, ViewModel.Game.AwayScore);
         }
         internal void ScoringUpdated(object? sender, EventArgs e)
         {
@@ -245,7 +249,7 @@ namespace Scorebook.Coordinators
                 game?.StartGame(ViewModel.GameSelection.SelectedGame?.GameDate ?? DateTime.Today, ViewModel.GameSelection.SelectedGame?.StartDateTime ?? DateTime.Now);
                 ViewModel.IsGameStarted = true;
                 if (ViewModel.GameSelection.SelectedGame is not null)
-                    ViewModel.GameSelection.SelectedGame.SetStartDateTime(game?.StartTime);
+                    ViewModel.GameManager.SetStartDateTime(game?.StartTime);
                 ViewModel.OnPropertyChanged(nameof(ViewModel.Game));
                 ViewModel.OnPropertyChanged(nameof(ViewModel.Defense));
                 if (!ViewModel.HomeTeam.Lineup.Any())
