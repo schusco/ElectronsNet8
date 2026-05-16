@@ -13,9 +13,11 @@ namespace Electrons.Net8.Models
 
         public MainModel(Repository repo, GameSettings settings, IWebHostEnvironment env, GameScore apiData, List<ScoreboardApi.Models.StandingsRow> standings = null)
         {
+            TimeZoneInfo cst = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
+            var cstTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, cst);
             JumboText = settings.JumboText;
-            var nextOutingTime = DateTime.Now.AddHours(-3);
-            var lastOuting = repo.GetNextOuting(DateTime.Now.AddHours(-12));
+            var nextOutingTime = cstTime.AddHours(-3);
+            var lastOuting = repo.GetNextOuting(cstTime.AddHours(-12));
             var nextOuting = repo.GetNextOuting(nextOutingTime);
             if (nextOuting != null)
             {
