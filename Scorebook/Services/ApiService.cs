@@ -73,11 +73,12 @@ namespace Scorebook.Services
             try
             {
                 var response = await client.PatchAsJsonAsync($"api/games/{e.Game.GameId}", e.Game);
+                var test = response.StatusCode.ToString();
             }
             catch (OperationCanceledException)
             {
                 // Handle timeout or cancellation gracefully            
-            }            
+            }
         }
         internal async Task<List<CmbaPlayer>> GetRosterFromApi(Team team, bool forceRefresh = false)
         {

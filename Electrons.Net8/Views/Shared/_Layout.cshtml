@@ -146,6 +146,8 @@
             const homeScoreEl = document.getElementById(`score-home-${game.gameId}`);
             const awayScoreEl = document.getElementById(`score-away-${game.gameId}`);
             const inningEl = document.getElementById(`score-inning-${game.gameId}`);
+            const upCaret = document.getElementById("caret-up");
+            const downCaret = document.getElementById("caret-down");
             if (homeScoreEl && awayScoreEl) {
                 // 2. Update the text (This is your "Binding")
                 homeScoreEl.innerText = game.homeRuns;
@@ -153,7 +155,21 @@
                 if (game.status=="Scheduled") {
                     inningEl.innerText = 'In Progress';
                 } else {
-                    inningEl.innerText = game.status;
+                    const pattern=/^(Top|Bottom) of (\d+)$/;
+                    const match=game.status.match(pattern);
+                    if (match){
+                        console.log(match);
+                        const inningHalf=match[1];
+                        console.log(inningHalf);
+                        inningEl.innerText = match[2];
+                        if (inningHalf === "Top"){
+                            upCaret?.classList.remove("d-none");
+                            downCaret?.classList.add("d-none");
+                        } else if (inningHalf === "Bottom"){
+                            downCaret?.classList.remove("d-none");
+                            upCaret?.classList.add("d-none");
+                        }
+                    }
                 }
                 // 3. Add your CSS "Pop" animation
                 const card = document.getElementById(`game-${game.gameId}`);

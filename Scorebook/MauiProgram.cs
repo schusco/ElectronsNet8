@@ -24,7 +24,7 @@ namespace Scorebook
                     fonts.AddFont("Segoe MDL2 Assets", "SegoeIcon");
                 });
 #if DEBUG
-            string baseAddress = "https://h503cfkn-7249.usw3.devtunnels.ms/";
+            string baseAddress = "https://webservices.electronsbaseball.com/";
 #else
             string baseAddress = "https://webservices.electronsbaseball.com/";
 #endif                  
