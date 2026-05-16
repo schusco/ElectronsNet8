@@ -92,7 +92,8 @@
             $('#statsCollapse').on('show.bs.collapse', function () {
                 $('#toggleTrendsButton').text('Hide Trends');
             });
-
+            const currentTime = new Date().toLocaleTimeString();
+console.log(currentTime);
             // When the section starts to close
             $('#statsCollapse').on('hide.bs.collapse', function () {
                 $('#toggleTrendsButton').text('View Trends');
@@ -158,9 +159,7 @@
                     const pattern=/^(Top|Bottom) of (\d+)$/;
                     const match=game.status.match(pattern);
                     if (match){
-                        console.log(match);
                         const inningHalf=match[1];
-                        console.log(inningHalf);
                         inningEl.innerText = match[2];
                         if (inningHalf === "Top"){
                             upCaret?.classList.remove("d-none");
