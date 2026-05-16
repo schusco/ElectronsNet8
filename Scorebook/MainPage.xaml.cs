@@ -1,16 +1,20 @@
-﻿using Scorebook.Services;
+﻿using CommunityToolkit.Maui.Views;
+using CommunityToolkit.Maui;
+using Scorebook.Services;
+using System.Threading.Tasks;
+using CommunityToolkit.Maui.Extensions;
+using Scorebook.Components;
 
 namespace Scorebook
 {
     public partial class MainPage : ContentPage
     {
         private ScorebookViewModel _vm;
-        private ApiService _apiService;
-        public MainPage(ScorebookViewModel vm, ApiService apiService)
+
+        public MainPage(ScorebookViewModel vm)
         {
             InitializeComponent();
             _vm = vm;
-            _apiService = apiService;
             BindingContext = _vm;
         }
         protected override async void OnAppearing()
@@ -125,7 +129,6 @@ namespace Scorebook
         private void SideBarToggle_Tapped(object sender, TappedEventArgs e)
         {
             Reallocate();
-        }
-
+        }        
     }
 }

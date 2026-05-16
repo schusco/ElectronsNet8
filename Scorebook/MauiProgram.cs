@@ -5,7 +5,7 @@ using ScoreboardApi.Client.Services;
 using Scorebook.Components;
 using Scorebook.Coordinators;
 using Scorebook.Services;
-using System.Reflection;
+using CommunityToolkit.Maui;
 using ApiService = Scorebook.Services.ApiService;
 
 namespace Scorebook
@@ -16,7 +16,7 @@ namespace Scorebook
         {
             var builder = MauiApp.CreateBuilder();
             builder
-                .UseMauiApp<App>()
+                .UseMauiApp<App>().UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -27,7 +27,7 @@ namespace Scorebook
             string baseAddress = "https://h503cfkn-7249.usw3.devtunnels.ms/";
 #else
             string baseAddress = "https://webservices.electronsbaseball.com/";
-#endif      
+#endif                  
             builder.Services.AddElectronsApiClients<LocalStorageService>(baseAddress);
             builder.Services.AddSingleton<ApiService>();
             builder.Services.AddTransient<ScorebookViewModel>();

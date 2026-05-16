@@ -92,6 +92,20 @@ namespace Scorebook.ViewObjects
             }
         }
         public int? GameUpdateId => !SendGameUpdates || !_vm.GameManager.IsLoggedIn ? null : SelectedGame?.GameId;
+        public DateTime? EndDateTime
+        {
+            get
+            {
+                if (SelectedGame is not null)
+                    return SelectedGame.EndDateTime;
+                var game = Schedule.FirstOrDefault(s => s.HomeTeam?.Name == _vm.Game.HomeTeam.Name && s.AwayTeam.Name == _vm.Game?.AwayTeam.Name);
+                if (game is not null)
+                    return game.EndDateTime;
+                return null;
+
+            }
+        }
+        public bool IsGameStarted => _vm.IsGameStarted;
         public ObservableCollection<Team> FilteredHomeTeams { get; set; } = [];
         public ObservableCollection<Team> FilteredAwayTeams { get; set; } = [];
         public ObservableCollection<string> Leagues { get; set; } = [];
@@ -213,19 +227,9 @@ namespace Scorebook.ViewObjects
         });
         public ICommand ConfigureGameCommand => new Command(() => IsConfiguringNewGame = true);
         public ICommand CloseGameSelectionCommand => new Command(() => IsSelectingGameFromSchedule = IsConfiguringNewGame = false);
-        public DateTime? EndDateTime
-        {
-            get
-            {
-                if (SelectedGame is not null)
-                    return SelectedGame.EndDateTime;
-                var game = Schedule.FirstOrDefault(s => s.HomeTeam?.Name == _vm.Game.HomeTeam.Name && s.AwayTeam.Name == _vm.Game?.AwayTeam.Name);
-                if (game is not null)
-                    return game.EndDateTime;
-                return null;
-
-            }
-        }
+        public ICommand SaveCommand => new Command(async () => await _vm.GameCoordinator.SaveGame(_vm.Game));
+        public ICommand EndGameCommand => new Command(() => _vm.Game.EndGame());
+        
 
         private readonly ScorebookViewModel _vm = vm;
         private string? _selectedHomeLeague = "CMBA";

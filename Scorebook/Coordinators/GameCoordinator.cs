@@ -1,5 +1,4 @@
 ﻿using Electrons.Core.Net8;
-using Electrons.Core.Net8.Entities;
 using Electrons.Core.Net8.Games;
 using Scorebook.ViewObjects;
 using System.Collections.ObjectModel;
@@ -440,6 +439,31 @@ namespace Scorebook.Coordinators
         {
             return await Shell.Current.DisplayAlert("Earned Run", $"Errors occurred this inning, charge {runner.DisplayName}'s run as earned?", "Yes", "No");
         }
+
+        internal async Task SaveGame(BaseballGame game)
+        {
+            if (game is null)
+                return;
+            string fileName = $"{game.HomeTeam.Name}{game.AwayTeam.Name}{game.GameDate.ToString("Md")}.sbg";
+            if (DeviceInfo.Current.Platform == DevicePlatform.WinUI)
+            {
+                string localPath = Path.Combine(ViewModel.LocalSavePath, fileName);
+                game.SaveAs(localPath);
+                await Application.Current.MainPage.DisplayAlert("Saved", "Game progress saved to device.", "OK");
+            }
+            else
+            {
+                string mainDir = FileSystem.CacheDirectory;
+                var filePath = Path.Combine(mainDir, fileName);
+                game.SaveAs(filePath);
+                await Share.Default.RequestAsync(new ShareFileRequest
+                {
+                    Title = "Upload Game To Cloud",
+                    File = new ShareFile(filePath, "text/plain")
+                });
+            }
+        }
+
         private readonly string[] _runnerMenuOptions = [
             "Advance Runner",
             "Runner Advanced On Throw",

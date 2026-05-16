@@ -10,6 +10,8 @@
                 <Button Text="Start New Game" Command="{Binding Source={x:Reference Root}, Path=Selection.ConfigureGameCommand}" />
                 <Button Text="Select From Schedule" Command="{Binding Source={x:Reference Root}, Path=Selection.SelectFromScheduleCommand}" />
                 <Button Text="Load Game from File" Command="{Binding Source={x:Reference Root}, Path=Selection.LoadGameCommand}" />
+                <Button Text="Save Game" Command="{Binding Source={x:Reference Root}, Path=Selection.SaveCommand}" IsVisible="{Binding Source={x:Reference Root}, Path=Selection.IsGameStarted}" />
+                <Button Text="End Game" Command="{Binding Source={x:Reference Root}, Path=Selection.EndGameCommand}" IsVisible="{Binding Source={x:Reference Root}, Path=Selection.IsGameStarted}" />
             </VerticalStackLayout>
             <VerticalStackLayout x:Name="GameConfiguration" ZIndex="110" Spacing="15" Grid.Column="2"  Padding="10,0,25,10"
                                  IsVisible="{Binding Source={x:Reference Root}, Path=Selection.IsConfiguringNewGame}" BackgroundColor="White">

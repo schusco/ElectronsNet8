@@ -77,11 +77,7 @@ namespace Scorebook.Services
             catch (OperationCanceledException)
             {
                 // Handle timeout or cancellation gracefully            
-            }
-            catch (Exception ex)
-            {
-                var test = 1;
-            }
+            }            
         }
         internal async Task<List<CmbaPlayer>> GetRosterFromApi(Team team, bool forceRefresh = false)
         {

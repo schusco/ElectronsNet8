@@ -149,6 +149,7 @@ namespace Scorebook
                     OnPropertyChanged(nameof(IsGameStarted));
                     OnPropertyChanged(nameof(NextBatterText));
                     OnPropertyChanged(nameof(ShowFieldPositionLinks));
+                    GameSelection.OnPropertyChanged(nameof(IsGameStarted));
                 }
             }
         }
@@ -434,7 +435,7 @@ namespace Scorebook
         internal void LoadGame(string loadPath)
         {
             var game = BaseballGame.Load(loadPath);
-            Game = game;            
+            Game = game;
             GameLoaded();
             IsGameStarted = game.IsStarted;
             HomeTeam = new TeamWrapper(this, game.HomeTeam, true);
@@ -547,30 +548,7 @@ namespace Scorebook
             OnPropertyChanged(nameof(CurrentAb));
             UpdateScoreBoard();
             IsFieldOverlayVisible = false;
-        });
-        public ICommand SaveCommand => new Command(async () =>
-        {
-            if (Game is null)
-                return;
-            string fileName = $"{Game.HomeTeam.Name}{Game.AwayTeam.Name}{Game.GameDate.ToString("Md")}.sbg";
-            if (DeviceInfo.Current.Platform == DevicePlatform.WinUI)
-            {
-                string localPath = Path.Combine(LocalSavePath, fileName);
-                Game.SaveAs(localPath);
-                await Application.Current.MainPage.DisplayAlert("Saved", "Game progress saved to device.", "OK");
-            }
-            else
-            {
-                string mainDir = FileSystem.CacheDirectory;
-                var filePath = Path.Combine(mainDir, fileName);
-                Game.SaveAs(filePath);
-                await Share.Default.RequestAsync(new ShareFileRequest
-                {
-                    Title = "Upload Game To Cloud",
-                    File = new ShareFile(filePath, "text/plain")
-                });
-            }
-        });
+        });        
         public ICommand SendRunnerBackCommand => new Command(() =>
         {
             CurrentAb.UndoRunScored();

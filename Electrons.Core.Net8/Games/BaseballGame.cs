@@ -830,8 +830,8 @@ namespace Electrons.Core.Net8.Games
         }
         public void EndGame(DateTime? endTime = null)
         {
-            if (CurrentAb.Result is null || CurrentAb.Result.GetType() == typeof(UnfinshedAb))
-                CurrentInning.RemoveLastAb();
+            if (CurrentAb?.Result is null || CurrentAb.Result.GetType() == typeof(UnfinshedAb))
+                CurrentInning?.RemoveLastAb();
             OnGameEnded(endTime: endTime);
         }
         public void UpdateUnknownHitter(Player newBatter, HalfInning half)

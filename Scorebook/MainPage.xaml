@@ -10,10 +10,9 @@
              x:Class="Scorebook.MainPage"
              x:Name="Page" Padding="0">    
     <Shell.TitleView>
-        <Grid ColumnDefinitions="*, Auto,Auto">
-            <Label Text="Baseball Scorekeeper" VerticalOptions="Center" FontAttributes="Bold" />
-            <Button Grid.Column="1" Text="Save Game" Command="{Binding SaveCommand}" BackgroundColor="Transparent" TextColor="Black" Margin="0,0,10,0" />
-            <Button Grid.Column="2" Text="Select Game" Command="{Binding ToggleGameSelectionCommand}" BackgroundColor="Transparent" TextColor="Black" Margin="0,0,10,0" />
+        <Grid ColumnDefinitions="*, Auto">
+            <Label Text="Baseball Scorekeeper" VerticalOptions="Center" Margin="5,0,5,0" FontAttributes="Bold" />
+            <Button x:Name="MenuAnchor" Grid.Column="1" Text="Game Actions" Command="{Binding ToggleGameSelectionCommand}" TextColor="Black" BackgroundColor="Transparent" VerticalOptions="Center"/>
         </Grid>
     </Shell.TitleView>
     <Grid RowDefinitions="*" ColumnSpacing="10">
