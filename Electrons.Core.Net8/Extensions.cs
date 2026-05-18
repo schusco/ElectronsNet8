@@ -20,7 +20,6 @@ namespace Electrons.Core.Net8
         {
             return $"{input[0].ToString().ToUpper()}{input.Substring(1, input.Length - 1).ToLower()}";
         }
-
         public static string ReplaceLast(this string input, string oldValue, string newValue)
         {
             var place = input.LastIndexOf(oldValue, StringComparison.Ordinal);
@@ -317,6 +316,11 @@ namespace Electrons.Core.Net8
                     dup.Player.SetDuplicate();
                 }
             }
+        }
+        public static DateTime Actual(this DateTime input)
+        {
+            TimeZoneInfo cst = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
+            return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, cst);
         }
     }
 

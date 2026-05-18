@@ -1,4 +1,5 @@
-﻿using Electrons.Core.Net8.Infrastructure;
+﻿using Electrons.Core.Net8;
+using Electrons.Core.Net8.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using ScoreboardApi.Models;
 using System;
@@ -13,15 +14,14 @@ namespace Electrons.Net8.Models
 
         public MainModel(Repository repo, GameSettings settings, IWebHostEnvironment env, GameScore apiData, List<ScoreboardApi.Models.StandingsRow> standings = null)
         {
-            TimeZoneInfo cst = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
-            var cstTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, cst);
+            
             JumboText = settings.JumboText;
-            var nextOutingTime = cstTime.AddHours(-3);
-            var lastOuting = repo.GetNextOuting(cstTime.AddHours(-12));
+            var nextOutingTime = DateTime.Now.Actual().AddHours(-3);
+            var lastOuting = repo.GetNextOuting(DateTime.Now.Actual().AddHours(-12));
             var nextOuting = repo.GetNextOuting(nextOutingTime);
             if (nextOuting != null)
             {
-                if (nextOuting.GameDate.Date == DateTime.Today && nextOutingTime < DateTime.Now)
+                if (nextOuting.GameDate.Date == DateTime.Now.Actual().Date && nextOutingTime < DateTime.Now.Actual())
                     NextGameInProgress = true;
                 if (nextOuting.GameFile != null)
                     NextGameRecap = true;

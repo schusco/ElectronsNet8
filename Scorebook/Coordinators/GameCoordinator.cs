@@ -439,7 +439,6 @@ namespace Scorebook.Coordinators
         {
             return await Shell.Current.DisplayAlert("Earned Run", $"Errors occurred this inning, charge {runner.DisplayName}'s run as earned?", "Yes", "No");
         }
-
         internal async Task SaveGame(BaseballGame game)
         {
             if (game is null)

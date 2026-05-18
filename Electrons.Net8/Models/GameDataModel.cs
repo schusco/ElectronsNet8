@@ -12,11 +12,11 @@ namespace Electrons.Net8.Models
         public int Hscore { get; set; }
         public int Ascore { get; set; }
         public string HvInd => HV == HV.V ? "@" : "vs.";
-        public bool Finished => GameDate <= DateTime.Now && (Hscore > 0 || Ascore > 0);
+        public bool Finished => GameDate <= DateTime.Now.Actual() && (Hscore > 0 || Ascore > 0);
         public DateTime GameDate { get; set; }
         public string OpponentLogo => HV == HV.V ? GetHomeLogo() : GetAwayLogo();
-        public string GameDescr => GameDate >= DateTime.Now ? ShortGameString : Opponent;            
-        public virtual string GameText => $"{HvInd} {(GameDate >= DateTime.Now ? ShortGameString : Opponent)}";
+        public string GameDescr => GameDate >= DateTime.Now.Actual() ? ShortGameString : Opponent;            
+        public virtual string GameText => $"{HvInd} {(GameDate >= DateTime.Now.Actual() ? ShortGameString : Opponent)}";
         private string ShortGameString { get; set; }
         public string Opponent { get; set; }
         public HV HV { get; set; }

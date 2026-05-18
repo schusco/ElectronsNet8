@@ -1,4 +1,5 @@
-﻿using Electrons.Net8.Models;
+﻿using Electrons.Core.Net8;
+using Electrons.Net8.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,7 @@ namespace Electrons.Net8.Controllers
         public async Task<ActionResult> Index()
         {
             List<StandingsRow> standings = null;
-            List<GameScore> apiData = await _client.GetFromJsonAsync<List<GameScore>>($"{GameSettings.BaseApiUrl}api/Games/getbydate/{DateTime.Now:yyyy-MM-dd}");
+            List<GameScore> apiData = await _client.GetFromJsonAsync<List<GameScore>>($"{GameSettings.BaseApiUrl}api/Games/getbydate/{DateTime.Now.Actual():yyyy-MM-dd}");
             try
             {
                 if (GameSettings.UseApiForStandings)

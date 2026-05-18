@@ -96,6 +96,9 @@ namespace Electrons.Net8.Models
                 CellCss = "awayGame";
             if (Events.Any())
                 CellCss = "eventCss";
+
+            if (DayOfMonth == DateTime.Now.Actual().Day && Month == DateTime.Now.Actual().Month && Year == DateTime.Now.Actual().Year)
+                CurrentDayCss = "currentDay";
         }
         public int DayOfMonth { get; set; }
         public IEnumerable<GameDataModel> Games { get; set; }
@@ -104,5 +107,6 @@ namespace Electrons.Net8.Models
         public int Year { get; set; }
         public int Month { get; set; }
         public string CellCss { get; set; }
+        public string CurrentDayCss { get; set; } = "regular";
     }
 }

@@ -431,6 +431,8 @@ namespace Scorebook
             OnPropertyChanged(nameof(CurrentBalls));
             OnPropertyChanged(nameof(CurrentStrikes));
             OnPropertyChanged(nameof(CurrentOuts));
+            HomeTeam?.OnPropertyChanged(nameof(HomeTeam.MobileText));
+            AwayTeam?.OnPropertyChanged(nameof(AwayTeam.MobileText));
         }
         internal void LoadGame(string loadPath)
         {
@@ -527,6 +529,7 @@ namespace Scorebook
             Game.PreviousAtBat();
             CurrentAb = Game.CurrentAb;
             InningEvents.RemoveAt(0);
+            LinkAb();
         });
         public ICommand TogglePitchesCommand => new RelayCommand(() => IsPitchesPanelVisible = !IsPitchesPanelVisible);
         public ICommand NextBatterCommand => new Command(async () => await _gameCoordinator.NextBatter(Game));

@@ -3,13 +3,7 @@
 @model ScheduleDayModel
 
 @{
-    string css = "regular";
-    if (Model.DayOfMonth == DateTime.Now.Day && Model.Month == DateTime.Now.Month && Model.Year == DateTime.Now.Year)
-    {
-        css = "currentDay";
-    }
-
-    <div class="@css">@Model.DayOfMonth</div>
+    <div class="@Model.CurrentDayCss">@Model.DayOfMonth</div>
     foreach (var game in Model.Games)
     {
         if (game.Finished)

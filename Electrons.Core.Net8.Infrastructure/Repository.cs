@@ -691,7 +691,6 @@ namespace Electrons.Core.Net8.Infrastructure
                 .ToDictionary(k => k.Key, v => v.OrderBy(o => o.Rank).ToList());
         }
         public IList<T> GetHistory<T>() where T : HistoryRow => Session.QueryOver<T>().OrderBy(o => o.Id).Asc.List();
-
         public IList<ManagerHistory> GetManagers()
         {
             var records = Session.CreateSQLQuery("SELECT * FROM managerrecords where Manager!='Total' order by Years")
@@ -713,7 +712,6 @@ namespace Electrons.Core.Net8.Infrastructure
 
             return records;
         }
-
         public IList<ResultsHistory> GetResults() => Session.CreateSQLQuery("SELECT * FROM RecordHistory order by Year").List<object[]>().Select(ResultsHistory.Create).ToList();
         public IList<PlayoffHistory> GetPlayoffs() => Session.CreateSQLQuery("SELECT * FROM playoffhistory order by Year").List<object[]>().Select(PlayoffHistory.Create).ToList();
         public IEnumerable<GameData> GetGamesByMonth(int month, int year) => Session.QueryOver<GameData>().Where(Restrictions.Eq(NhProjections.Year<GameData>(g => g.GameDate), year))
@@ -742,7 +740,6 @@ namespace Electrons.Core.Net8.Infrastructure
                 return false;
             }
         }
-
         public async Task<DateTime> GetStatsLastUpdatedAsync()
         {
             var p = await Session.GetAsync<PlayerProfile>(0);
@@ -780,7 +777,6 @@ namespace Electrons.Core.Net8.Infrastructure
                 _cancellationTokenSource = new CancellationTokenSource();
             }
         }
-
         public async Task<IList<YearlySummary>> GetHistoricalTrendsAsync(int startYear)
         {
             YearlySummary model = null;
@@ -817,7 +813,6 @@ namespace Electrons.Core.Net8.Infrastructure
                 .ListAsync<YearlySummary>();
             return summaries;
         }
-
         public bool CreateDepthChart(DepthChartDto dto)
         {
             return WrapInTryCatch(() =>
@@ -826,7 +821,6 @@ namespace Electrons.Core.Net8.Infrastructure
                 Session.Save(dc);
             });
         }
-
         public bool UpdateDepthChart(List<DepthChartDto> dtos)
         {
             return WrapInTryCatch(() =>
@@ -843,7 +837,6 @@ namespace Electrons.Core.Net8.Infrastructure
                 }
             });
         }
-
         public bool DeleteDepthChart(int id)
         {
             return WrapInTryCatch(() =>

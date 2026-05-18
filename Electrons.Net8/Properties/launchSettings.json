@@ -27,9 +27,10 @@
     },
     "Production": {
       "commandName": "Project",
+      "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Production",
-        "GameSettings__DefaultConnection__Password": "<ULTRA SECRET PASSWORD>"
+        "GameSettings__DefaultConnection__Password": "SuckMyB@11s!"
       }
     }
   },

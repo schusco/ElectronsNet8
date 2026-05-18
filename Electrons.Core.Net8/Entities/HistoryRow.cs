@@ -53,7 +53,7 @@ namespace Electrons.Core.Net8.Entities
                 if (!int.TryParse(YearStart, out int startYear))
                     startYear = 2003;
                 if (!int.TryParse(YearEnd, out int endYear))
-                    endYear = DateTime.Now.Year;
+                    endYear = DateTime.Now.Actual().Year;
                 var startDate = new DateTime(startYear, 1, 1);
                 var endDate = new DateTime(endYear, 1, 2);
                 var span = endDate - startDate;
