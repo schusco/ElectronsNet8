@@ -9,13 +9,6 @@ namespace Scorebook.Services
 {
     public class LocalStorageService : IAuthStorageService
     {
-        public bool ClearToken()
-        {
-            _apiToken = null;
-            _refreshToken = null;
-            return true;
-        }
-
         public async Task<string?> GetRefreshTokenAsync() => await Task.FromResult(_refreshToken);
 
         public async Task<string?> GetTokenAsync() => await Task.FromResult(_apiToken);
@@ -31,6 +24,14 @@ namespace Scorebook.Services
             _apiToken = token;
             return Task.CompletedTask;
         }
+
+        public Task ClearTokenAsync()
+        {
+            _apiToken = null;
+            _refreshToken = null;
+            return Task.CompletedTask;
+        }
+
         private string? _apiToken;
         private string? _refreshToken;
     }

@@ -2,7 +2,6 @@
 using Electrons.Core.Net8.Entities;
 using Electrons.Core.Net8.Games;
 using Electrons.Core.Net8.Infrastructure;
-using Google.Protobuf.WellKnownTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +30,13 @@ namespace Electrons.Net8.Models
             Fill(fullGame, gameDate, location, seasonStats);
             HomeBox = BoxScore.Create(fullGame.HomeTeamHitting, fullGame.HomeTeamPitching, fullGame.HomeTeam, seasonStats);
             AwayBox = BoxScore.Create(fullGame.AwayTeamHitting, fullGame.AwayTeamPitching, fullGame.AwayTeam, seasonStats);
+        }
+        public LiveGameModel(GameData game, Repository repo) : this()
+        {
+            var seasonStats = repo.GetSeasonHittingStats(game.GameDate.Year, game.Playoff, game.GameDate);
+            Fill(game.FullGame, game.GameDate, game.Location);
+            HomeBox = HomeBoxScore.Create(game, seasonStats);
+            AwayBox = AwayBoxScore.Create(game, seasonStats);
         }
         private void Fill(BaseballGame fullGame, DateTime gameDate, Location location, List<HittingStatsRow> seasonStats = null)
         {
@@ -108,13 +114,6 @@ namespace Electrons.Net8.Models
                 ScoringPlays.Add(scoreStack.Pop());
             Pitches = fullGame.CurrentAb.Pitches.Select(s => s.ToString()).ToList();
         }
-        public LiveGameModel(GameData game, Repository repo) : this()
-        {
-            var seasonStats = repo.GetSeasonHittingStats(game.GameDate.Year, game.Playoff, game.GameDate);
-            Fill(game.FullGame, game.GameDate, game.Location);
-            HomeBox = HomeBoxScore.Create(game, seasonStats);
-            AwayBox = AwayBoxScore.Create(game, seasonStats);
-        }
         public string DateString { get; set; }
         public IList<string> PreviousAbs { get; set; }
         public IList<string> Pitches { get; set; }
@@ -127,7 +126,6 @@ namespace Electrons.Net8.Models
         public int Balls { get; set; }
         public int Strikes { get; set; }
         public int Outs { get; set; }
-        public string RelativePath { get; set; }
         public string Title { get; private set; }
         public int HomeScore { get; private set; }
         public int AwayScore { get; private set; }
@@ -148,8 +146,8 @@ namespace Electrons.Net8.Models
         public HalfInning InningHalf { get; private set; }
         public List<int> HomeInnings { get; private set; }
         public List<int> AwayInnings { get; private set; }
-        public BoxScore HomeBox { get; set; }
-        public BoxScore AwayBox { get; set; }
+        public BoxScore HomeBox { get; private set; }
+        public BoxScore AwayBox { get; private set; }
         public Player CurrentPitcher { get; private set; }
         public Player CurrentHitter { get; private set; }
         public string AbString { get; private set; }
@@ -186,10 +184,7 @@ namespace Electrons.Net8.Models
     {
         public HomeBoxScore(GameData game, List<HittingStatsRow> seasonStats)
         {
-            if (game.HV == HV.H)
-                HittingBox = new HittingBoxScore(game, seasonStats);
-            else
-                HittingBox = new HittingBoxScore(game.FullGame.HomeTeamHitting, new List<HittingStatsRow>());
+            HittingBox = new HittingBoxScore(game.FullGame.HomeTeamHitting, new List<HittingStatsRow>());
             PitchingBox = new PitchingBoxScore(game.FullGame.HomeTeamPitching);
             RispAb = game.FullGame.HomeRisp.Abs;
             RispH = game.FullGame.HomeRisp.Hits;
@@ -204,7 +199,7 @@ namespace Electrons.Net8.Models
         public AwayBoxScore(GameData game, List<HittingStatsRow> seasonStats)
         {
             if (game.HV == HV.V)
-                HittingBox = new HittingBoxScore(game,seasonStats);
+                HittingBox = new HittingBoxScore(game, seasonStats);
             else
                 HittingBox = new HittingBoxScore(game.FullGame.AwayTeamHitting, new List<HittingStatsRow>());
             PitchingBox = new PitchingBoxScore(game.FullGame.AwayTeamPitching);
@@ -226,8 +221,6 @@ namespace Electrons.Net8.Models
         internal HittingBoxScore(GameData game, List<HittingStatsRow> seasonStats) : this()
         {
             Stats = [.. game.HittingStats.Select(HStats.Create)];
-
-            //SeasonStats = [.. game.HittingStats.Select(s => HittingStatsRow.Sum(s.Profile.SeasonHittingTo(game.GameDate)))];
             SeasonStats = seasonStats;
         }
         public HittingBoxScore(List<HStats> hitting, List<HittingStatsRow> stats)

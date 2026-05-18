@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 
 
 namespace Electrons.Core.Net8.Games
@@ -59,6 +60,20 @@ namespace Electrons.Core.Net8.Games
         public string OpsFormatted => OPS.GetValueOrDefault().ToString("#.000");
         public decimal? OPS => Utilities.CalculateOps(OBP.GetValueOrDefault(), SLG.GetValueOrDefault());
         public override string ToString() => $"{Player.LastName}: {BA?.ToString("f3")}/{OBP?.ToString("f3")}/{SLG?.ToString("f3")}";
+        internal void UpdateFromAbList(List<AtBat> abs)
+        {
+            AB = abs.Sum(s => s?.Result?.Ab ?? 0);
+            H = abs.Sum(s => s?.Result?.Hits ?? 0);
+            Doubles = abs.Sum(s => s?.Result?.Doubles ?? 0);
+            Triples = abs.Sum(s => s?.Result?.Triples ?? 0);
+            BB = abs.Sum(s => s?.Result?.Walks ?? 0);
+            HR = abs.Sum(s => s?.Result?.HomeRuns ?? 0);
+            RBI = abs.Sum(s => s?.RunsBattedIn ?? 0);
+            HBP = abs.Sum(s => s?.Result?.Hbp ?? 0);
+            SAC = abs.Sum(s => s?.Result?.Sac ?? 0);
+            SF = abs.Sum(s => s?.Result?.SacFly ?? 0);
+            K = abs.Sum(s => s?.Result?.StrikeOuts ?? 0);
+        }
         internal static HStats Sum(IEnumerable<HStats> input)
         {
             return new HStats
@@ -84,21 +99,12 @@ namespace Electrons.Core.Net8.Games
 
         internal static HStats Create(IGrouping<Player, AtBat> abs)
         {
-            return new HStats
+            var stats= new HStats
             {
-                Player = abs.Key,
-                AB = abs.Sum(s => s?.Result?.Ab ?? 0),
-                H = abs.Sum(s => s?.Result?.Hits ?? 0),
-                Doubles = abs.Sum(s => s?.Result?.Doubles ?? 0),
-                Triples = abs.Sum(s => s?.Result?.Triples ?? 0),
-                BB = abs.Sum(s => s?.Result?.Walks ?? 0),
-                HR = abs.Sum(s => s?.Result?.HomeRuns ?? 0),
-                RBI = abs.Sum(s => s?.RunsBattedIn ?? 0),
-                HBP = abs.Sum(s => s?.Result?.Hbp ?? 0),
-                SAC = abs.Sum(s => s?.Result?.Sac ?? 0),
-                SF = abs.Sum(s => s?.Result?.SacFly ?? 0),
-                K = abs.Sum(s => s?.Result?.StrikeOuts ?? 0)
+                Player = abs.Key                
             };
+            stats.UpdateFromAbList(abs.ToList());
+            return stats;
         }
         internal static HStats Create(HittingStatsRow hitter)
         {
@@ -163,5 +169,6 @@ namespace Electrons.Core.Net8.Games
                 Triples = stats.Triples
             };
         }
+        
     }
 }

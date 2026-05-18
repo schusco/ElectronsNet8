@@ -119,10 +119,20 @@ namespace Electrons.Core.Net8.Games
             var tb = home ? HalfInning.Bottom : HalfInning.Top;
             var team = home ? HomeTeam : AwayTeam;
             var innings = Innings.Where(w => w.Half == tb);
-            var abs = innings.SelectMany(s => s.Events);
+            var abs = innings.SelectMany(s => s.Events).ToList();
             if (filter != null)
-                abs = abs.Where(filter);
-            var hitStats = abs.GroupBy(g => g.Batter).Select(HStats.Create).ToList();
+                abs = abs.Where(filter).ToList();
+            var hitStats = team.Lineup.Select(HStats.Create).ToList();
+            foreach (var abList in abs.GroupBy(g => g.Batter))
+            {
+                var stat = hitStats.SingleOrDefault(s => s.Player == abList.Key);
+                if ( stat is null)
+                {
+                    stat = HStats.Create(abList.Key);
+                    hitStats.Add(stat);
+                }
+                stat.UpdateFromAbList(abList.ToList());
+            }            
             var runEv = abs.SelectMany(s => s.AdvancingRunners).Distinct();
             var excluded = team.AllBatters.Except(abs.Select(s => s.Batter)).Union(runEv.Select(s => s.Player).Except(abs.Select(s => s.Batter))).Where(w => !(w is null));
             foreach (var excludedPlayer in excluded.Where(w => w.IsMemberOf(team)))
