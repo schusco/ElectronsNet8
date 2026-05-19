@@ -33,7 +33,7 @@ namespace Electrons.Core.Net8.Games
         public bool IsPitcher => Position?.IsPitcher ?? false;
         public bool IsMemberOf(Team team) => team.Roster.Contains(this);
         [JsonIgnore]
-        public bool IsUnknown { get; protected set; }
+        public bool IsUnknown { get; internal set; }
         [JsonIgnore]
         public IEnumerable<HStats> GameStats { get; internal set; }
         [JsonIgnore]
@@ -140,7 +140,8 @@ namespace Electrons.Core.Net8.Games
             {
                 FirstName = player?.FirstName,
                 LastName = player?.LastName,
-                DisplayNumber = player?.DisplayNumber
+                DisplayNumber = player?.DisplayNumber,
+                IsUnknown = player.IsUnknown
             };
         }
         protected internal Player UpdateFromXml(XElement xel)
@@ -198,10 +199,14 @@ namespace Electrons.Core.Net8.Games
         public override int GetHashCode() => $"{Number}{LastName}".GetHashCode();
         public static explicit operator Player(Pitcher pitcher)
         {
-            return new Player(pitcher?.LastName ?? "Unknown", pitcher?.DisplayNumber ?? "0")
+            if (pitcher is null)
+                return null;
+            var player = new Player(pitcher?.LastName ?? "Unknown", pitcher?.DisplayNumber ?? "0")
             {
                 FirstName = pitcher?.FirstName ?? "Player"
             };
+            player.IsUnknown = pitcher.IsUnknown;
+            return player;
         }
     }
     public class Position : IEqualityComparer<Position>

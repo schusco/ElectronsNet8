@@ -72,8 +72,7 @@ namespace Scorebook.Services
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
             try
             {
-                var response = await client.PatchAsJsonAsync($"api/games/{e.Game.GameId}", e.Game);
-                var test = response.StatusCode.ToString();
+                var response = await client.PatchAsJsonAsync($"api/games/{e.Game.GameId}", e.Game);                
             }
             catch (OperationCanceledException)
             {

@@ -37,7 +37,7 @@ namespace Scorebook.ViewObjects
         internal void SetNextInning()
         {
             if (_inningNumber == 0)
-                _inningNumber++;
+                return;
             if (_halfInning == HalfInning.Top)
             {
                 _halfInning = HalfInning.Bottom;

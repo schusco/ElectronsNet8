@@ -126,13 +126,13 @@ namespace Electrons.Core.Net8.Games
             foreach (var abList in abs.GroupBy(g => g.Batter))
             {
                 var stat = hitStats.SingleOrDefault(s => s.Player == abList.Key);
-                if ( stat is null)
+                if (stat is null)
                 {
                     stat = HStats.Create(abList.Key);
                     hitStats.Add(stat);
                 }
                 stat.UpdateFromAbList(abList.ToList());
-            }            
+            }
             var runEv = abs.SelectMany(s => s.AdvancingRunners).Distinct();
             var excluded = team.AllBatters.Except(abs.Select(s => s.Batter)).Union(runEv.Select(s => s.Player).Except(abs.Select(s => s.Batter))).Where(w => !(w is null));
             foreach (var excludedPlayer in excluded.Where(w => w.IsMemberOf(team)))

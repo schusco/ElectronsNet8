@@ -1,12 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using ScoreboardApi.Client.Services;
 using Scorebook.Components;
 using Scorebook.Coordinators;
 using Scorebook.Services;
 using CommunityToolkit.Maui;
 using ApiService = Scorebook.Services.ApiService;
+using ScoreboardApi.Client;
 
 namespace Scorebook
 {
@@ -23,12 +22,7 @@ namespace Scorebook
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                     fonts.AddFont("Segoe MDL2 Assets", "SegoeIcon");
                 });
-#if DEBUG
-            string baseAddress = "https://webservices.electronsbaseball.com/";
-#else
-            string baseAddress = "https://webservices.electronsbaseball.com/";
-#endif                  
-            builder.Services.AddElectronsApiClients<LocalStorageService>(baseAddress);
+            builder.Services.AddElectronsApiClients<LocalStorageService>(Client.ElectronsApiBaseAddress);
             builder.Services.AddSingleton<ApiService>();
             builder.Services.AddTransient<ScorebookViewModel>();
             builder.Services.AddTransient<MainPage>();
