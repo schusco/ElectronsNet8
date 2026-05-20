@@ -48,12 +48,10 @@
                         <div class="nextOutingText col col-xs-3 center score-box">
                             <h1 id="score-home-@Model.GameId">  @Model.HomeScore</h1>
                         </div>
-                        <div class="nextOutingText col col-xs-6 center score-box d-inline-flex align-items-center justify-content-center">
+                        <div class="nextOutingText col col-xs-6 center score-box d-inline-flex align-items-center justify-content-center" >
                             <span id="caret-up" class="bi bi-caret-up-fill me-1 @(Model.IsTopHalfOfInning.HasValue && Model.IsTopHalfOfInning.Value ? "" : "d-none")"></span>
                             <span id="caret-down" class="bi bi-caret-down-fill me-1 @(Model.IsTopHalfOfInning.HasValue && !Model.IsTopHalfOfInning.Value ? "" : "d-none")"></span>
-                                
-                            
-                            <span id="score-inning-@Model.GameId">@Model.LiveInning</span>
+                            <span id="score-inning-@Model.GameId" style="font-size:.75em">@Model.LiveInning</span>
                         </div>
                         <div class="nextOutingText col col-xs-3 center score-box">
                             <h1 id="score-away-@Model.GameId">@Model.AwayScore</h1>
