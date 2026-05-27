@@ -8,7 +8,7 @@ using System.Windows.Input;
 using Team = ScoreboardApi.Models.Team;
 namespace Scorebook.ViewObjects
 {
-    public class GameSelection(ScorebookViewModel vm) : INotifyPropertyChanged
+    public class GameSelection(ScorebookViewModel vm, ApiService apiService) : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
         public GameScoreWrapper? SelectedGame { get; set; }
@@ -92,20 +92,10 @@ namespace Scorebook.ViewObjects
             }
         }
         public int? GameUpdateId => !SendGameUpdates || !_vm.GameManager.IsLoggedIn ? null : SelectedGame?.GameId;
-        public DateTime? EndDateTime
-        {
-            get
-            {
-                if (SelectedGame is not null)
-                    return SelectedGame.EndDateTime;
-                var game = Schedule.FirstOrDefault(s => s.HomeTeam?.Name == _vm.Game.HomeTeam.Name && s.AwayTeam.Name == _vm.Game?.AwayTeam.Name);
-                if (game is not null)
-                    return game.EndDateTime;
-                return null;
-
-            }
-        }
+        public DateTime? EndDateTime { get; set; }
+        public DateTime? StartDateTime { get; set; }
         public bool IsGameStarted => _vm.IsGameStarted;
+        public bool GameInProgress => _vm.IsGameStarted && !_vm.GameIsOver;
         public ObservableCollection<Team> FilteredHomeTeams { get; set; } = [];
         public ObservableCollection<Team> FilteredAwayTeams { get; set; } = [];
         public ObservableCollection<string> Leagues { get; set; } = [];
@@ -142,7 +132,7 @@ namespace Scorebook.ViewObjects
                         FilteredAwayTeams.Add(team);
                 }
             }
-        }        
+        }
         public ICommand CreateGameFromScheduleCommand => new Command(async () =>
         {
             var homeLeague = "CMBA";
@@ -155,6 +145,7 @@ namespace Scorebook.ViewObjects
             await _vm.SetTeamsForGame(homeTeam, awayTeam);
             IsSelectingGameFromSchedule = false;
             _vm.GameLoaded();
+            await LoadGameData();
             if (SendGameUpdates && !_vm.GameManager.IsLoggedIn)
                 await _vm.GameManager.StartAsync();
             if (GameUpdateId.HasValue)
@@ -163,6 +154,23 @@ namespace Scorebook.ViewObjects
                 _vm.GameManager.SetSelectedGame(SelectedGame);
             }
         });
+
+        private async Task LoadGameData()
+        {
+            var id = 0;
+            if (SelectedGame is not null)
+                id = SelectedGame.GameId;
+            else
+            {
+                var game = Schedule.FirstOrDefault(s => s.HomeTeam?.Name == _vm.Game.HomeTeam.Name && s.AwayTeam.Name == _vm.Game?.AwayTeam.Name);
+                if (game is not null)
+                    id = game.GameId;
+            }
+            var apiGame = await _apiService.GetGame(id);
+            StartDateTime = apiGame?.StartDateTime;
+            EndDateTime = apiGame?.EndDateTime;
+        }
+
         public ICommand CreateGameCommand => new Command(async () =>
         {
             var homeTeam = ApiService.ApiTeams.FirstOrDefault(f => f.Name == SelectedHomeTeam?.Name);
@@ -229,9 +237,9 @@ namespace Scorebook.ViewObjects
         public ICommand CloseGameSelectionCommand => new Command(() => IsSelectingGameFromSchedule = IsConfiguringNewGame = false);
         public ICommand SaveCommand => new Command(async () => await _vm.GameCoordinator.SaveGame(_vm.Game));
         public ICommand EndGameCommand => new Command(() => _vm.Game.EndGame());
-        
 
         private readonly ScorebookViewModel _vm = vm;
+        private readonly ApiService _apiService = apiService;
         private string? _selectedHomeLeague = "CMBA";
         private string? _selectedAwayLeague = "CMBA";
         private Team? _selectedHomeTeam;

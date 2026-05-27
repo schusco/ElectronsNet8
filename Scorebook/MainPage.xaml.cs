@@ -1,8 +1,4 @@
-﻿using CommunityToolkit.Maui.Views;
-using CommunityToolkit.Maui;
-using Scorebook.Services;
-using System.Threading.Tasks;
-using CommunityToolkit.Maui.Extensions;
+﻿using Scorebook.Services;
 using Scorebook.Components;
 
 namespace Scorebook

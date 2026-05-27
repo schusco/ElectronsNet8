@@ -13,9 +13,7 @@ namespace Scorebook.ViewObjects
             _player = player;
             LineupNumber = spot;
             if (player.Position != null)
-                SetPosition(player.Position, loading);
-            if (player.IsUnknown)
-                CanReplace = true;
+                SetPosition(player.Position, loading);            
         }
         public bool IsActive
         {

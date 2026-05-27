@@ -17,16 +17,14 @@ namespace Scorebook.Coordinators
             var selectedPitcher = team.CoreTeam.AvailablePitchers.SingleOrDefault(s => s.FullName == pitcher);
             if (selectedPitcher is null || selectedPitcher == (Player)team.CoreTeam.CurrentPitcher)
                 return;
-            if (team.CoreTeam.CurrentPitcher is null || !team.CoreTeam.OrderIsSet || !ViewModel.Game.IsStarted || (ViewModel.Game.IsStarted && team.CoreTeam.CurrentPitcher.IsUnknown))
+            if (team.CoreTeam.CurrentPitcher is null || !team.CoreTeam.OrderIsSet || !ViewModel.Game.IsStarted || (ViewModel.Game.IsStarted && team.CanReplacePitcher))
             {
                 team.CoreTeam.SetStartingPitcher((Pitcher)selectedPitcher);
                 ViewModel.CurrentPitchStats = new PitchTotals(selectedPitcher.DisplayName);
                 if (ViewModel.Game.IsStarted && selectedPitcher.IsMemberOf(ViewModel.Game.FieldingTeam))
                     ViewModel.Game.CurrentInning.SetCurrentPitcher((Pitcher)selectedPitcher);
-                if (home)
-                    ViewModel.HomeTeam.PitcherSelected = true;
-                else
-                    ViewModel.AwayTeam.PitcherSelected = true;
+                team.PitcherSelected = true;
+                team.CanReplacePitcher = false;
                 return;
             }
             var result = await Shell.Current.DisplayAlert("Confirm", $"Replace {team.CoreTeam.CurrentPitcher.LastName} with {selectedPitcher.LastName}?  ", "Yes", "No");
@@ -159,57 +157,70 @@ namespace Scorebook.Coordinators
         }
         internal async Task SubstitutePlayer(bool home, LineupPosition lp)
         {
-            if (lp is null)
-                return;
-            var replaced = lp.Player;
-            var team = home ? ViewModel.HomeTeam : ViewModel.AwayTeam;
-            string action;
-            if (lp.CanReplace || team.IsUnknownRoster)
+            try
             {
-                var headerText = lp.CanReplace ? "Unknown Player" : $"Sub for {replaced.DisplayName}";
-                action = await Application.Current.MainPage?.DisplayPromptAsync(headerText, "Enter player Number", "Ok", "Cancel", maxLength: 2, keyboard: Keyboard.Numeric);
-            }
-            else
-                action = await Application.Current.MainPage?.DisplayActionSheet($"Sub for {replaced.DisplayName}", "Cancel", null, [.. team.CoreTeam.Bench.Select(s => s.FullName)]);
-            if (action != "Cancel" && !string.IsNullOrEmpty(action))
-            {
-                Player newPlayer;
-                if (lp.CanReplace)
+                if (lp is null)
+                    return;
+                var replaced = lp.Player;
+                var team = home ? ViewModel.HomeTeam : ViewModel.AwayTeam;
+                string action;
+                if (lp.CanReplace || team.IsUnknownRoster)
                 {
-                    newPlayer = team.CoreTeam.Roster.FirstOrDefault(s => s.Number.ToString() == action);
-                    if (newPlayer is null)
-                    {
-                        newPlayer = Player.Unknown(int.Parse(action));
-                        team.CoreTeam.AddPlayer(newPlayer);
-                    }
-                    team.CoreTeam.ReplaceUnknown(replaced, newPlayer);
-                    lp.Player = newPlayer;
-                    ViewModel.Game.UpdatePlayer(replaced, newPlayer);
-                    ViewModel.OnPropertyChanged(nameof(ViewModel.CurrentAb));
+                    var headerText = lp.CanReplace ? "Unknown Player" : $"Sub for {replaced.DisplayName}";
+                    action = await Application.Current.MainPage?.DisplayPromptAsync(headerText, "Enter player Number", "Ok", "Cancel", maxLength: 2, keyboard: Keyboard.Numeric);
                 }
                 else
+                    action = await Application.Current.MainPage?.DisplayActionSheet($"Sub for {replaced.DisplayName}", "Cancel", null, [.. team.CoreTeam.Roster.Select(s => s.FullName)]);
+                if (action != "Cancel" && !string.IsNullOrEmpty(action))
                 {
-                    newPlayer = team.CoreTeam.Roster.FirstOrDefault(s => s.FullName == action);
-                    var diagResult = await Shell.Current.DisplayAlert("Confirm", $"Substitute {newPlayer.LastName} for {replaced.LastName}?", "Yes", "No");
-                    if (!diagResult)
-                        return;
-                    var sub = ViewModel.Game.Substitute(team.CoreTeam, newPlayer, replaced);
-                    team.UpdateLineup(lp, newPlayer);
-                    team.Bench.Remove(newPlayer);
-                    team.Replaced.Add(replaced);
-                    ViewModel.Game.AddEventToAb(sub);
-                    ViewModel.ReplaceCurrentAbInLog();
-                    ViewModel.CurrentAb = ViewModel.Game.CurrentAb;
-                    ViewModel.InningEvents.Insert(0, ViewModel.CurrentAb.ToString());
-                    ViewModel.LinkAb();
-                    ViewModel.OnPropertyChanged(nameof(ViewModel.CurrentAb));
+                    Player newPlayer;
+                    if (lp.CanReplace)
+                    {
+                        newPlayer = GetPlayer(team, action);
+                        team.CoreTeam.ReplaceUnknown(lp.LineupNumber, newPlayer);
+                        lp.Player = newPlayer;
+                        ViewModel.Game.UpdatePlayer(replaced, newPlayer);
+                        ViewModel.OnPropertyChanged(nameof(ViewModel.CurrentAb));
+                    }
+                    else
+                    {
+                        newPlayer = GetPlayer(team, action);
+                        var diagResult = await Shell.Current.DisplayAlert("Confirm", $"Substitute {newPlayer.DisplayName} for {replaced.DisplayName}?", "Yes", "No");
+                        if (!diagResult)
+                            return;
+                        var sub = ViewModel.Game.Substitute(team.CoreTeam, newPlayer, replaced);
+                        team.UpdateLineup(lp, newPlayer);
+                        team.Bench.Remove(newPlayer);
+                        team.Replaced.Add(replaced);
+                        ViewModel.Game.AddEventToAb(sub);
+                        ViewModel.ReplaceCurrentAbInLog();
+                        ViewModel.CurrentAb = ViewModel.Game.CurrentAb;
+                        ViewModel.InningEvents.Insert(0, ViewModel.CurrentAb.ToString());
+                        ViewModel.LinkAb();
+                        ViewModel.OnPropertyChanged(nameof(ViewModel.CurrentAb));
+                    }
+                    team.UpdatePositionAvailability(); // Re-run your strikethrough logic
+                    ViewModel.OnPropertyChanged(nameof(ViewModel.Game));
+                    ViewModel.OnPropertyChanged(nameof(team.Replaced));
+                    ViewModel.OnPropertyChanged(nameof(team.Bench));
+                    ViewModel.UpdateRunners();
                 }
-                team.UpdatePositionAvailability(); // Re-run your strikethrough logic
-                ViewModel.OnPropertyChanged(nameof(ViewModel.Game));
-                ViewModel.OnPropertyChanged(nameof(team.Replaced));
-                ViewModel.OnPropertyChanged(nameof(team.Bench));
-                ViewModel.UpdateRunners();
             }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", $"An error occurred: {ex.Message}", "OK");
+            }
+        }
+
+        private Player GetPlayer(TeamWrapper team, string action)
+        {
+            var newPlayer = team.CoreTeam.Roster.FirstOrDefault(s => s.Number.ToString() == action);
+            if (newPlayer is null)
+            {
+                newPlayer = Player.Unknown(int.Parse(action));
+                team.CoreTeam.AddPlayer(newPlayer);
+            }
+            return newPlayer;
         }
 
         private LineupPosition? _draggedLp;

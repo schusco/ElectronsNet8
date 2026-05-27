@@ -29,7 +29,10 @@ namespace Scorebook.Services
             var response = await _api.Login(user, pass);
             _isLoggedIn = response.Success;
         }
-        internal void SetSelectedGame(GameScoreWrapper game) => _selectedGame = game;
+        internal void SetSelectedGame(GameScoreWrapper game)
+        {
+            _selectedGame = game;
+        }
         internal void SetNextInning()
         {
             _selectedGame?.SetNextInning();

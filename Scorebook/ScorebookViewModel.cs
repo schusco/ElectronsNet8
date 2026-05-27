@@ -18,15 +18,13 @@ namespace Scorebook
 {
     public class ScorebookViewModel : INotifyPropertyChanged
     {
-        public const string FinalText = "Final";
-        private GameUpdateManager _gameManager;
         public ScorebookViewModel(ApiService apiService, RosterCoordinator rosterCoordinator, GameCoordinator gameCoordinator, GameUpdateManager gameManager)
         {
             WeakReferenceMessenger.Default.Register<PositionChangedMessage>(this, rosterCoordinator.HandlePositionChangedMesage);
             _apiService = apiService;
             _rosterCoordinator = rosterCoordinator;
             _gameCoordinator = gameCoordinator;
-            GameSelection = new GameSelection(this);
+            GameSelection = new GameSelection(this, apiService);
             ShowGameSelectionOptions = true;
             IsSideBarOpen = true;
             _gameManager = gameManager;
@@ -150,6 +148,7 @@ namespace Scorebook
                     OnPropertyChanged(nameof(NextBatterText));
                     OnPropertyChanged(nameof(ShowFieldPositionLinks));
                     GameSelection.OnPropertyChanged(nameof(IsGameStarted));
+                    GameSelection.OnPropertyChanged(nameof(GameSelection.GameInProgress));
                 }
             }
         }
@@ -436,19 +435,27 @@ namespace Scorebook
         }
         internal void LoadGame(string loadPath)
         {
-            var game = BaseballGame.Load(loadPath);
-            Game = game;
-            GameLoaded();
-            IsGameStarted = game.IsStarted;
-            HomeTeam = new TeamWrapper(this, game.HomeTeam, true);
-            AwayTeam = new TeamWrapper(this, game.AwayTeam, false);
-            HomeTeam.FillLineup(true);
-            AwayTeam.FillLineup(true);
+            try
+            {
+                var game = BaseballGame.Load(loadPath);
+                Game = game;
+                GameLoaded();
+                IsGameStarted = game.IsStarted;
+                HomeTeam = new TeamWrapper(this, game.HomeTeam, true);
+                AwayTeam = new TeamWrapper(this, game.AwayTeam, false);
+                HomeTeam.FillLineup(true);
+                AwayTeam.FillLineup(true);
+            }
+            catch (BaseballGameException ex)
+            {
+                Application.Current?.MainPage?.DisplayAlert("Error Loading Game", $"There was an error loading the game: {ex.Message}", "OK");
+            }
         }
         internal void GameLoaded()
         {
             OnPropertyChanged(nameof(Game));
             OnPropertyChanged(nameof(IsGameNull));
+            GameSelection.OnPropertyChanged(nameof(GameSelection.GameInProgress));
             UpdateRunners();
         }
         internal void UpdateRunners()
@@ -475,10 +482,11 @@ namespace Scorebook
                 InningEvents.Insert(0, CurrentAb?.ToString() ?? "");
             }
 
-            var lineup = Game?.CurrentInning.Half == HalfInning.Top ? AwayTeam.Lineup : HomeTeam.Lineup;
+            var team = Game?.CurrentInning.Half == HalfInning.Top ? AwayTeam : HomeTeam;
+            var lineup = team.Lineup;
             foreach (var lp in lineup)
                 lp.IsActive = false;
-            var current = lineup.SingleOrDefault(s => s.Player == CurrentAb?.Batter);
+            var current = lineup[team.CurrentBatterIndex];
             if (current is not null)
                 current.IsActive = true;
             var pitcherText = $"Pitching: {CurrentAb?.Pitcher?.FullName}";
@@ -551,7 +559,7 @@ namespace Scorebook
             OnPropertyChanged(nameof(CurrentAb));
             UpdateScoreBoard();
             IsFieldOverlayVisible = false;
-        });        
+        });
         public ICommand SendRunnerBackCommand => new Command(() =>
         {
             CurrentAb.UndoRunScored();
@@ -636,6 +644,7 @@ namespace Scorebook
         private ApiService _apiService;
         private RosterCoordinator _rosterCoordinator;
         private GameCoordinator _gameCoordinator;
+        private GameUpdateManager _gameManager;
         private TeamWrapper? _homeTeam;
         private TeamWrapper? _awayTeam;
         private bool _isPitchesPanelVisible;
@@ -665,5 +674,6 @@ namespace Scorebook
         private FieldLocation? _activeHitZone;
         private PitchTotals? _currentPitchStats;
         private DefensiveAlignment? _defense;
+        public const string FinalText = "Final";
     }
 }

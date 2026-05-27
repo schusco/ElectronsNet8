@@ -80,14 +80,14 @@
                     <Button Grid.Column="2" Text="SB" Style="{StaticResource ActionButtonStyle}" Command="{Binding ScoringEnteredCommand}" CommandParameter="{x:Static games:AB.StolenBase}"  />
                     <Button Grid.Column="2" Text="CS" Style="{StaticResource ActionButtonStyle}" Command="{Binding ScoringEnteredCommand}" CommandParameter="{x:Static games:AB.OutStealing}"  />
                     <Button Grid.Column="2" Text="SAC" Style="{StaticResource ActionButtonStyle}" Command="{Binding ScoringEnteredCommand}" CommandParameter="{x:Static games:AB.Sacrifice}"  />
-                    <Border  Padding="5" HeightRequest="125">
+                    <Border  Padding="5" MinimumHeightRequest="125">
                         <VerticalStackLayout>
                             <Label Text="Pitching" HorizontalOptions="Center" FontSize="Small" Grid.Column="0" Grid.Row="3" WidthRequest="100" IsVisible="{Binding ShowDesktopActionButtons}" />
-                            <Label Text="{Binding CurrentAb.Pitcher.FullName}" FontSize="Small" Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2" IsVisible="{Binding ShowDesktopActionButtons}" />
+                            <Label Text="{Binding CurrentAb.Pitcher.FullName}" FontSize="Small" Grid.Column="1" Grid.Row="3" LineBreakMode="NoWrap" Grid.ColumnSpan="2" IsVisible="{Binding ShowDesktopActionButtons}" />
                             <Label Text="Pitches" TextDecorations="Underline"  HorizontalOptions="Center" FontAttributes="None" />
                             <Label Text="{Binding CurrentPitchStats.Balls, StringFormat='Balls: {0}'}" />
                             <Label Text="{Binding CurrentPitchStats.Strikes, StringFormat='Strikes: {0}'}" />
-                            <Label Text="{Binding CurrentPitchStats.Pitches, StringFormat='Total: {0}'}" />
+                            <Label Text="{Binding CurrentPitchStats.Total, StringFormat='Total: {0}'}" />
                         </VerticalStackLayout>
                     </Border>
                 </VerticalStackLayout>

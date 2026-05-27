@@ -23,14 +23,14 @@
                                  Command="{Binding Source={x:Reference Root}, Path=Team.RefreshRosterCommand}" />
                     <ScrollView Orientation="Vertical">
                         <Border Grid.Column="0">
-                            <CollectionView BackgroundColor="White" WidthRequest="200" ItemSizingStrategy="MeasureFirstItem" ItemsLayout="VerticalList" 
+                            <CollectionView BackgroundColor="White" MinimumWidthRequest="200" ItemSizingStrategy="MeasureFirstItem" ItemsLayout="VerticalList" 
                                             HeightRequest="600" HorizontalOptions="End" VerticalOptions="Start" 
                                         ItemsSource="{Binding Source={x:Reference Root}, Path=Team.TeamPlayers}" >
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate x:DataType="games:Player">
                                         <ContentView HorizontalOptions="Fill">
                                             <Grid ColumnDefinitions="*,Auto" Padding="5,0" HorizontalOptions="Fill" >
-                                                <Label Text="{Binding FullName}" Grid.Column="0" HorizontalOptions="Fill" LineBreakMode="HeadTruncation" MaxLines="1" HorizontalTextAlignment="End" 
+                                                <Label Text="{Binding FullName}" Grid.Column="0" HorizontalOptions="Fill" LineBreakMode="NoWrap" MaxLines="1" HorizontalTextAlignment="End" 
                                                    FontSize="Small" Margin="0,0,10,0" VerticalOptions="Center" />
                                                 <Button Text="+" Margin="5" Grid.Column="1" WidthRequest="40" HorizontalOptions="End" 
                                                         Command="{Binding Source={x:Reference Root}, Path=Team.AddToLineupCommand}" CommandParameter="{Binding .}" />

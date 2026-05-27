@@ -1,4 +1,4 @@
-﻿using Electrons.Core.Net8;
+﻿ using Electrons.Core.Net8;
 using Electrons.Core.Net8.Games;
 using Scorebook.ViewObjects;
 using System.Collections.ObjectModel;
@@ -9,11 +9,10 @@ namespace Scorebook.Coordinators
     {
         public ScorebookViewModel ViewModel { get; set; }
 
-        internal void GameEnded(object? sender, EventArgs e)
+        internal async void GameEnded(object? sender, EventArgs e)
         {
             ViewModel.GameIsOver = true;
-            ViewModel.IsGameStarted = false;
-            ViewModel.LineScore.Clear();
+            ViewModel.LineScore.Clear();            
             ViewModel.Game.SetGameEndTime(ViewModel.GameSelection.EndDateTime);
             ViewModel.TotalInningCount = new int[] { 7, ViewModel.Game.Innings.Max(m => m.Number) }.Max();
             var grps = ViewModel.Game?.Innings.GroupBy(g => g.Number);
@@ -30,6 +29,7 @@ namespace Scorebook.Coordinators
             ViewModel.IsTopHalfOfInning = false;
             ViewModel.IsBottomHalfOfInning = false;
             ViewModel.GameManager.SetGameEnded(ViewModel.Game.EndTime);
+            ViewModel.GameSelection.OnPropertyChanged(nameof(ViewModel.GameSelection.GameInProgress));
         }
         internal void InningEnded(object? sender, InningChangeEventArgs e)
         {
@@ -238,47 +238,54 @@ namespace Scorebook.Coordinators
         }
         internal async Task NextBatter(BaseballGame? game)
         {
-            if (!ViewModel.IsGameStarted)
+            try
             {
-                if (game.HomeTeam is null || game.AwayTeam is null)
+                if (!ViewModel.IsGameStarted)
                 {
-                    await Shell.Current.DisplayAlert("Error", "Select teams before starting game", "OK");
-                    return;
-                }
-                game?.StartGame(ViewModel.GameSelection.SelectedGame?.GameDate ?? DateTime.Today, ViewModel.GameSelection.SelectedGame?.StartDateTime ?? DateTime.Now);
-                ViewModel.IsGameStarted = true;
-                if (ViewModel.GameSelection.SelectedGame is not null)
-                    ViewModel.GameManager.SetStartDateTime(game?.StartTime);
-                ViewModel.OnPropertyChanged(nameof(ViewModel.Game));
-                ViewModel.OnPropertyChanged(nameof(ViewModel.Defense));
-                if (!ViewModel.HomeTeam.Lineup.Any())
-                    ViewModel.HomeTeam.FillLineup(false);
-                if (!ViewModel.AwayTeam.Lineup.Any())
-                    ViewModel.AwayTeam.FillLineup(false);
-                ViewModel.LinkAb();
-            }
-            else
-            {
-                ViewModel.IsFieldOverlayVisible = false;
-                if (ViewModel.ScoringIsRequired)
-                {
-                    var scoringAdded = game?.AddScoring();
-                    ViewModel.ScoringIsRequired = false;
-                    if (!ViewModel.CurrentAb.IsFinished && ViewModel.CurrentAb.Result is FieldersChoice fc)
+                    if (game.HomeTeam is null || game.AwayTeam is null)
                     {
-                        var advances = game.ForceRunners();
-                        fc.AddAdvances(advances);
-                        ViewModel.UpdateRunners();
+                        await Shell.Current.DisplayAlert("Error", "Select teams before starting game", "OK");
+                        return;
                     }
-                }
-                else if (!game?.FinishAb() ?? false)
-                {
-                    await Shell.Current.DisplayAlert("Error", "Add scoring before moving to next batter", "OK");
-                    return;
-                }
-
-                if (!game?.IsGameOver ?? false)
+                    game?.StartGame(ViewModel.GameSelection.SelectedGame?.GameDate ?? DateTime.Today, ViewModel.GameSelection?.StartDateTime ?? DateTime.Now);
+                    ViewModel.IsGameStarted = true;
+                    if (ViewModel.GameSelection.SelectedGame is not null)
+                        ViewModel.GameManager.SetStartDateTime(game?.StartTime);
+                    ViewModel.OnPropertyChanged(nameof(ViewModel.Game));
+                    ViewModel.OnPropertyChanged(nameof(ViewModel.Defense));
+                    if (!ViewModel.HomeTeam.Lineup.Any())
+                        ViewModel.HomeTeam.FillLineup(false);
+                    if (!ViewModel.AwayTeam.Lineup.Any())
+                        ViewModel.AwayTeam.FillLineup(false);
                     ViewModel.LinkAb();
+                }
+                else
+                {
+                    ViewModel.IsFieldOverlayVisible = false;
+                    if (ViewModel.ScoringIsRequired)
+                    {
+                        var scoringAdded = game?.AddScoring();
+                        ViewModel.ScoringIsRequired = false;
+                        if (!ViewModel.CurrentAb.IsFinished && ViewModel.CurrentAb.Result is FieldersChoice fc)
+                        {
+                            var advances = game.ForceRunners();
+                            fc.AddAdvances(advances);
+                            ViewModel.UpdateRunners();
+                        }
+                    }
+                    else if (!game?.FinishAb() ?? false)
+                    {
+                        await Shell.Current.DisplayAlert("Error", "Add scoring before moving to next batter", "OK");
+                        return;
+                    }
+
+                    if (!game?.IsGameOver ?? false)
+                        ViewModel.LinkAb();
+                }
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Error", $"An error occurred: {ex.Message}", "OK");
             }
         }
         internal void AddPitch(PitchResult pitchType)
@@ -358,8 +365,10 @@ namespace Scorebook.Coordinators
                 AddRunnerOutEvent(onBase, false);
             }
             else if (action == _runnerMenuOptions[4]) // Runner Advanced On Error
+            {
+                ViewModel.ScoringIsRequired = true;
                 await ViewModel.GameCoordinator.AdvanceRunners(onBase, AdvanceReason.Error);
-
+            }
             else if (action == _runnerMenuOptions[5]) // Runner Out Advancing
             {
                 if (!ViewModel.CurrentAb.Result.HasFielders)

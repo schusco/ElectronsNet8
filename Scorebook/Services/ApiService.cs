@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using ScoreboardApi.Client.Services;
+﻿using ScoreboardApi.Client.Services;
 using ScoreboardApi.Models;
 using Scorebook.ViewObjects;
 using System.Collections.ObjectModel;
@@ -149,6 +147,13 @@ namespace Scorebook.Services
             {
                 return null;
             }
+        }
+        internal async Task<GameScore?> GetGame(int id)
+        {
+            var response = await LoadFromApi<GameScore>($"api/games/{id}");
+            if (response.Success)
+                return response.Data;
+            return null;
         }
     }
     internal class ApiResponse<T>

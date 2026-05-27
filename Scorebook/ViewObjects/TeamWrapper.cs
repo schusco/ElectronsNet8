@@ -16,6 +16,7 @@ namespace Scorebook.ViewObjects
             CoreTeam = coreTeam;
             _isHome = isHome;
             _isUnknownRoster = unknown;
+            CanReplacePitcher = coreTeam.CurrentPitcher is null && coreTeam.StartingPitcher is null;
             IsEditing = false;
             foreach (var player in CoreTeam.Roster)
             {
@@ -76,6 +77,15 @@ namespace Scorebook.ViewObjects
                 OnPropertyChanged(nameof(IsUnknownRoster));
             }
         }
+        public bool CanReplacePitcher
+        {
+            get => _canReplacePitcher;
+            set
+            {
+                _canReplacePitcher = value;
+                OnPropertyChanged(nameof(CanReplacePitcher));
+            }
+        }
         public bool IsEditing
         {
             get => _isEditing;
@@ -102,6 +112,8 @@ namespace Scorebook.ViewObjects
             foreach (var player in CoreTeam.Lineup)
             {
                 var lineupPos = new LineupPosition(player, lp++, loading);
+                if (!loading && player.IsUnknown)
+                    lineupPos.CanReplace = true;
                 if (player.HittingFor is not null)
                     lineupPos.HittingFor = player.HittingFor;
                 Lineup.Add(lineupPos);
@@ -152,13 +164,9 @@ namespace Scorebook.ViewObjects
                 return;
             var roster = new List<Player>();
             if (ApiService.ApiRosters.TryGetValue(CoreTeam.Name, out var apiRoster))
-            {
                 roster = apiRoster.Select(s => new Player(s.LastName, s.Number.ToString()) { FirstName = s.FirstName }).ToList();
-            }
             else
-            {
                 roster = [.. CoreTeam.Roster];
-            }
             foreach (var player in roster.Except(CoreTeam.Lineup))
                 TeamPlayers.Add(player);
         }
@@ -200,11 +208,14 @@ namespace Scorebook.ViewObjects
         public ICommand LineupItemDroppedCommand => new Command<LineupPosition>((lp) => _vm.RosterCoordinator.LineupItemDropped(this, lp));
         public bool IsSideBarOpen => _vm.IsSideBarOpen;
 
+        public int CurrentBatterIndex => CoreTeam.CurrentHitterIndex;
+
         private ScorebookViewModel _vm;
         private bool _isUnknownRoster;
         private bool _pitcherSelected;
         private bool _isHome;
         private string? _mobileText;
         private bool _isEditing;
+        private bool _canReplacePitcher;
     }
 }

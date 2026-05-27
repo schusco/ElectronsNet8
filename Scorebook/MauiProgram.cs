@@ -22,6 +22,11 @@ namespace Scorebook
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                     fonts.AddFont("Segoe MDL2 Assets", "SegoeIcon");
                 });
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            {
+                var ex = e.ExceptionObject as Exception;
+                System.Diagnostics.Debug.WriteLine($"Unhandled exception: {ex}");
+            };
             builder.Services.AddElectronsApiClients<LocalStorageService>(Client.ElectronsApiBaseAddress);
             builder.Services.AddSingleton<ApiService>();
             builder.Services.AddTransient<ScorebookViewModel>();

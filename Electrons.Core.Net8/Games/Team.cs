@@ -39,10 +39,12 @@ namespace Electrons.Core.Net8.Games
         public List<Player> Replaced => _substitutions.Select(s => s.Replaced).ToList();
         [JsonIgnore]
         public Player CurrentHitter => _order.CurrentSpot == 0 ? _order.Order.First() : _order.CurrentHitter;
+
+        public int CurrentHitterIndex => _order.CurrentSpot - 1;
         [JsonIgnore]
         public Pitcher CurrentPitcher => !GamePitchers.Any() ? null : GamePitchers.LastOrDefault(w => _substitutions.Any(a => (Pitcher)a.NewPlayer == w)) ?? GamePitchers.First();
         [JsonIgnore]
-        public Pitcher StartingPitcher => GamePitchers.First();
+        public Pitcher StartingPitcher => GamePitchers.FirstOrDefault();
         public override string ToString() => Name;
         public void SetBattingOrder(List<Player> players)
         {
@@ -99,6 +101,10 @@ namespace Electrons.Core.Net8.Games
                 _battingOrder.Remove(spot);
                 return spot;
             }
+            internal void RemoveFromLineup(int spot)
+            {
+                _battingOrder.Remove(spot);
+            }
             public IList<Player> Order => _battingOrder.OrderBy(o => o.Key).Select(s => s.Value).ToList();
             internal Player Next(bool noAdvance)
             {
@@ -152,7 +158,7 @@ namespace Electrons.Core.Net8.Games
         }
         [JsonIgnore]
         public Pitcher PitcherOfRecord => GamePitchers.Single(s => s.IsPitcherOfRecord);
-        public bool RemoveFromLineup(Player player, bool force =false)
+        public bool RemoveFromLineup(Player player, bool force = false)
         {
             var canRemove = !OrderIsSet || force;
             if (canRemove)
@@ -168,6 +174,11 @@ namespace Electrons.Core.Net8.Games
                 if (remove)
                     _roster.Remove(replaced);
             }
+        }
+        public void ReplaceUnknown(int spot, Player newPlayer)
+        {
+            _order.RemoveFromLineup(spot);
+            _order.AddToLineup(spot, newPlayer);
         }
         internal List<Pitcher> GamePitchers { get; }
         public void AddPlayer(Player player)
