@@ -22,8 +22,11 @@ namespace Scorebook.ViewObjects
                 _halfInning = HalfInning.Top;
                 SetInningStatus();
                 StartDateTime = startTime.Value;
-                _game.StartDateTime = StartDateTime;
-                OnGameScoreUpdated();
+                if (!game.StartDateTime.HasValue)
+                {
+                    _game.StartDateTime = StartDateTime;
+                    OnGameScoreUpdated();
+                }
             }
         }
         private void OnGameScoreUpdated()
@@ -59,7 +62,8 @@ namespace Scorebook.ViewObjects
         internal void SetGameEnded(DateTime? endTime)
         {
             _game.Status = "Final";
-            _game.EndDateTime = endTime;
+            if (!_game.EndDateTime.HasValue && endTime.HasValue)
+                _game.EndDateTime = endTime;
             OnGameScoreUpdated();
         }
 
