@@ -49,6 +49,7 @@ namespace Scorebook
                     CurrentAb.ScoringUpdated += _gameCoordinator.ScoringUpdated;
                 _game.InningStarted += _gameCoordinator.InningStarted;
                 _game.InningEnded += _gameCoordinator.InningEnded;
+                _game.InningUpdated += _gameCoordinator.InningUpdated;
                 _game.GameEnded += _gameCoordinator.GameEnded;
                 HomeTeam?.UpdatePositionLists();
                 AwayTeam?.UpdatePositionLists();
@@ -66,7 +67,7 @@ namespace Scorebook
         public RosterCoordinator RosterCoordinator => _rosterCoordinator;
         public ApiService ApiService => _apiService;
         public GameSelection GameSelection { get; set; }
-        public DefensiveAlignment Defense
+        public DefensiveAlignment? Defense
         {
             get => _defense;
             set
@@ -480,6 +481,7 @@ namespace Scorebook
             {
                 CurrentAb = Game?.CurrentAb;
                 InningEvents.Insert(0, CurrentAb?.ToString() ?? "");
+                GameManager.UpdateAb(CurrentAb);
             }
 
             var team = Game?.CurrentInning.Half == HalfInning.Top ? AwayTeam : HomeTeam;
@@ -505,7 +507,7 @@ namespace Scorebook
             UpdatePitches();
             UpdateScoreBoard();
             OnPropertyChanged(nameof(Game));
-            UpdateRunners();
+            UpdateRunners();            
         }
         public void ReplaceCurrentAbInLog()
         {

@@ -8,12 +8,11 @@ namespace Scorebook.Coordinators
     public class GameCoordinator
     {
         public ScorebookViewModel ViewModel { get; set; }
-
-        internal async void GameEnded(object? sender, EventArgs e)
+        internal void GameEnded(object? sender, EventArgs e)
         {
             ViewModel.GameIsOver = true;
             ViewModel.LineScore.Clear();            
-            ViewModel.Game.SetGameEndTime(ViewModel.GameSelection.EndDateTime);
+            ViewModel.Game.SetGameEndTime(ViewModel.GameManager.SelectedGame.EndDateTime);
             ViewModel.TotalInningCount = new int[] { 7, ViewModel.Game.Innings.Max(m => m.Number) }.Max();
             var grps = ViewModel.Game?.Innings.GroupBy(g => g.Number);
             for (int i = 1; i <= ViewModel.TotalInningCount; i++)
@@ -36,6 +35,7 @@ namespace Scorebook.Coordinators
             ViewModel.InningEvents.Clear();
             var stats = GetCurrentPitcherStats();
             ViewModel.CurrentPitchStats = new PitchTotals(stats);
+            ViewModel.GameManager.UpdateInning(ViewModel.Game.CurrentInning);
         }
         internal void InningStarted(object? sender, InningChangeEventArgs e)
         {
@@ -52,7 +52,13 @@ namespace Scorebook.Coordinators
                 ViewModel.AwayTeam.Defense.RefreshPositions(ViewModel.AwayTeam.Lineup);
                 ViewModel.Defense = ViewModel.AwayTeam.Defense;
             }
-            ViewModel.GameManager.SetNextInning();
+            ViewModel.GameManager.SetNextInning(ViewModel.Game.CurrentAb);
+        }
+        internal void InningUpdated(object? sender, EventArgs e)
+        {
+            var inning = ViewModel.Game.CurrentInning;
+            ViewModel.GameManager?.UpdateAb(inning.CurrentAb);
+            ViewModel.GameManager?.UpdateInning(inning);
         }
         internal void ScoreChanged(object? sender, ScoreChangedEventArgs e)
         {
@@ -247,10 +253,10 @@ namespace Scorebook.Coordinators
                         await Shell.Current.DisplayAlert("Error", "Select teams before starting game", "OK");
                         return;
                     }
-                    game?.StartGame(ViewModel.GameSelection.SelectedGame?.GameDate ?? DateTime.Today, ViewModel.GameSelection?.StartDateTime ?? DateTime.Now);
-                    ViewModel.IsGameStarted = true;
                     if (ViewModel.GameSelection.SelectedGame is not null)
                         ViewModel.GameManager.SetStartDateTime(game?.StartTime);
+                    game?.StartGame(ViewModel.GameSelection.SelectedGame?.GameDate ?? DateTime.Today, ViewModel.GameSelection?.StartDateTime ?? DateTime.Now);
+                    ViewModel.IsGameStarted = true;                    
                     ViewModel.OnPropertyChanged(nameof(ViewModel.Game));
                     ViewModel.OnPropertyChanged(nameof(ViewModel.Defense));
                     if (!ViewModel.HomeTeam.Lineup.Any())
@@ -313,6 +319,7 @@ namespace Scorebook.Coordinators
             ViewModel.OnPropertyChanged(nameof(ViewModel.CurrentStrikes));
             ViewModel.ReplaceCurrentAbInLog();
             ViewModel.UpdatePitches();
+            ViewModel.GameManager.UpdateAb(ViewModel.CurrentAb);
         }
         internal void SetStats(bool home)
         {

@@ -1,4 +1,5 @@
-﻿using ScoreboardApi.Client.Services;
+﻿using Microsoft.Extensions.Logging;
+using ScoreboardApi.Client.Services;
 using ScoreboardApi.Models;
 using Scorebook.ViewObjects;
 using System.Collections.ObjectModel;
@@ -10,9 +11,17 @@ namespace Scorebook.Services
 {
     public class ApiService : ServiceBase
     {
+        public event EventHandler<InningEventArgs> InningCreated;
+        public event EventHandler<AbEventArgs> AbCreated;
+        private readonly IApiService _apiService;
+        private readonly ILogger<ApiService> _logger;
         internal static readonly IDictionary<string, List<CmbaPlayer>> ApiRosters = new Dictionary<string, List<CmbaPlayer>>();
         public static ObservableCollection<Team> ApiTeams { get; set; } = [];
-        public ApiService(IHttpClientFactory factory, IApiService apiService) : base(factory) { }
+        public ApiService(IHttpClientFactory factory, IApiService apiService, ILogger<ApiService> logger) : base(factory) 
+        {
+            _apiService = apiService;
+            _logger = logger;
+        }
         public async Task<List<GameScore>> GetSchedule(int teamId)
         {
             DateTime nextSync = Preferences.Default.Get($"ScheduleNextSync_{teamId}", DateTime.MinValue);
@@ -70,12 +79,65 @@ namespace Scorebook.Services
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
             try
             {
-                var response = await client.PatchAsJsonAsync($"api/games/{e.Game.GameId}", e.Game);                
+                var response = await client.PatchAsJsonAsync($"api/games/{e.Game.GameId}", e.Game);
             }
             catch (OperationCanceledException)
             {
                 // Handle timeout or cancellation gracefully            
             }
+        }
+        internal async Task SendInningUpdate(object? sender, InningEventArgs e)
+        {
+            var url = $"api/innings/{e.Inning.Id}";
+            if (e.Inning.Id == 0)
+                url = $"api/games/{e.Inning.GameId}/innings";
+            await SendUpdate(url, e.Inning, e.Inning.Id == 0, OnCreated);
+        }
+        private async Task SendUpdate<T>(string url, T? data, bool post, Action<T> onCreated) where T : class
+        {
+            var client = GetAuthClient();
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            try
+            {
+                var json = JsonSerializer.Serialize(data);
+
+                HttpResponseMessage response;
+                if (post)
+                {
+                    response = await client.PostAsJsonAsync(url, data, cts.Token);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var respObj = await response.Content.ReadFromJsonAsync<T>(cts.Token);
+                        onCreated?.Invoke(respObj);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Request failed with statusCode: {StatusCode}, payload was {json}", response.StatusCode, json);
+                    }
+                }
+                else
+                {
+                    await client.PutAsJsonAsync(url, data, cts.Token);
+                }
+
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        }
+        internal async Task SendAbUpdate(object? sender, AbEventArgs e)
+        {
+            var url = $"api/atbats/{e.Ab.Id}";
+            if (e.Ab.Id == 0)
+                url = $"api/innings/{e.Ab.InningId}/ab";
+            await SendUpdate(url, e.Ab, e.Ab.Id == 0, OnCreated);
+        }
+        private void OnCreated<T>(T inningEventArgs)
+        {
+            if (typeof(T) == typeof(Inning))
+                InningCreated?.Invoke(this, new InningEventArgs((Inning)(object)inningEventArgs));
+            else if (typeof(T) == typeof(Atbat))
+                AbCreated?.Invoke(this, new AbEventArgs((Atbat)(object)inningEventArgs));
         }
         internal async Task<List<CmbaPlayer>> GetRosterFromApi(Team team, bool forceRefresh = false)
         {
@@ -155,6 +217,7 @@ namespace Scorebook.Services
                 return response.Data;
             return null;
         }
+
     }
     internal class ApiResponse<T>
     {

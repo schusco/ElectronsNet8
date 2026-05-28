@@ -1,3 +1,4 @@
 [submodule "External/CmbaLeagueApp"]
 	path = External/CmbaLeagueApp
 	url = https://gitlab.com/Electrons-Baseball/CmbaLeagueApp.git
+	branch = liveupdates
