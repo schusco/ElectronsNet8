@@ -2,6 +2,7 @@
 using Electrons.Core.Net8.Infrastructure;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Electrons.Net8.Models
 {
@@ -40,6 +41,20 @@ namespace Electrons.Net8.Models
                 model.Events.Add(inningStack.Pop());
             return model;
         }
+        internal static InningModel Create(ScoreboardApi.Models.Inning inning, string logo)
+        {
+            var model = new InningModel
+            {
+                Description = $"{(inning.IsTopHalf ? "Top" : "Bottom")} of {inning.Number}",
+                Summary = $"{inning.Runs} {(inning.Runs == 1 ? "Run" : "Runs")}, {inning.Hits} {(inning.Hits == 1 ? "Hit" : "Hits")}, {inning.Errors} {(inning.Errors == 1 ? "Error" : "Errors")}",
+                Logo = logo
+            };
+            var inningStack = new Stack<InningEventModel>();
+            inning.Atbats.ToList().ForEach(f => inningStack.Push(InningEventModel.Create(f)));
+            while (inningStack.Any())
+                model.Events.Add(inningStack.Pop());
+            return model;
+        }
     }
     public class InningEventModel
     {
@@ -51,6 +66,14 @@ namespace Electrons.Net8.Models
             {
                 EventText = arg.ToString(),
                 ScoringPlay = arg.AdvancingRunners.Any(a => a.Runs > 0)
+            };
+        }
+        internal static InningEventModel Create(ScoreboardApi.Models.Atbat arg)
+        {
+            return new InningEventModel
+            {
+                EventText = arg.Result,
+                ScoringPlay = arg.IsScoringPlay
             };
         }
         public override string ToString() => EventText;

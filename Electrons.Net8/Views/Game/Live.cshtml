@@ -61,13 +61,13 @@
                                     {
                                         if (Model.InningHalf == HalfInning.Bottom)
                                         {
-                                            <i class="bi bi-caret-down-fill"></i>
+                                            <i class="bi bi-caret-down-fill" style="color:white"></i>
                                         }
                                         if (Model.InningHalf == HalfInning.Top)
                                         {
-                                            <i class="bi bi-caret-up-fill"></i>
+                                            <i class="bi bi-caret-up-fill" style="color:white"></i>
                                         }
-                                        <span class="sbStyle">&nbsp;@Model.InningNumber&nbsp;</span>
+                                        <span class="sbStyle px-1">@Model.InningNumber</span>
                                     }
                                     <div class="d-none d-lg-inline-block" style="border:1px solid gray;margin-top:0">
                                         <span class="bsoStyle">B</span>
@@ -79,7 +79,7 @@
                                         <span class="@(Model.Strikes > 1 ? "strikeDot" : "noStrikeDot")"></span>
                                         <span class="bsoStyle">O</span>
                                         <span class="@((Model.Outs == 1 || Model.Outs == 2) ? "outDot" : "noOutDot")"></span>
-                                        <span class="@(Model.Outs == 2 ? "outDot" : "noOutDot")"></span>
+                                        <span class="@(Model.Outs == 2 ? "outDot" : "noOutDot") " style="margin-right:4px"></span>
                                     </div>
                                 </div>
                                 @if (Model.GameIsOver)

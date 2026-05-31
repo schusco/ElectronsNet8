@@ -151,11 +151,11 @@ namespace Scorebook.ViewObjects
             if (GameUpdateId.HasValue)
             {
                 SelectedGame.GameScoreUpdated += _vm.ApiService.SendGameUpdate;
-                SelectedGame.InningUpdated += _vm.ApiService.SendInningUpdate;
-                SelectedGame.AtbatUpdated += _vm.ApiService.SendAbUpdate;
-                _vm.ApiService.InningCreated += SelectedGame.UpdateCurrentInning;
-                _vm.ApiService.AbCreated += SelectedGame.UpdateCurrentAtbat;
-                _vm.GameManager.SetSelectedGame(SelectedGame);
+                //SelectedGame.InningUpdated += _vm.ApiService.SendInningUpdate;
+                //SelectedGame.AtbatUpdated += _vm.ApiService.SendAbUpdate;
+                //_vm.ApiService.InningCreated += SelectedGame.UpdateCurrentInning;
+                //_vm.ApiService.AbCreated += SelectedGame.UpdateCurrentAtbat;
+                _vm.GameManager.SetSelectedGame(SelectedGame, _vm);
             }
         });
         private async Task LoadGameData()
@@ -172,7 +172,7 @@ namespace Scorebook.ViewObjects
             var apiGame = await _apiService.GetGame(id);
             StartDateTime = apiGame?.StartDateTime;
             EndDateTime = apiGame?.EndDateTime;
-        }        
+        }
         public ICommand CreateGameCommand => new Command(async () =>
         {
             var homeTeam = ApiService.ApiTeams.FirstOrDefault(f => f.Name == SelectedHomeTeam?.Name);

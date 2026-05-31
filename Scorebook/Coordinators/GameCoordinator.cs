@@ -52,7 +52,7 @@ namespace Scorebook.Coordinators
                 ViewModel.AwayTeam.Defense.RefreshPositions(ViewModel.AwayTeam.Lineup);
                 ViewModel.Defense = ViewModel.AwayTeam.Defense;
             }
-            ViewModel.GameManager.SetNextInning(ViewModel.Game.CurrentAb);
+            ViewModel.GameManager.SetNextInning();            
         }
         internal void InningUpdated(object? sender, EventArgs e)
         {

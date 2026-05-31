@@ -5,14 +5,19 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using ScoreboardApi.Models;
 using System;
 using System.IO;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Electrons.Net8.Controllers
 {
-    public class GameController(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings)
+    public class GameController(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, 
+        IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings, HttpClient client)
         : ControllerBase(session, cache, httpContextAccessor, env, settings)
     {
+        private readonly HttpClient _client = client;
         public ActionResult Index(int? id) => RedirectToAction("Game", "Statistics", new { id });
         public ActionResult Plays(int? id)
         {
@@ -26,6 +31,7 @@ namespace Electrons.Net8.Controllers
             }
             return RedirectToAction("Game", "Statistics", new { id });
         }
+        [Route("game/{id}/Recap")]
         public ActionResult Recap(int? id)
         {
             try
@@ -47,6 +53,17 @@ namespace Electrons.Net8.Controllers
             {
                 return View("Error");
             }
+        }
+        [Route("game/{id}/Live")]
+        public async Task<ActionResult> Live(int id)
+        {
+            var response = await _client.GetAsync($"{GameSettings.BaseApiUrl}api/Games/{id}/full");
+            if (response.IsSuccessStatusCode)
+            {
+                var game = await response.Content.ReadAsAsync<GameScore>();
+                return View(new LiveGameModel(game));
+            }
+            return View("Error");
         }
     }
 }

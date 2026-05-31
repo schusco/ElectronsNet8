@@ -11,13 +11,11 @@ namespace Scorebook.Services
 {
     public class ApiService : ServiceBase
     {
-        public event EventHandler<InningEventArgs> InningCreated;
-        public event EventHandler<AbEventArgs> AbCreated;
         private readonly IApiService _apiService;
         private readonly ILogger<ApiService> _logger;
         internal static readonly IDictionary<string, List<CmbaPlayer>> ApiRosters = new Dictionary<string, List<CmbaPlayer>>();
         public static ObservableCollection<Team> ApiTeams { get; set; } = [];
-        public ApiService(IHttpClientFactory factory, IApiService apiService, ILogger<ApiService> logger) : base(factory) 
+        public ApiService(IHttpClientFactory factory, IApiService apiService, ILogger<ApiService> logger) : base(factory)
         {
             _apiService = apiService;
             _logger = logger;
@@ -86,58 +84,58 @@ namespace Scorebook.Services
                 // Handle timeout or cancellation gracefully            
             }
         }
-        internal async Task SendInningUpdate(object? sender, InningEventArgs e)
+        internal async Task<Inning?> SendInningUpdate(Inning inning)
         {
-            var url = $"api/innings/{e.Inning.Id}";
-            if (e.Inning.Id == 0)
-                url = $"api/games/{e.Inning.GameId}/innings";
-            await SendUpdate(url, e.Inning, e.Inning.Id == 0, OnCreated);
+            var url = $"api/innings/{inning.Id}";
+            if (inning.Id == 0)
+                url = $"api/games/{inning.GameId}/innings";
+            return await SendUpdate(url, inning, inning.Id == 0);
         }
-        private async Task SendUpdate<T>(string url, T? data, bool post, Action<T> onCreated) where T : class
+        private async Task<T?> SendUpdate<T>(string url, T? data, bool post) where T : class
         {
+            HttpResponseMessage response;
             var client = GetAuthClient();
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            var json = JsonSerializer.Serialize(data);
             try
             {
-                var json = JsonSerializer.Serialize(data);
-
-                HttpResponseMessage response;
+                // 1. Execute the correct HTTP method and capture the response
                 if (post)
-                {
                     response = await client.PostAsJsonAsync(url, data, cts.Token);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var respObj = await response.Content.ReadFromJsonAsync<T>(cts.Token);
-                        onCreated?.Invoke(respObj);
-                    }
-                    else
-                    {
-                        _logger.LogWarning("Request failed with statusCode: {StatusCode}, payload was {json}", response.StatusCode, json);
-                    }
+                else
+                    response = await client.PutAsJsonAsync(url, data, cts.Token);
+
+                // 2. Unify the response handling for BOTH POST and PUT
+                if (response.IsSuccessStatusCode)
+                {
+                    if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                        return data;
+                    var respObj = await response.Content.ReadFromJsonAsync<T>(cancellationToken: cts.Token);
+                    return respObj;
                 }
                 else
-                {
-                    await client.PutAsJsonAsync(url, data, cts.Token);
-                }
+                    _logger.LogWarning("Request failed. Method: {Method}, StatusCode: {StatusCode}, Payload: {json}",
+                        post ? "POST" : "PUT", response.StatusCode, json);
 
             }
             catch (OperationCanceledException)
             {
+                // If cts.Token canceled it, it's a timeout
+                _logger.LogError("The network request to {Url} timed out after 15 seconds.", url);
             }
+            catch (Exception ex)
+            {
+                // Catch any other unexpected network/deserialization crashes
+                _logger.LogError(ex, "An unexpected error occurred during SendUpdate for {Url}", url);
+            }
+            return null;
         }
-        internal async Task SendAbUpdate(object? sender, AbEventArgs e)
+        internal async Task<Atbat?> SendAbUpdate(Atbat ab)
         {
-            var url = $"api/atbats/{e.Ab.Id}";
-            if (e.Ab.Id == 0)
-                url = $"api/innings/{e.Ab.InningId}/ab";
-            await SendUpdate(url, e.Ab, e.Ab.Id == 0, OnCreated);
-        }
-        private void OnCreated<T>(T inningEventArgs)
-        {
-            if (typeof(T) == typeof(Inning))
-                InningCreated?.Invoke(this, new InningEventArgs((Inning)(object)inningEventArgs));
-            else if (typeof(T) == typeof(Atbat))
-                AbCreated?.Invoke(this, new AbEventArgs((Atbat)(object)inningEventArgs));
+            var url = $"api/atbats/{ab.Id}";
+            if (ab.Id == 0)
+                url = $"api/innings/{ab.InningId}/ab";
+            return await SendUpdate(url, ab, ab.Id == 0);
         }
         internal async Task<List<CmbaPlayer>> GetRosterFromApi(Team team, bool forceRefresh = false)
         {
