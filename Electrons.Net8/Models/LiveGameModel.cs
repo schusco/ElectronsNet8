@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+
 namespace Electrons.Net8.Models
 {
     public class LiveGameModel
@@ -25,6 +26,88 @@ namespace Electrons.Net8.Models
             foreach (var position in Position.All)
                 Defense.Add(position, "");
         }
+        public LiveGameModel(ScoreboardApi.Models.GameScore game) : this()
+        {
+            Title = $"{game.AwayTeam.Name} @ {game.HomeTeam.Name}, {game.GameDate.ToShortDateString()}";
+            DateString = game.StartDateTime.HasValue ? game.StartDateTime.Value.ToString("M/d/yyyy h:mm tt") : game.GameDate.ToLongDateString();
+            GameIsOver = game.Status.IsIn(ScoreboardApi.Models.GameScore.CompletedStatuses);
+            IsStarted = game.Status != "Scheduled";
+            GameTime = game.GameDate.ToShortTimeString();
+            HomeScore = game.HomeRuns;
+            AwayScore = game.AwayRuns;
+            HomeHits = game.Innings.Where(w => !w.IsTopHalf).Sum(s => s.Hits);
+            HomeErrors = game.Innings.Where(w => !w.IsTopHalf).Sum(s => s.Errors);
+            AwayHits = game.Innings.Where(w => w.IsTopHalf).Sum(s => s.Hits);
+            AwayErrors = game.Innings.Where(w => w.IsTopHalf).Sum(s => s.Errors); ;
+            HomeName = game.HomeTeam.Name;
+            AwayName = game.AwayTeam.Name;
+            LocationText = game.Location?.FieldName ?? "";
+            CityText = game.Location?.CityAndState ?? "";
+            //LengthOfGame = game.EndDateTime.LengthOfGameString;
+            AwayLogo = game.AwayTeam.Name.GetLogo();
+            HomeLogo = game.HomeTeam.Name.GetLogo();
+            if (!IsStarted)
+                return;
+            var currentInning = game.Innings.LastOrDefault();
+            if (currentInning is null)
+                return;
+            if (currentInning.IsTopHalf)
+            {
+                PitcherLogo = HomeLogo;
+                HitterLogo = AwayLogo;
+            }
+            else
+            {
+                PitcherLogo = AwayLogo;
+                HitterLogo = HomeLogo;
+            }
+            InningNumber = currentInning.Number;
+            InningHalf = currentInning.IsTopHalf ? HalfInning.Top : HalfInning.Bottom;
+            var currentAb = currentInning.Atbats.LastOrDefault();
+            Balls = currentAb.Balls;
+            Strikes = currentAb.Strikes;
+            Outs = currentAb.Outs;
+            TotalInnings = 7;
+            foreach (var inning in game.Innings)
+            {
+                if (inning.IsTopHalf)
+                    AwayInnings.Add(inning.Runs);
+                else
+                    HomeInnings.Add(inning.Runs);
+            }
+            //foreach (var player in fullGame.FieldingTeam.Lineup)
+            //    Defense[player.Position] = player.LastName;
+            //Defense[Position.P] = fullGame.FieldingTeam.CurrentPitcher.LastName;
+
+            CurrentPitcher = Player.Create(currentAb.Pitcher?.Number ?? 0, currentAb.Pitcher?.FirstName, currentAb.Pitcher?.LastName);
+            CurrentHitter = Player.Create(currentAb.Batter?.Number ?? 0, currentAb.Batter?.FirstName, currentAb.Batter?.LastName);
+            AbString = currentAb.Result;
+            //RunnerOnFirst = fullGame.CurrentInning.CurrentRunners.OnFirst?.Runner?.FullName;
+            //RunnerOnSecond = fullGame.CurrentInning.CurrentRunners.OnSecond?.Runner?.FullName;
+            //RunnerOnThird = fullGame.CurrentInning.CurrentRunners.OnThird?.Runner?.FullName;
+            PreviousAbs = [.. currentInning.Atbats.OrderByDescending(o => o.Sequence).Skip(1).Select(s => s.Result)];
+            var inningStack = new Stack<InningModel>();
+            foreach (var inning in game.Innings.Select(s => InningModel.Create(s, s.IsTopHalf ? AwayLogo : HomeLogo)))
+                inningStack.Push(inning);
+            while (inningStack.Any())
+                Innings.Add(inningStack.Pop());
+            var homeScore = 0;
+            var awayScore = 0;
+            var scoreStack = new Stack<ScoringPlayModel>();
+            var x = game.Innings.Where(w => w.Runs > 0).GroupBy(g => g.Number);
+            foreach (var fullInning in x)
+            {
+                var vm = ScoringPlayModel.Create(fullInning.ToList(), HomeLogo, AwayLogo, homeScore, awayScore);
+                homeScore = vm.Plays.First().HomeScore;
+                awayScore = vm.Plays.First().AwayScore;
+                scoreStack.Push(vm);
+            }
+            while (scoreStack.Any())
+                ScoringPlays.Add(scoreStack.Pop());
+            Pitches = currentAb.Result.Split('.').Where(w => w.Trim().IsIn(pitchResults)).ToList();
+
+        }
+        private static string[] pitchResults = ["Ball", "Called strike", "Foul", "Strike swinging"];
         public LiveGameModel(BaseballGame fullGame, DateTime gameDate, Location location, List<HittingStatsRow> seasonStats = null) : this()
         {
             Fill(fullGame, gameDate, location, seasonStats);

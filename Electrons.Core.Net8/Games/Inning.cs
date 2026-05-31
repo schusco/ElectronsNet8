@@ -29,6 +29,7 @@ namespace Electrons.Core.Net8.Games
             var nextBatter = Team.NextHitter(sameHitter);
             var ab = _navEvents.Any() ? _navEvents.Pop() : NewAb(nextBatter);
             _events.Push(ab);
+            OnInningUpdated();
             return ab;
         }
         private AtBat NewAb(Player batter)
@@ -74,7 +75,7 @@ namespace Electrons.Core.Net8.Games
         internal void AddAb(AtBat ab) => _events.Push(ab);
         internal void AtBat_AtBatFinished(object sender, EventArgs e)
         {
-            InningUpdated?.Invoke(this, new EventArgs());
+            OnInningUpdated();
             if (Outs > 3)
                 throw new BaseballGameException("Too many outs");
             if (Outs == 3)
@@ -162,7 +163,7 @@ namespace Electrons.Core.Net8.Games
             CurrentPitcher = pitcher;
             foreach (var ab in _events.Where(w => w.Pitcher is null || w.Pitcher.IsUnknown))
                 ab.SetPitcher((Player)pitcher);
-            InningUpdated?.Invoke(this, new EventArgs());
+            OnInningUpdated();
         }
         public bool InningIsFinished { get; private set; }
         [JsonIgnore]
@@ -286,7 +287,7 @@ namespace Electrons.Core.Net8.Games
             var inning = _events.Pop();
             _navEvents.Push(inning);
             Team.SetNextHitter(CurrentAb.Batter);
-            InningUpdated?.Invoke(this, new EventArgs());
+            OnInningUpdated();
         }
         internal void NextAtBat()
         {
@@ -295,7 +296,7 @@ namespace Electrons.Core.Net8.Games
                 var inning = _navEvents.Pop();
                 _events.Push(inning);
                 Team.SetNextHitter(CurrentAb.Batter);
-                InningUpdated?.Invoke(this, new EventArgs());
+                OnInningUpdated();
             }
         }
         internal void MoveCurrent()
@@ -366,6 +367,7 @@ namespace Electrons.Core.Net8.Games
             }
         }
 
+        private void OnInningUpdated() => InningUpdated?.Invoke(this, EventArgs.Empty);
         internal void SetPitcher(Pitcher currentPitcher) => CurrentPitcher = currentPitcher;
         private readonly bool _inningStartsWithLastBatterFromPreviousInning;
         private readonly Stack<AtBat> _events;

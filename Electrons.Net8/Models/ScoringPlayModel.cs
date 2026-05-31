@@ -7,9 +7,11 @@ namespace Electrons.Net8.Models
 {
     public class ScoringPlayModel
     {
-        public ScoringPlayModel()
+        public ScoringPlayModel(string homeLogo, string awayLogo)
         {
             Plays = new List<ScoringPlay>();
+            HomeLogo = homeLogo;
+            AwayLogo = awayLogo;
         }
         public string InningText { get; set; }
         public List<ScoringPlay> Plays { get; set; }
@@ -17,15 +19,8 @@ namespace Electrons.Net8.Models
         public string AwayLogo { get; set; }
         internal static ScoringPlayModel Create(List<Inning> innings, string homeLogo, string awayLogo, int hscore, int ascore)
         {
-            var vm = new ScoringPlayModel();
-            var inningNumber = innings.First().Number;
-            if (inningNumber == 1)
-                vm.InningText = "1ST INNING";
-            else if (inningNumber == 2) vm.InningText = "2ND INNING";
-            else if (inningNumber == 3) vm.InningText = "3RD INNING";
-            else vm.InningText = $"{inningNumber}TH INNING";
-            vm.HomeLogo = homeLogo;
-            vm.AwayLogo = awayLogo;
+            var vm = new ScoringPlayModel(homeLogo, awayLogo);
+            SetInningText(vm, innings.First().Number);
 
             var playStack = new Stack<ScoringPlay>();
             foreach (var inning in innings)
@@ -44,25 +39,65 @@ namespace Electrons.Net8.Models
                 vm.Plays.Add(playStack.Pop());
             return vm;
         }
-    }
-
-    public class ScoringPlay
-    {
-        public string ScoreText { get; set; }
-        public string TeamLogo { get; set; }
-        public int HomeScore { get; set; }
-        public int AwayScore { get; set; }
-
-        internal static ScoringPlay Create(AtBat ab, string logo, int hscore, int ascore)
+        internal static ScoringPlayModel Create(List<ScoreboardApi.Models.Inning> innings, string homeLogo, string awayLogo, int hscore, int ascore)
         {
-            return new ScoringPlay
+            var vm = new ScoringPlayModel(homeLogo, awayLogo);
+            SetInningText(vm, innings.First().Number);
+            var playStack = new Stack<ScoringPlay>();
+            foreach (var inning in innings)
             {
-                ScoreText = ab.ScoreText, 
-                TeamLogo = logo,
-                HomeScore = hscore,
-                AwayScore = ascore
-            };
+                var logo = inning.IsTopHalf ? awayLogo : homeLogo;
+                foreach (var play in inning.Atbats.Where(w => w.IsScoringPlay))
+                {
+                    if (inning.IsTopHalf)
+                        ascore += play.Scoring;
+                    else
+                        hscore += play.Scoring;
+                    playStack.Push(ScoringPlay.Create(play, logo, hscore, ascore));
+                }
+            }
+            while (playStack.Any())
+                vm.Plays.Add(playStack.Pop());
+            return vm;
         }
-        public override string ToString() => ScoreText;
+
+        private static void SetInningText(ScoringPlayModel vm, int inningNumber)
+        {
+            if (inningNumber == 1)
+                vm.InningText = "1ST INNING";
+            else if (inningNumber == 2) vm.InningText = "2ND INNING";
+            else if (inningNumber == 3) vm.InningText = "3RD INNING";
+            else vm.InningText = $"{inningNumber}TH INNING";
+        }
+
+        public class ScoringPlay
+        {
+            public string ScoreText { get; set; }
+            public string TeamLogo { get; set; }
+            public int HomeScore { get; set; }
+            public int AwayScore { get; set; }
+
+            internal static ScoringPlay Create(AtBat ab, string logo, int hscore, int ascore)
+            {
+                return new ScoringPlay
+                {
+                    ScoreText = ab.ScoreText,
+                    TeamLogo = logo,
+                    HomeScore = hscore,
+                    AwayScore = ascore
+                };
+            }
+            internal static ScoringPlay Create(ScoreboardApi.Models.Atbat ab, string logo, int hscore, int ascore)
+            {
+                return new ScoringPlay
+                {
+                    ScoreText = ab.Result,
+                    TeamLogo = logo,
+                    HomeScore = hscore,
+                    AwayScore = ascore
+                };
+            }
+            public override string ToString() => ScoreText;
+        }
     }
 }
