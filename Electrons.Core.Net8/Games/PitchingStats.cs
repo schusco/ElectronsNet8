@@ -17,22 +17,22 @@ namespace Electrons.Core.Net8.Games
         public string DecisionDisplay => Decision.GetDescription();
         public int GS { get; private set; }
         [TableColumn("H", 10)]
-        public int H { get; private set; }
+        public int H { get; set; }
         [TableColumn("HR", 37)]
-        public int HR { get; private set; }
+        public int HR { get; set; }
         [TableColumn("BB", 25)]
-        public int BB { get; private set; }
+        public int BB { get; set; }
         [TableColumn("K", 30)]
-        public int K { get; private set; }
+        public int K { get; set; }
         [TableColumn("HB", 35)]
         public int HB { get; private set; }
         [TableColumn("BF", 40)]
-        public int BF { get; private set; }
+        public int BF { get; set; }
         [TableColumn("R", 15)]
-        public int R { get; private set; }
+        public int R { get; set; }
         [TableColumn("ER", 20)]
         public int ER { get; private set; }
-        public int Outs { get; private set; }
+        public int Outs { get; set; }
         [TableColumn("IP", 5)]
         public string IP => $"{Math.Floor(Outs / 3M)}.{Outs % 3}";
         public int CG { get; private set; }
@@ -63,7 +63,7 @@ namespace Electrons.Core.Net8.Games
         internal void SetAsCompleteGame() => CG = 1;
         internal void SetDecision(Decision dec) => Decision = dec;
         public override string ToString() => $"{Player} ({Decision})";
-        internal static PStats Create(Player pitcher)
+        public static PStats Create(Player pitcher)
         {
             return new PStats
             {

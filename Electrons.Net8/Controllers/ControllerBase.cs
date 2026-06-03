@@ -16,6 +16,7 @@ namespace Electrons.Net8.Controllers
     {
         protected Repository Repository;
         protected ILog Log;
+        protected IMemoryCache Cache;
         private readonly IHttpContextAccessor _httpContextAccessor;
         protected HttpContext CurrentContext => _httpContextAccessor.HttpContext;
         protected IWebHostEnvironment WebHostEnvironment { get; set; }
@@ -26,6 +27,7 @@ namespace Electrons.Net8.Controllers
             GameSettings = settings.Value;
             WebHostEnvironment = env;
             var configPath = WebHostEnvironment.ContentRootPath;
+            Cache = cache;
             Repository = new Repository(session, cache);
         }
         protected T GetSessionValue<T>(string key) where T : class

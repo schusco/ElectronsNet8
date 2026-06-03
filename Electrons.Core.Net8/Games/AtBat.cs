@@ -39,7 +39,7 @@ namespace Electrons.Core.Net8.Games
         public int Sequence { get; private set; }
         public IOrderedEnumerable<InningEvent> Events { get => _events.OrderBy(o => o.Sequence); private set => _events = value.ToList(); }
         [JsonIgnore]
-        internal int Outs => _events.Where(w => !w.IsScoringRequired()).Sum(m => m.Outs);
+        public int Outs => _events.Where(w => !w.IsScoringRequired()).Sum(m => m.Outs);
         [JsonIgnore]
         public int Runs => _events.Sum(m => m.Runs);
         [JsonIgnore]
@@ -133,12 +133,13 @@ namespace Electrons.Core.Net8.Games
         internal void OnRunningEventChanged(InningEvent ev) => RunningEventAdded?.Invoke(this, new InningEventArgs(ev));
         internal bool Finish(Inning currentInning)
         {
-            if (IsFinished)
-                return false;
-            AddEvent(_result);
-            foreach (var advance in AdvancingRunners.OfType<RunScored>())
-                RunScored?.Invoke(this, new InningEventArgs(advance));
-            RunnersOnForAb = currentInning.CurrentRunners.Runners;
+            if (!IsFinished)
+            {
+                RunnersOnForAb = currentInning.CurrentRunners.Runners;
+                AddEvent(_result);
+                foreach (var advance in AdvancingRunners.OfType<RunScored>())
+                    RunScored?.Invoke(this, new InningEventArgs(advance));                
+            }
             AtBatFinished?.Invoke(this, new InningEventArgs(_result));
             if (_result.HasFielders && Events.Any(a => a.IsScoringRequired()))
                 _result.ClearScoringRequired();

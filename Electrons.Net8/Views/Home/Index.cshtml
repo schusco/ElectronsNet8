@@ -2,7 +2,63 @@
 @using Elecredesign;
 @using Electrons.Net8
 @using Electrons.Net8.Models
+@section Scripts {
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl(baseurl+"scorehub")
+            .withAutomaticReconnect([0, 2000, 5000, 10000, null])
+            .build();
+        connection.serverTimeoutInMilliseconds=30000; // 30 second timeout
+        connection.keepAliveIntervalInMilliseconds= 15000; // 15 second keep alive ping
 
+        connection.on("GameUpdated", (game) => {
+            // 1. Find the elements on the page
+            const homeScoreEl = document.getElementById(`score-home-${game.gameId}`);
+            const awayScoreEl = document.getElementById(`score-away-${game.gameId}`);
+            const inningEl = document.getElementById(`score-inning-${game.gameId}`);
+            const upCaret = document.getElementById("caret-up");
+            const downCaret = document.getElementById("caret-down");
+            if (homeScoreEl && awayScoreEl) {
+                // 2. Update the text (This is your "Binding")
+                homeScoreEl.innerText = game.homeRuns;
+                awayScoreEl.innerText = game.awayRuns;
+                if (game.status=="Scheduled") {
+                    inningEl.innerText = 'In Progress';
+                } else {
+                    const pattern=/^(Top|Bottom) of (\d+)$/;
+                    const match=game.status.match(pattern);
+                    if (match){
+                        const inningHalf=match[1];
+                        inningEl.innerText = match[2];
+                        if (inningHalf === "Top"){
+                            upCaret?.classList.remove("d-none");
+                            downCaret?.classList.add("d-none");
+                        } else if (inningHalf === "Bottom"){
+                            downCaret?.classList.remove("d-none");
+                            upCaret?.classList.add("d-none");
+                        }
+                    }
+                }
+                // 3. Add your CSS "Pop" animation
+                const card = document.getElementById(`game-${game.gameId}`);
+                const scoreCells = card.querySelectorAll('.score-box');
+
+                scoreCells.forEach(cell => {
+                    cell.classList.add('score-updated');
+                    setTimeout(() => cell.classList.remove('score-updated'), 2000);
+                });
+
+            }
+        });
+
+        connection.start().catch(err => console.error(err));
+        setInterval(() =>{
+            if (connection.state === signalR.HubConnectionState.Connnected) {
+                connection.invoke("Heartbeat").catch(err => console.error("Heartbeat failed: ", err));
+            }
+        }, 20000);
+    </script>
+}
 <div class="container theme-showcase" role="main">
     <div class="row">
         <div class="col-sm-12 mt-3">
@@ -10,7 +66,7 @@
                 <h1 class="display-4 center" style="font-weight:bold">@Html.Raw(Model.JumboText)</h1>
             </div>
             <div>
-                <h5 class="center alert alert-info"><a href="~/Home/Download" >Download the CMBA mobile app</a></h5>
+                <h5 class="center alert alert-info"><a href="~/Home/Download">Download the CMBA mobile app</a></h5>
             </div>
         </div>
     </div>
@@ -48,7 +104,7 @@
                         <div class="nextOutingText col col-xs-3 center score-box">
                             <h1 id="score-home-@Model.GameId">  @Model.HomeScore</h1>
                         </div>
-                        <div class="nextOutingText col col-xs-6 center score-box d-inline-flex align-items-center justify-content-center" >
+                        <div class="nextOutingText col col-xs-6 center score-box d-inline-flex align-items-center justify-content-center">
                             <span id="caret-up" class="bi bi-caret-up-fill me-1 @(Model.IsTopHalfOfInning.HasValue && Model.IsTopHalfOfInning.Value ? "" : "d-none")"></span>
                             <span id="caret-down" class="bi bi-caret-down-fill me-1 @(Model.IsTopHalfOfInning.HasValue && !Model.IsTopHalfOfInning.Value ? "" : "d-none")"></span>
                             <span id="score-inning-@Model.GameId" style="font-size:.75em">@Model.LiveInning</span>
@@ -73,15 +129,15 @@
                     <div class="nextOutingText col col-sm-12">
                         @if (Model.NextGameInProgress)
                         {
-                            <span>Live</span>
+                            <span><a asp-controller="Game" asp-action="Live" asp-route-id="@Model.GameId">Live</a></span>
                         }
                         else if (Model.NextGameRecap)
                         {
-                            <span>@Html.ActionLink("Game Recap", "Live", "Game")</span>
+                            <span><a asp-controller="Game" asp-action="Live" asp-route-id="@Model.GameId">Game Recap</a></span>
                         }
                         else
                         {
-                            <span>@Html.ActionLink("Complete Schedule", "Index", "Schedule", null, new { @class = "complSched" })</span>
+                            <span><a asp-action="Index" asp-controller="Schedule" class="complSched">Complete Schedule</a></span>
                         }
                     </div>
                 </div>

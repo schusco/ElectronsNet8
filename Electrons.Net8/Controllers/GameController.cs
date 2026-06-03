@@ -1,4 +1,5 @@
-﻿using Electrons.Core.Net8.Games;
+﻿using Electrons.Core.Net8;
+using Electrons.Core.Net8.Games;
 using Electrons.Net8.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -8,16 +9,18 @@ using Microsoft.Extensions.Options;
 using ScoreboardApi.Models;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Electrons.Net8.Controllers
 {
-    public class GameController(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, 
+    public class GameController(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor,
         IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings, HttpClient client)
         : ControllerBase(session, cache, httpContextAccessor, env, settings)
     {
         private readonly HttpClient _client = client;
+        
         public ActionResult Index(int? id) => RedirectToAction("Game", "Statistics", new { id });
         public ActionResult Plays(int? id)
         {
@@ -64,6 +67,54 @@ namespace Electrons.Net8.Controllers
                 return View(new LiveGameModel(game));
             }
             return View("Error");
+        }
+
+        public async Task<ActionResult> GetPlayByPlayPartial(int gameId)
+        {
+            var data = await GetCachedGameData(gameId);
+            return PartialView("PlayByPlay", data.PlayByPlay);
+        }
+        public async Task<ActionResult> GetScoringPlaysPartial(int gameId)
+        {
+            var data = await GetCachedGameData(gameId);
+            return PartialView("ScoringPlay", data.ScoringPlays);
+        }
+        public async Task<ActionResult> GetBoxScorePartial(int gameId, bool home)
+        {
+            var data = await GetCachedGameData(gameId);
+            ViewData.Add("home", home);
+            ViewData.Add("logo", home ? data.HomeTeamName.GetLogo() : data.AwayTeamName.GetLogo());
+            ViewData.Add("team", home ? data.HomeTeamName : data.AwayTeamName);
+            return PartialView("BoxScore", home ? data.HomeBoxScore : data.AwayBoxScore);
+        }
+        private async Task<GameInningUpdateDto> GetCachedGameData(int gameId)
+        {
+            string cacheKey = $"game_history_{gameId}";
+
+            // Try to get the data from server memory. If it's missing, execute the factory block:
+            return await Cache.GetOrCreateAsync(cacheKey, async entry =>
+            {
+                // Set a strict expiration window so it never stays stale
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3);
+                var response = await _client.GetAsync($"{GameSettings.BaseApiUrl}api/Games/{gameId}/full");
+                if (response.IsSuccessStatusCode)
+                {
+                    var game = await response.Content.ReadAsAsync<GameScore>();
+
+                    // Fetch the heavy data from the database ONCE
+                    return new GameInningUpdateDto
+                    {
+                        GameId = gameId,
+                        HomeTeamName = game.HomeTeam?.Name ?? "Home Team",
+                        AwayTeamName = game.AwayTeam?.Name ?? "Away Team",
+                        PlayByPlay = InningModel.CreateInnings(game.Innings.ToList(), game.HomeTeam.Name.GetLogo(), game.AwayTeam.Name.GetLogo()),
+                        HomeBoxScore = HomeBoxScore.Create(game),
+                        AwayBoxScore = AwayBoxScore.Create(game),
+                        ScoringPlays = ScoringPlayModel.CreateScoringPlays(game.Innings.ToList(), game.HomeTeam.Name.GetLogo(), game.AwayTeam.Name.GetLogo())
+                    };
+                }
+                throw new Exception($"Failed to fetch game data for game ID {gameId}");
+            });
         }
     }
 }

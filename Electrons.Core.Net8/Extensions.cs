@@ -227,7 +227,7 @@ namespace Electrons.Core.Net8
         }
         public static string GetFormat<T>(this Enum input)
         {
-            var attr= input.GetStatAttribute();
+            var attr = input.GetStatAttribute();
             if (attr == null)
                 return "";
             var statPropertyName = attr.Name;
@@ -321,6 +321,69 @@ namespace Electrons.Core.Net8
         {
             TimeZoneInfo cst = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
             return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, cst);
+        }
+        public static bool IsHit(this string input)
+        {
+            var hits = new[] { "single", "singled", "doubled", "tripled", "homered" };
+            foreach (var item in hits)
+            {
+                if (input.Contains(item))
+                    return true;
+            }
+            return false;
+        }
+        public static bool IsHomeRun(this string input)
+        {
+            var hits = new[] { "home run", "homered" };
+            foreach (var item in hits)
+            {
+                if (input.Contains(item))
+                    return true;
+            }
+            return false;
+        }
+        public static bool IsDouble(this string input)
+        {
+            var hits = new[] { "double", "doubled" };
+            foreach (var item in hits)
+            {
+                if (input.Contains(item))
+                    return true;
+            }
+            return false;
+        }
+        public static bool IsTriple(this string input)
+        {
+            var hits = new[] { "triple", "tripled" };
+            foreach (var item in hits)
+            {
+                if (input.Contains(item))
+                    return true;
+            }
+            return false;
+        }
+        public static bool IsAtBat(this string input)
+        {
+            if (input.IsHit())
+                return true;
+            var hits = new[] { "out", "fielders choice", "error" };
+            foreach (var item in hits)
+            {
+                if (input.Contains(item))
+                    return true;
+            }
+            return false;
+        }
+        public static int GetRbi(this string input)
+        {
+            var rbi = 0;
+            var hits = new[] { "scored", "and", "error" };
+            foreach (var item in hits)
+            {
+                if (input.Contains(item))
+                    rbi++;
+            }
+            return rbi;
         }
     }
 

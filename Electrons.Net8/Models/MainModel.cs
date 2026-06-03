@@ -1,6 +1,7 @@
 ﻿using Electrons.Core.Net8;
 using Electrons.Core.Net8.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
+using NHibernate.Criterion;
 using ScoreboardApi.Models;
 using System;
 using System.Collections.Generic;
@@ -12,50 +13,57 @@ namespace Electrons.Net8.Models
     {
         public MainModel() { }
 
-        public MainModel(Repository repo, GameSettings settings, IWebHostEnvironment env, GameScore apiData, List<ScoreboardApi.Models.StandingsRow> standings = null)
+        public MainModel(Repository repo, GameSettings settings, IWebHostEnvironment env, List<GameScore> apiData, List<StandingsRow> standings = null)
         {
             
-            JumboText = settings.JumboText;
+           JumboText = settings.JumboText;
             var nextOutingTime = DateTime.Now.Actual().AddHours(-3);
-            var lastOuting = repo.GetNextOuting(DateTime.Now.Actual().AddHours(-12));
+            var lastOuting = repo.GetNextOuting(DateTime.Now.Actual().AddHours(-18));
             var nextOuting = repo.GetNextOuting(nextOutingTime);
-            if (nextOuting != null)
+            if (lastOuting != nextOuting)
+                DisplayLastGame = true;
+            var displayOuting = DisplayLastGame && lastOuting != null ? lastOuting : nextOuting;
+            if (displayOuting != null)
             {
-                if (nextOuting.GameDate.Date == DateTime.Now.Actual().Date && nextOutingTime < DateTime.Now.Actual())
+                if (displayOuting.GameDate.Date == DateTime.Now.Actual().Date && displayOuting.GameDate < DateTime.Now.Actual())
                     NextGameInProgress = true;
-                if (nextOuting.GameFile != null)
-                    NextGameRecap = true;
-                if (lastOuting != nextOuting)
-                    DisplayLastGame = true;
-                var displayOuting = DisplayLastGame && lastOuting != null ? lastOuting : nextOuting;
+                if (displayOuting.GameFile != null)
+                    NextGameRecap = true;                
+                
                 var gd = GameDataModel.Create(displayOuting);
                 HomeLogo = gd.GetHomeLogo();
                 AwayLogo = gd.GetAwayLogo();
                 HomeTeam = gd.HomeTeam;
                 AwayTeam = gd.AwayTeam;
-                GameId = apiData?.GameId;
+                
                 GameDate = gd.GameDate.ToString("g");
-                Location = nextOuting.Location.Field;
+                Location = displayOuting.Location.Field;
                 if (NextGameInProgress)
                 {
-                    if (apiData != null)
+                    GameScore currentGame;
+                    if (displayOuting.HV == HV.H)
+                        currentGame = apiData.SingleOrDefault(s => s.GameDate.Date == DateTime.Today && s.HomeTeam.Name == "Electrons" && s.AwayTeam.Name == nextOuting.Opponent);
+                    else
+                        currentGame = apiData.SingleOrDefault(s => s.GameDate.Date == DateTime.Today && s.HomeTeam.Name == nextOuting.Opponent && s.AwayTeam.Name == "Electrons");
+                    if (currentGame != null)
                     {
-                        HomeScore = apiData?.HomeRuns.ToString() ?? "0";
-                        AwayScore = apiData?.AwayRuns.ToString() ?? "0";
-                        if (apiData?.Status == "Scheduled")
-                            LiveInning = apiData.GameDate.ToShortTimeString();
-                        else if (apiData?.Status.Contains("Top") ?? false)
+                        GameId = currentGame.GameId;
+                        HomeScore = currentGame.HomeRuns.ToString() ?? "0";
+                        AwayScore = currentGame.AwayRuns.ToString() ?? "0";
+                        if (currentGame.Status == "Scheduled")
+                            LiveInning = currentGame.GameDate.ToShortTimeString();
+                        else if (currentGame.Status.Contains("Top"))
                         {
                             IsTopHalfOfInning = true;
-                            LiveInning = apiData.Status.Replace("Top of", "").Trim();
+                            LiveInning = currentGame.Status.Replace("Top of", "").Trim();
                         }
-                        else if (apiData?.Status.Contains("Bottom") ?? false)
+                        else if (currentGame.Status.Contains("Bottom"))
                         {
                             IsTopHalfOfInning = false;
-                            LiveInning = apiData.Status.Replace("Bottom of", "").Trim();
+                            LiveInning = currentGame.Status.Replace("Bottom of", "").Trim();
                         }
                         else
-                            LiveInning = apiData?.Status ?? "";
+                            LiveInning = currentGame.Status ?? "";
                     }
                     else
                         LiveInning = nextOuting.GameDate.ToShortTimeString();
@@ -63,11 +71,14 @@ namespace Electrons.Net8.Models
                 else if (DisplayLastGame)
                 {
                     LiveInning = "Final";
-                    if (apiData != null)
+                    var currentGame = apiData.Where(w => w.GameDate < DateTime.Now).OrderBy(o => o.GameDate).LastOrDefault();
+                    var test = apiData.Where(w => w.GameDate < DateTime.Now);
+                    var test2 = test.OrderBy(o => o.GameDate).LastOrDefault();
+                    if (currentGame != null)
                     {
-                        HomeScore = apiData?.HomeRuns.ToString() ?? "0";
-                        AwayScore = apiData?.AwayRuns.ToString() ?? "0";
-
+                        GameId = currentGame.GameId;
+                        HomeScore = currentGame.HomeRuns.ToString();
+                        AwayScore = currentGame.AwayRuns.ToString();
                     }
                 }
             }

@@ -22,7 +22,7 @@ namespace Electrons.Net8.Controllers
         public async Task<ActionResult> Index()
         {
             List<StandingsRow> standings = null;
-            List<GameScore> apiData = await _client.GetFromJsonAsync<List<GameScore>>($"{GameSettings.BaseApiUrl}api/Games/getbydate/{DateTime.Now.Actual():yyyy-MM-dd}");
+            List<GameScore> apiData = await _client.GetFromJsonAsync<List<GameScore>>($"{GameSettings.BaseApiUrl}api/teams/1/Games");
             try
             {
                 if (GameSettings.UseApiForStandings)
@@ -34,9 +34,8 @@ namespace Electrons.Net8.Controllers
                 Console.WriteLine($"Error fetching standings: {ex.Message}");
                 // Optionally, you can set standings to an empty list or null to handle it gracefully in the view
                 standings = new List<StandingsRow>();
-            }
-            var currentGame = apiData?.FirstOrDefault(w => w.HomeTeamId == 1 || w.AwayTeamId == 1);
-            return View(new MainModel(Repository, GameSettings, WebHostEnvironment, currentGame, standings));
+            }            
+            return View(new MainModel(Repository, GameSettings, WebHostEnvironment, apiData, standings));
         }
         public ActionResult Download() => View();
         public ActionResult Electrons20() => View();

@@ -1,5 +1,7 @@
 ﻿@using Elecredesign
 @using Electrons.Net8
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -11,11 +13,14 @@
     <link rel="icon" href="/favicon.ico" />
 
     <title>@ViewBag.Title</title>
-    <!-- Bootstrap core CSS -->@Url.Css("~/Content/electrons.css")
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="~/Content/electrons.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
     <link href="~/Content/bootstrap-icons.css" rel="stylesheet" />
     <!-- Electrons theme -->
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+    <script>const baseurl="@Configuration["GameSettings:BaseApiUrl"]";</script>
+    @await RenderSectionAsync("Scripts", required: false)    
 
 </head>
 

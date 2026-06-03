@@ -1,6 +1,7 @@
 ﻿using Electrons.Core.Net8.Games;
 using Scorebook.Messages;
 using Scorebook.ViewObjects;
+using System.Text.RegularExpressions;
 
 
 namespace Scorebook.Coordinators
@@ -214,10 +215,15 @@ namespace Scorebook.Coordinators
 
         private Player GetPlayer(TeamWrapper team, string action)
         {
-            var newPlayer = team.CoreTeam.Roster.FirstOrDefault(s => s.Number.ToString() == action);
+            var match = Regex.Match(action, @"^(\d+)\s*-\s*([^,]+)");
+            if (!match.Success) 
+                throw new FormatException("Player string is not in the expected format 'Number - LastName, FirstName'");
+            var number = int.Parse(match.Groups[1].Value.Trim());
+            var lname = match.Groups[2].Value.Trim();
+            var newPlayer = team.CoreTeam.Roster.FirstOrDefault(s => s.Number == number && s.LastName == lname);
             if (newPlayer is null)
             {
-                newPlayer = Player.Unknown(int.Parse(action));
+                newPlayer = Player.Unknown(number);
                 team.CoreTeam.AddPlayer(newPlayer);
             }
             return newPlayer;

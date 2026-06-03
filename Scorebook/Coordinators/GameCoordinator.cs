@@ -12,7 +12,7 @@ namespace Scorebook.Coordinators
         {
             ViewModel.GameIsOver = true;
             ViewModel.LineScore.Clear();            
-            ViewModel.Game.SetGameEndTime(ViewModel.GameManager.SelectedGame.EndDateTime);
+            ViewModel.Game.SetGameEndTime(ViewModel.GameManager.SelectedGame?.EndDateTime);
             ViewModel.TotalInningCount = new int[] { 7, ViewModel.Game.Innings.Max(m => m.Number) }.Max();
             var grps = ViewModel.Game?.Innings.GroupBy(g => g.Number);
             for (int i = 1; i <= ViewModel.TotalInningCount; i++)
