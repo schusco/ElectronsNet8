@@ -6,13 +6,13 @@
         <th style="width:30px"></th>
         <th ></th>
         @{
-            var totalInnings = Model.TotalInnings;
+            var totalInnings = Model.TotalInnings;            
             if (Model.AwayInnings.Count > 7)
             {
                 totalInnings = Model.AwayInnings.Count;
             }
             for (int i = 1; i <= totalInnings; i++)
-            {
+            {                
                 <th>@i</th>
             }
         }
@@ -20,9 +20,9 @@
         <th>H</th>
         <th>E</th>
     </tr>
-    <tr>
+    <tr class="awayrow">
         <td>@Html.Image(Model.AwayLogo,"24")</td>
-        <td style="text-align:left;min-width:100px">@Model.AwayName</td>
+        <td style="text-align:left;min-width:120px">@Model.AwayName</td>
         @for (int i = 0; i < totalInnings; i++)
         {
             if (i >= Model.AwayInnings.Count)
@@ -31,14 +31,16 @@
             }
             else
             {
-                <td class="text-center">@Model.AwayInnings[i]</td>
+                var currentInning = i + 1;
+                var inningClass = Model.InningHalf == Electrons.Core.Net8.HalfInning.Top && currentInning == Model.InningNumber ? "activeInning" : "";
+                <td class="text-center @inningClass">@Model.AwayInnings[i]</td>
             }
         }
-        <td class="text-center">@Model.AwayScore</td>
-        <td class="text-center">@Model.AwayHits</td>
-        <td class="text-center">@Model.AwayErrors</td>
+        <td id="awayRunsLs" class="text-center">@Model.AwayScore</td>
+        <td id="awayHitsLs" class="text-center">@Model.AwayHits</td>
+        <td id="awayErrorsLs" class="text-center">@Model.AwayErrors</td>
     </tr>
-    <tr>
+    <tr class="homerow">
         <td>@Html.Image(Model.HomeLogo,"24")</td>
         <td style="text-align:left;min-width:100px;">@Model.HomeName</td>
         @for (int i = 0; i < totalInnings; i++)
@@ -49,12 +51,14 @@
             }
             else
             {
-                <td class="text-center">@Model.HomeInnings[i]</td>
+                var currentInning = i + 1;
+                var inningClass = Model.InningHalf == Electrons.Core.Net8.HalfInning.Bottom && currentInning == Model.InningNumber ? "activeInning" : "";
+                <td class="text-center @inningClass">@Model.HomeInnings[i]</td>
             }
         }
-        <td class="text-center">@Model.HomeScore</td>
-        <td class="text-center">@Model.HomeHits</td>
-        <td class="text-center">@Model.HomeErrors</td>
+        <td id="homeRunsLs" class="text-center">@Model.HomeScore</td>
+        <td id="homeHitsLs" class="text-center">@Model.HomeHits</td>
+        <td id="homeErrorsLs" class="text-center">@Model.HomeErrors</td>
     </tr>
     <tfoot>
         <tr>@{

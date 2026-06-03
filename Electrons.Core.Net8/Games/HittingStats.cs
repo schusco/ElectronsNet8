@@ -21,17 +21,17 @@ namespace Electrons.Core.Net8.Games
         public Player Player { get; private set; }
         public int G { get; private set; }
         [TableColumn("2B", 25)]
-        public int Doubles { get; private set; }
+        public int Doubles { get; set; }
         [TableColumn("3B", 30)]
-        public int Triples { get; private set; }
+        public int Triples { get; set; }
         [TableColumn("HR", 35)]
-        public int HR { get; private set; }
+        public int HR { get; set; }
         [TableColumn("AB", 5)]
-        public int AB { get; private set; }
+        public int AB { get; set; }
         [TableColumn("R", 10)]
         public int Runs { get; private set; }
         [TableColumn("H", 15)]
-        public int H { get; private set; }
+        public int H { get; set; }
         [TableColumn("BB", 40)]
         public int BB { get; private set; }
         [TableColumn("K", 45)]
@@ -39,9 +39,9 @@ namespace Electrons.Core.Net8.Games
         [TableColumn("SB", 50)]
         public int SB { get; private set; }
         [TableColumn("CS", 55)]
-        public int CS { get; private set; }
+        public int CS { get; set; }
         [TableColumn("RBI", 20)]
-        public int RBI { get; private set; }
+        public int RBI { get; set; }
         [TableColumn("HBP", 48)]
         public int HBP { get; private set; }
         public int SAC { get; private set; }
@@ -128,7 +128,7 @@ namespace Electrons.Core.Net8.Games
                 Player = Player.Create(hitter.UniformNumber, hitter.LastName, hitter.FirstName, hitter.Id),
             };
         }
-        internal static HStats Create(Player player)
+        public static HStats Create(Player player)
         {
             return new HStats
             {

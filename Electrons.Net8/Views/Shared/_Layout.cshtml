@@ -20,6 +20,9 @@
     <!-- Electrons theme -->
     <link href="~/Content/electrons.css?v=@DateTime.Now.Ticks" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+    <script>const baseurl="@Configuration["GameSettings:BaseApiUrl"]";</script>
+    @await RenderSectionAsync("Scripts", required: false)
 </head>
 
 <body role="document" style="margin-left:25px;margin-right:25px; padding:5px">
@@ -78,8 +81,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script src="~/Scripts/jquery.tablesorter.min.js"></script>
-    <script src="~/Scripts/jquery.tablesorter.widgets.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+    <script src="~/Scripts/jquery.tablesorter.widgets.js"></script>    
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script>
         $(document).on("ajaxStart",function () {
@@ -131,62 +133,7 @@
                     }
                 });
             })
-        });
-        const baseurl="@Configuration["GameSettings:BaseApiUrl"]";       
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl(baseurl+"scorehub")
-            .withAutomaticReconnect([0, 2000, 5000, 10000, null])
-            .build();
-        connection.serverTimeoutInMilliseconds=30000; // 30 second timeout
-        connection.keepAliveIntervalInMilliseconds= 15000; // 15 second keep alive ping
-
-        connection.on("GameUpdated", (game) => {            
-            // 1. Find the elements on the page
-            const homeScoreEl = document.getElementById(`score-home-${game.gameId}`);
-            const awayScoreEl = document.getElementById(`score-away-${game.gameId}`);
-            const inningEl = document.getElementById(`score-inning-${game.gameId}`);
-            const upCaret = document.getElementById("caret-up");
-            const downCaret = document.getElementById("caret-down");
-            if (homeScoreEl && awayScoreEl) {
-                // 2. Update the text (This is your "Binding")
-                homeScoreEl.innerText = game.homeRuns;
-                awayScoreEl.innerText = game.awayRuns;
-                if (game.status=="Scheduled") {
-                    inningEl.innerText = 'In Progress';
-                } else {
-                    const pattern=/^(Top|Bottom) of (\d+)$/;
-                    const match=game.status.match(pattern);
-                    if (match){
-                        const inningHalf=match[1];
-                        inningEl.innerText = match[2];
-                        if (inningHalf === "Top"){
-                            upCaret?.classList.remove("d-none");
-                            downCaret?.classList.add("d-none");
-                        } else if (inningHalf === "Bottom"){
-                            downCaret?.classList.remove("d-none");
-                            upCaret?.classList.add("d-none");
-                        }
-                    }
-                }
-                // 3. Add your CSS "Pop" animation
-                const card = document.getElementById(`game-${game.gameId}`);
-                const scoreCells = card.querySelectorAll('.score-box');
-                
-                scoreCells.forEach(cell => {
-                    cell.classList.add('score-updated');
-                    setTimeout(() => cell.classList.remove('score-updated'), 2000);
-                });                
-                
-            }
-        });
-
-        connection.start().catch(err => console.error(err));
-        setInterval(() =>{
-            if (connection.state === signalR.HubConnectionState.Connnected) {
-                connection.invoke("Heartbeat").catch(err => console.error("Heartbeat failed: ", err));
-            }
-        }, 20000);
-
+        });        
     </script>
     @await RenderSectionAsync("Sortable", required: false)    
 </body>

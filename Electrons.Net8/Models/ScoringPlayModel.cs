@@ -1,7 +1,9 @@
 ﻿using Electrons.Core.Net8;
 using Electrons.Core.Net8.Games;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Electrons.Net8.Models.ScoringPlayModel;
 
 namespace Electrons.Net8.Models
 {
@@ -59,6 +61,28 @@ namespace Electrons.Net8.Models
             while (playStack.Any())
                 vm.Plays.Add(playStack.Pop());
             return vm;
+        }
+
+        internal static List<ScoringPlayModel> CreateScoringPlays(List<ScoreboardApi.Models.Inning> innings, string homeLogo, string awayLogo)
+        {
+            var list = new List<ScoringPlayModel>();
+            int homeScore = 0;
+            int awayScore = 0;
+            var scoreStack = new Stack<ScoringPlayModel>();
+            var x = innings.Where(w => w.Runs > 0).GroupBy(g => g.Number);
+            foreach (var fullInning in x)
+            {
+                var vm = Create(fullInning.ToList(), homeLogo, awayLogo, homeScore, awayScore);
+                if (vm.Plays.Any())
+                {
+                    homeScore = vm.Plays.First().HomeScore;
+                    awayScore = vm.Plays.First().AwayScore;
+                    scoreStack.Push(vm);
+                }
+            }
+            while (scoreStack.Any())
+                list.Add(scoreStack.Pop());
+            return list;
         }
 
         private static void SetInningText(ScoringPlayModel vm, int inningNumber)

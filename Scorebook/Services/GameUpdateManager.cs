@@ -44,6 +44,8 @@ namespace Scorebook.Services
         }
         internal async Task SetNextInning()
         {
+            if (_selectedGame is null)
+                return;
             if (_inningNumber == 0)
             {
                 _halfInning = HalfInning.Top;
@@ -71,7 +73,8 @@ namespace Scorebook.Services
             if (result != null)
             {
                 _currentInning = result;
-                await UpdateAb(ConvertAb(_vm.Game.CurrentAb));
+                if (_currentInning != null)
+                    await UpdateAb(ConvertAb(_vm.Game.CurrentAb));
             }
         }
         internal void SetStartDateTime(DateTime? startTime)
@@ -93,7 +96,8 @@ namespace Scorebook.Services
         }
         internal async Task UpdateAb(AtBat ab)
         {
-            await UpdateAb(ConvertAb(ab));
+            if (_currentInning != null)
+                await UpdateAb(ConvertAb(ab));
         }
         internal async Task UpdateInning(Electrons.Core.Net8.Games.Inning currentInning)
         {
@@ -146,6 +150,8 @@ namespace Scorebook.Services
         }
         private ApiAb ConvertAb(AtBat currentAb)
         {
+            if (_currentInning is null)
+                return null;
             var hittingTeam = _currentInning.IsTopHalf ? _selectedGame.AwayTeam : _selectedGame.HomeTeam;
             var pitchingTeam = _currentInning.IsTopHalf ? _selectedGame.HomeTeam : _selectedGame.AwayTeam;
             var batter = ApiService.ApiRosters[hittingTeam.Name].FirstOrDefault(p => p.Number == currentAb.Batter.Number);
@@ -155,6 +161,7 @@ namespace Scorebook.Services
             var pitcherId = pitcher?.Id ?? 0;
             var ab = new ApiAb
             {
+                Id = _currentAtbat.Sequence != currentAb.Sequence ? 0 : _currentAtbat.Id,
                 Sequence = currentAb.Sequence,
                 BatterId = batterId,
                 PitcherId = pitcherId,
@@ -172,7 +179,12 @@ namespace Scorebook.Services
                     Number = currentAb.Pitcher.Number,
                     TeamId = pitchingTeam.Id
                 },
-                Result = currentAb.ToString()
+                Result = currentAb.ToString(),
+                Balls = currentAb.Balls > 3 ? 3 : currentAb.Balls,
+                Strikes = currentAb.Strikes > 2 ? 2 : currentAb.Strikes,
+                Outs = _vm.Game.CurrentInning.Outs,
+                Scoring = currentAb.Runs,
+                OnBase = (int)_vm.Game.CurrentInning.CurrentRunners.Runners.GetDescription()
             };
             return ab;
         }
@@ -181,13 +193,5 @@ namespace Scorebook.Services
         private int _inningNumber;
         private ApiInning? _currentInning;
         private ApiAb? _currentAtbat;
-    }
-    public class InningEventArgs(ApiInning inning) : EventArgs
-    {
-        internal ApiInning Inning = inning;
-    }
-    public class AbEventArgs(ApiAb ab) : EventArgs
-    {
-        internal ApiAb Ab = ab;
     }
 }

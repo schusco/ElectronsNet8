@@ -2,7 +2,6 @@
 using Electrons.Core.Net8.Infrastructure;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Electrons.Net8.Models
 {
@@ -55,6 +54,17 @@ namespace Electrons.Net8.Models
                 model.Events.Add(inningStack.Pop());
             return model;
         }
+
+        internal static List<InningModel> CreateInnings(List<ScoreboardApi.Models.Inning> innings, string homeLogo, string awayLogo)
+        {
+            var list = new List<InningModel>();
+            var inningStack = new Stack<InningModel>();
+            foreach (var inning in innings.Select(s => Create(s, s.IsTopHalf ? awayLogo : homeLogo)))
+                inningStack.Push(inning);
+            while (inningStack.Any())
+                list.Add(inningStack.Pop());
+            return list;
+        }
     }
     public class InningEventModel
     {
@@ -78,4 +88,6 @@ namespace Electrons.Net8.Models
         }
         public override string ToString() => EventText;
     }
+
+
 }
