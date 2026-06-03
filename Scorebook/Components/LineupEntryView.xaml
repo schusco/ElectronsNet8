@@ -30,7 +30,7 @@
                                     <DataTemplate x:DataType="games:Player">
                                         <ContentView HorizontalOptions="Fill">
                                             <Grid ColumnDefinitions="*,Auto" Padding="5,0" HorizontalOptions="Fill" >
-                                                <Label Text="{Binding FullName}" Grid.Column="0" HorizontalOptions="Fill" LineBreakMode="NoWrap" MaxLines="1" HorizontalTextAlignment="End" 
+                                                <Label Text="{Binding FullName}" MinimumWidthRequest="150" Grid.Column="0" HorizontalOptions="Fill" LineBreakMode="NoWrap" MaxLines="1" HorizontalTextAlignment="End" 
                                                    FontSize="Small" Margin="0,0,10,0" VerticalOptions="Center" />
                                                 <Button Text="+" Margin="5" Grid.Column="1" WidthRequest="40" HorizontalOptions="End" 
                                                         Command="{Binding Source={x:Reference Root}, Path=Team.AddToLineupCommand}" CommandParameter="{Binding .}" />
