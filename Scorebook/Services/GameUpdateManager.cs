@@ -184,7 +184,7 @@ namespace Scorebook.Services
                 Strikes = currentAb.Strikes > 2 ? 2 : currentAb.Strikes,
                 Outs = _vm.Game.CurrentInning.Outs,
                 Scoring = currentAb.Runs,
-                OnBase = (int)_vm.Game.CurrentInning.CurrentRunners.Runners.GetDescription()
+                OnBase = (int)_vm.Game.CurrentInning.CurrentRunners.Runners
             };
             return ab;
         }

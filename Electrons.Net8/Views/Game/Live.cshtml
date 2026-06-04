@@ -230,7 +230,7 @@
                                     <div class="tab-content">
                                         <div role="tabpanel" class="tab-pane active" id="inning">
                                             <div class="row">
-                                                <div class="col-md-8">
+                                                <div class="offset-1 col-lg-10 col-xl-7">
                                                     <p id="pitcherLogo" class="mt-2">@Html.Image(Model.PitcherLogo, "25")<span id="currentPitcher">@Html.Raw(object.ReferenceEquals(Model.CurrentPitcher, null) ? "" : string.Format("&nbsp;{0} pitching", Model.CurrentPitcher))</span></p>
                                                     <p id="hitterLogo" >@Html.Image(@Model.HitterLogo, "25")<span id="abresult" class="ms-2">@Model.AbString</span></p>
                                                     <fieldset id="prevabs" style="margin-top:15px">
@@ -244,7 +244,7 @@
                                                     </fieldset>
                                                 </div>
 
-                                                <div class="col-md-4">
+                                                <div class="offset-1 col-lg-10 col-xl-3">
                                                     <fieldset id="pitches" style="margin-top:8px">
                                                         <legend>Pitches</legend>
                                                         <ol>
@@ -275,7 +275,7 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-xs-12">
+                                <div class="offset-1 col-xs-10">
                                     <fieldset id="scoringplays" style="margin-top:15px">
                                         <legend>Scoring Plays</legend>
                                         @Html.DisplayFor(m => m.ScoringPlays)

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 
 
 namespace Electrons.Core.Net8.Games
@@ -16,7 +15,7 @@ namespace Electrons.Core.Net8.Games
     {
         private HStats() { }
         [TableColumn("Hitters", 1, Class = "alignLeft")]
-        public string PlayerDisplay => $"{Player.LastName}, {Player.FirstName[0]}";
+        public string PlayerDisplay => Player.IsUnknown ? $"{Player.LastName} #{Player.Number}" : $"{Player.LastName}, {Player.FirstName[0]}";
         public string PlayerName => $"{Player.FirstName[0]}. {Player.LastName}";
         public Player Player { get; private set; }
         public int G { get; private set; }

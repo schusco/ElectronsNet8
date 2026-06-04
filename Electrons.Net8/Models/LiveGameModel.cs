@@ -337,7 +337,10 @@ namespace Electrons.Net8.Models
             Stats = new List<HStats>();
             foreach (var ab in abs.GroupBy(g => g.BatterId))
             {
-                var stat = HStats.Create(Player.Create(ab.First().Batter.Number, ab.First().Batter.FirstName, ab.First().Batter.LastName));
+                var player = Player.Create(ab.First().Batter.Number, ab.First().Batter.FirstName, ab.First().Batter.LastName);
+                if (player.LastName == "Player" && player.FirstName.StartsWith("Unknown"))
+                    player = Player.Unknown(player.Number);
+                var stat = HStats.Create(player);
                 foreach (var a in ab)
                 {
                     if (a.Result.IsAtBat())
@@ -398,7 +401,10 @@ namespace Electrons.Net8.Models
             Stats = new List<PStats>();
             foreach (var ab in enumerable.GroupBy(g => g.PitcherId))
             {
-                var stat = PStats.Create(Player.Create(ab.First().Pitcher.Number, ab.First().Pitcher.FirstName, ab.First().Pitcher.LastName));
+                var player = Player.Create(ab.First().Pitcher.Number, ab.First().Pitcher.FirstName, ab.First().Pitcher.LastName);
+                if (player.LastName == "Player" && player.FirstName.StartsWith("Unknown"))
+                    player = Player.Unknown(player.Number);
+                var stat = PStats.Create(player);
                 foreach (var a in ab)
                 {
                     stat.BF += 1;                    
