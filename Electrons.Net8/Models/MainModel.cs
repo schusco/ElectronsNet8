@@ -17,7 +17,7 @@ namespace Electrons.Net8.Models
             
             JumboText = settings.JumboText;
             var nextOutingTime = DateTime.Now.Actual().AddHours(-3);
-            var lastOuting = repo.GetNextOuting(DateTime.Now.Actual().AddHours(-12));
+            var lastOuting = repo.GetNextOuting(DateTime.Now.Actual().AddHours(-18));
             var nextOuting = repo.GetNextOuting(nextOutingTime);
             if (nextOuting != null)
             {
@@ -35,7 +35,7 @@ namespace Electrons.Net8.Models
                 AwayTeam = gd.AwayTeam;
                 GameId = apiData?.GameId;
                 GameDate = gd.GameDate.ToString("g");
-                Location = nextOuting.Location.Field;
+                Location = displayOuting.Location.Field;
                 if (NextGameInProgress)
                 {
                     if (apiData != null)
