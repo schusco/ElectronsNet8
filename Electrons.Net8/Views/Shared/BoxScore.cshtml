@@ -26,7 +26,7 @@
     @foreach (var stat in Model.HittingBox.Stats)
     {
         <tr style="height:26px" class="@(stat.Player==Model.CurrentHitter? "current":"")">
-            <td style="text-align:left">@stat.Player.FullName<span class="posString">@(stat.Player.Position == null ?"" : stat.Player.Position.PositionString)</span></td>
+            <td style="text-align:left">@(stat.Player.IsUnknown ? stat.Player.DisplayName : stat.Player.FullName)<span class="posString">@(stat.Player.Position == null ? "" : stat.Player.Position.PositionString)</span></td>
             <td style="text-align:center">@stat.AB</td>
             <td style="text-align:center">@stat.Runs</td>
             <td style="text-align:center">@stat.H</td>
@@ -78,7 +78,7 @@
             decisionText = string.Format("({0})", stat.Decision.GetDescription());
         }
         <tr style="height:26px">
-            <td style="text-align:left">@stat.Player.FullName&nbsp;@decisionText</td>
+            <td style="text-align:left">@(stat.Player.IsUnknown? stat.Player.DisplayName : stat.Player.FullName)&nbsp;@decisionText</td>
             <td style="text-align:center">@stat.IP</td>
             <td style="text-align:center">@stat.R</td>
             <td style="text-align:center">@stat.H</td>

@@ -10,7 +10,7 @@ namespace Electrons.Core.Net8.Games
     public class PStats : IHasPlayer
     {
         [TableColumn("Pitchers", 1, Class = "alignLeft")]
-        public string PitcherDisplay => $"{Player} {(Decision != Decision.ND ? $"({Decision.GetDescription()})" : "")}";
+        public string PitcherDisplay => $"{(Player.IsUnknown ? $"{Player.LastName} #{Player.Number}" : $"{Player.LastName}, {Player.FirstName[0]}")} {(Decision != Decision.ND ? $"({Decision.GetDescription()})" : "")}";
         public string PlayerName => $"{Player.FirstName[0]}. {Player.LastName}";
         public Pitcher Player { get; private set; }
         public Decision Decision { get; private set; }
