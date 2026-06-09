@@ -1,7 +1,6 @@
 ﻿using Electrons.Core.Net8;
 using Electrons.Core.Net8.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
-using NHibernate.Criterion;
 using ScoreboardApi.Models;
 using System;
 using System.Collections.Generic;
@@ -15,12 +14,12 @@ namespace Electrons.Net8.Models
 
         public MainModel(Repository repo, GameSettings settings, IWebHostEnvironment env, List<GameScore> apiData, List<StandingsRow> standings = null)
         {
-            
-           JumboText = settings.JumboText;
+
+            JumboText = settings.JumboText;
             var nextOutingTime = DateTime.Now.Actual().AddHours(-3);
             var lastOuting = repo.GetNextOuting(DateTime.Now.Actual().AddHours(-18));
             var nextOuting = repo.GetNextOuting(nextOutingTime);
-            if (lastOuting != nextOuting)
+            if (lastOuting != nextOuting && DateTime.Now.AddHours(12) < nextOuting.GameDate)
                 DisplayLastGame = true;
             var displayOuting = DisplayLastGame && lastOuting != null ? lastOuting : nextOuting;
             if (displayOuting != null)
@@ -28,14 +27,14 @@ namespace Electrons.Net8.Models
                 if (displayOuting.GameDate.Date == DateTime.Now.Actual().Date && displayOuting.GameDate < DateTime.Now.Actual())
                     NextGameInProgress = true;
                 if (displayOuting.GameFile != null)
-                    NextGameRecap = true;                
-                
+                    NextGameRecap = true;
+
                 var gd = GameDataModel.Create(displayOuting);
                 HomeLogo = gd.GetHomeLogo();
                 AwayLogo = gd.GetAwayLogo();
                 HomeTeam = gd.HomeTeam;
                 AwayTeam = gd.AwayTeam;
-                
+
                 GameDate = gd.GameDate.ToString("g");
                 Location = displayOuting.Location.Field;
                 if (NextGameInProgress)

@@ -29,8 +29,16 @@ namespace Scorebook.Services
                 await SecureStorage.Default.SetAsync("service_user", user);
                 await SecureStorage.Default.SetAsync("service_pwd", pass);
             }
-            var response = await _api.Login(user, pass);
-            _isLoggedIn = response.Success;
+            try
+            {
+                var response = await _api.Login(user, pass);
+                _isLoggedIn = response.Success;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Login failed: {ex.Message}");
+                _isLoggedIn = false;
+            }
         }
         internal GameScoreWrapper? SelectedGame => _selectedGame;
         internal void SetSelectedGame(GameScoreWrapper game, ScorebookViewModel vm)
@@ -151,7 +159,7 @@ namespace Scorebook.Services
         private ApiAb ConvertAb(AtBat currentAb)
         {
             if (_currentInning is null)
-                return null;
+                return null;            
             var hittingTeam = _currentInning.IsTopHalf ? _selectedGame.AwayTeam : _selectedGame.HomeTeam;
             var pitchingTeam = _currentInning.IsTopHalf ? _selectedGame.HomeTeam : _selectedGame.AwayTeam;
             var batter = ApiService.ApiRosters[hittingTeam.Name].FirstOrDefault(p => p.Number == currentAb.Batter.Number);
@@ -161,7 +169,7 @@ namespace Scorebook.Services
             var pitcherId = pitcher?.Id ?? 0;
             var ab = new ApiAb
             {
-                Id = _currentAtbat.Sequence != currentAb.Sequence ? 0 : _currentAtbat.Id,
+                Id = _currentAtbat?.Sequence != currentAb.Sequence ? 0 : _currentAtbat.Id,
                 Sequence = currentAb.Sequence,
                 BatterId = batterId,
                 PitcherId = pitcherId,

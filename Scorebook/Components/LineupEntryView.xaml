@@ -17,10 +17,9 @@
             </BindableLayout.ItemTemplate>
         </FlexLayout>
         <ScrollView Orientation="Horizontal" Grid.Row="1">
-            <Grid ColumnDefinitions="Auto,50,Auto"  HorizontalOptions="Center"  >
+            <Grid ColumnDefinitions="Auto,55,Auto"  HorizontalOptions="Center"  >
                 <HorizontalStackLayout>
-                    <ImageButton Source="arrow_counterclockwise.png" BackgroundColor="White" Margin="0,0,10,0" CornerRadius="15" VerticalOptions="Center" 
-                                 Command="{Binding Source={x:Reference Root}, Path=Team.RefreshRosterCommand}" />
+
                     <ScrollView Orientation="Vertical">
                         <Border Grid.Column="0">
                             <CollectionView BackgroundColor="White" MinimumWidthRequest="200" ItemSizingStrategy="MeasureFirstItem" ItemsLayout="VerticalList" 
@@ -42,8 +41,14 @@
                         </Border>
                     </ScrollView>
                 </HorizontalStackLayout>
-                <ImageButton Source="x_circle.png" CornerRadius="20" BackgroundColor="White" HeightRequest="50" WidthRequest="45" Grid.Column="1" 
+                <VerticalStackLayout Spacing="5" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center">
+                    <ImageButton Source="arrow_counterclockwise.png" BackgroundColor="White" Margin="5"  CornerRadius="20"   VerticalOptions="Center" 
+                            Command="{Binding Source={x:Reference Root}, Path=Team.RefreshRosterCommand}" />
+                    <ImageButton Source="person_plus.png" BackgroundColor="White" Margin="5" CornerRadius="20" WidthRequest="45" VerticalOptions="Center" 
+                            Command="{Binding Source={x:Reference Root}, Path=Team.AddToRosterCommand}" />
+                    <ImageButton Source="x_circle.png" CornerRadius="20" BackgroundColor="White" HeightRequest="50"   
                              Command="{Binding Source={x:Reference Root}, Path=Team.CloseSetLineupCommand}"  VerticalOptions="Center" Margin="5" />
+                </VerticalStackLayout>
                 <ScrollView Orientation="Vertical" Grid.Column="2">
                     <Border Grid.Column="2">
                         <CollectionView MinimumWidthRequest="300" BackgroundColor="White" VerticalOptions="Start" HeightRequest="600" HorizontalOptions="Start" 

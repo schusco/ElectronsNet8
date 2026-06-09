@@ -5,6 +5,10 @@ namespace Scorebook.ViewObjects
 {
     public class LineScoreData
     {
+        public LineScoreData(int number)
+        {
+            InningNumber = number.ToString();
+        }
         public LineScoreData(int number, IGrouping<int, Inning> grp)
         {
             InningNumber = number.ToString();
@@ -15,8 +19,8 @@ namespace Scorebook.ViewObjects
         }
 
         public string InningNumber { get; set; } = "-";
-        public string HomeRuns { get; set; } = "0";
-        public string AwayRuns { get; set; } = "0";
+        public string HomeRuns { get; set; } = "-";
+        public string AwayRuns { get; set; } = "-";
         public bool IsTotalsColumn { get; set; }
     }
 }

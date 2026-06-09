@@ -1,6 +1,5 @@
 ﻿using Electrons.Core.Net8;
 using Electrons.Core.Net8.Entities;
-using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,16 +7,14 @@ namespace Electrons.Net8.Models
 {
     public class GameModel
     {
-        public GameModel(GameData game, HttpContext context)
+        public GameModel(GameData game)
         {
             GameId = game.GameId;
             DateAndLocation = $"{game.GameDate.ToLongDateString()}  {game.GameDate.ToShortTimeString()} @ {game.Location}";
             AwayLine = game.GetLineScore(HV.V);
             HomeLine = game.GetLineScore(HV.H);
-            var request= context.Request;
-            var baseUrl = $"{request.Scheme}://{request.Host}{request.PathBase}";
-            var elecUrl = $"{baseUrl}/Content/Images/logos/nextOuting_electrons.png";
-            var oppUrl = $"{baseUrl}/Content/images/logos/nextOuting_{game.Opponent.Replace(" ", "").ToLower()}.png";
+            var elecUrl = "Electrons".GetLogo();
+            var oppUrl = game.Opponent.GetLogo();
             if (AwayLine.Team == "Electrons")
             {
                 AwayLogo = elecUrl;

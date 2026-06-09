@@ -419,11 +419,12 @@ namespace Scorebook
             if (CurrentAb != null)
             {
                 CurrentAbPitches.Clear();
-                CurrentAbPitches.Add($"{CurrentAb.Pitcher.LastName} pitching to {CurrentAb.Batter.LastName}");
+                CurrentAbPitches.Add($"{CurrentAb.Pitcher.DisplayName} pitching to {CurrentAb.Batter.DisplayName}");
                 foreach (var pitch in CurrentAb.Pitches)
                     CurrentAbPitches.Add($"{pitch.Sequence}) {pitch}");
                 var stats = _gameCoordinator.GetCurrentPitcherStats();
-                CurrentPitchStats = new PitchTotals(stats);
+                if (stats != null)
+                    CurrentPitchStats = new PitchTotals(stats);
             }
         }
         private void UpdateScoreBoard()
@@ -507,7 +508,7 @@ namespace Scorebook
             UpdatePitches();
             UpdateScoreBoard();
             OnPropertyChanged(nameof(Game));
-            UpdateRunners();            
+            UpdateRunners();
         }
         public void ReplaceCurrentAbInLog()
         {

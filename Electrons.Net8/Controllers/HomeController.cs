@@ -1,5 +1,4 @@
-﻿using Electrons.Core.Net8;
-using Electrons.Net8.Models;
+﻿using Electrons.Net8.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +7,6 @@ using Microsoft.Extensions.Options;
 using ScoreboardApi.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;

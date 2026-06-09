@@ -875,7 +875,21 @@ namespace Electrons.Core.Net8.Games
         {
             _EndTime = endDateTime ?? DateTime.Now;
         }
-
+        public bool PitcherStartedGame(bool home)
+        {
+            var team = home ? HomeTeam : AwayTeam;
+            if (team.StartingPitcher != null && team.GamePitchers.Any() && team.StartingPitcher.Equals(team.GamePitchers.First()))
+            {
+                var stats = GetPitchingStats(home);
+                if (stats.Any() && stats.First().Player.Equals(team.StartingPitcher))
+                {
+                    var stat = stats.First();
+                    if (stat.Pitches > 0 || stat.Outs > 0 || Innings.SelectMany(a => a.Events).Any(e => e.Pitcher != null && e.IsFinished && e.Pitcher.Equals(team.StartingPitcher)))
+                        return true;
+                }
+            }
+            return false;
+        }
         private readonly Stack<Inning> _innings;
         private readonly Stack<Inning> _navInnings;
         private Team homeTeam;

@@ -203,9 +203,10 @@ namespace Scorebook.ViewObjects
         });
         public ICommand CloseSetLineupCommand => new RelayCommand(() => _vm.RosterCoordinator.CloseSetLineup(this));
         public ICommand AddToLineupCommand => new RelayCommand<Player>(async (player) => await _vm.RosterCoordinator.AddToLineup(this, player));
-        public ICommand RemoveFromLineupCommand => new Command<LineupPosition>((lp) => _vm.RosterCoordinator.RemoveFromLineup(this, lp));
+        public ICommand RemoveFromLineupCommand => new Command<LineupPosition>((lp) => Coordinators.RosterCoordinator.RemoveFromLineup(this, lp));
         public ICommand LineupItemDraggedCommand => new Command<LineupPosition>(_vm.RosterCoordinator.SetDraggedLineupPosition);
         public ICommand LineupItemDroppedCommand => new Command<LineupPosition>((lp) => _vm.RosterCoordinator.LineupItemDropped(this, lp));
+        public ICommand AddToRosterCommand => new Command(() => _vm.RosterCoordinator.AddToRoster(this));
         public bool IsSideBarOpen => _vm.IsSideBarOpen;
 
         public int CurrentBatterIndex => CoreTeam.CurrentHitterIndex;

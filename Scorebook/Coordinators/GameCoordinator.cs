@@ -12,11 +12,17 @@ namespace Scorebook.Coordinators
         {
             ViewModel.GameIsOver = true;
             ViewModel.LineScore.Clear();            
-            ViewModel.Game.SetGameEndTime(ViewModel.GameManager.SelectedGame?.EndDateTime);
+            ViewModel.Game.SetGameEndTime(ViewModel.GameSelection?.EndDateTime);
             ViewModel.TotalInningCount = new int[] { 7, ViewModel.Game.Innings.Max(m => m.Number) }.Max();
             var grps = ViewModel.Game?.Innings.GroupBy(g => g.Number);
             for (int i = 1; i <= ViewModel.TotalInningCount; i++)
-                ViewModel.LineScore.Add(new LineScoreData(i, grps.SingleOrDefault(s => s.Key == i)));
+            {
+                var grp = grps?.SingleOrDefault(s => s.Key == i);
+                if (grp != null)
+                    ViewModel.LineScore.Add(new LineScoreData(i, grp));
+                else
+                    ViewModel.LineScore.Add(new LineScoreData(i));
+            }
             if (!(ViewModel.Game?.SaveAwardedTo is null))
             {
                 ViewModel.SaveAwarded = true;
@@ -73,7 +79,7 @@ namespace Scorebook.Coordinators
         internal PStats GetCurrentPitcherStats()
         {
             var stats = ViewModel.Game.CurrentInning.Half == HalfInning.Top ? ViewModel.Game.HomeTeamPitching : ViewModel.Game.AwayTeamPitching;
-            return stats.First(s => s.Player == ViewModel.Game.CurrentInning.CurrentPitcher);
+            return stats.FirstOrDefault(s => s.Player == ViewModel.Game.CurrentInning.CurrentPitcher);
         }
         internal async Task ScoringEntered(AB ab, BaseballGame Game)
         {
@@ -254,7 +260,7 @@ namespace Scorebook.Coordinators
                         return;
                     }
                     if (ViewModel.GameSelection.SelectedGame is not null)
-                        ViewModel.GameManager.SetStartDateTime(game?.StartTime);
+                        ViewModel.GameManager.SetStartDateTime(ViewModel.GameSelection.StartDateTime);
                     game?.StartGame(ViewModel.GameSelection.SelectedGame?.GameDate ?? DateTime.Today, ViewModel.GameSelection?.StartDateTime ?? DateTime.Now);
                     ViewModel.IsGameStarted = true;                    
                     ViewModel.OnPropertyChanged(nameof(ViewModel.Game));
@@ -267,6 +273,7 @@ namespace Scorebook.Coordinators
                 }
                 else
                 {
+                    ViewModel.SendRunnerBackButtonVisible = false;
                     ViewModel.IsFieldOverlayVisible = false;
                     if (ViewModel.ScoringIsRequired)
                     {

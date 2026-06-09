@@ -24,19 +24,28 @@ namespace Electrons.Net8.Controllers
             if (!id.HasValue)
                 id = Repository.Seasons().First();
             var model = new StatsModel(id.Value);
-            await model.Fill(Repository,isPlayoffs);
+            await model.Fill(Repository, isPlayoffs);
             return View(model);
         }
+        [Route("statistics/{id:int}/game")]
         public ActionResult Game(int? id)
         {
             var game = Repository.GetGameById(id.Value);
             if (game is null)
                 return RedirectToAction("Index", "Home");
             if (game.FullGame is null)
-                return View(new GameModel(game, CurrentContext));
+                return View(new GameModel(game));
             return RedirectToAction("Recap", "Game", new { id = id.Value });
-        }       
-        [HttpGet,Route("statistics/records")]
+        }
+        [Route("statistics/{id:int}/box")]
+        public ActionResult Box(int? id)
+        {
+            var game = Repository.GetGameById(id.Value);
+            if (game is null)
+                return RedirectToAction("Index", "Home");
+            return View("Game", new GameModel(game));
+        }
+        [HttpGet, Route("statistics/records")]
         public ActionResult Records() => View("Records", new LeadersModel(GameSettings));
         public async Task<IActionResult> GetLeaders(LeadersModel model)
         {
@@ -50,6 +59,6 @@ namespace Electrons.Net8.Controllers
             if (!id.HasValue && id < DateTime.Today.Year)
                 return new StatusCodeResult((int)HttpStatusCode.NoContent);
             return File(ExcelGenerator.Export(id.Value, Repository), "application/download", "stats.xlsx");
-        }        
+        }
     }
 }

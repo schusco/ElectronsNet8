@@ -57,6 +57,16 @@ namespace Electrons.Net8.Controllers
                 return View("Error");
             }
         }
+        [Route("game/{id}/Box")]
+        public ActionResult Box(int? id)
+        {
+            if (!id.HasValue)
+                return RedirectToAction("Index", "Home");
+            var game = Repository.GetGameById(id.Value);
+            if (game is null)
+                return RedirectToAction("Index", "Home");
+            return RedirectToAction("Box", "Statistics", new { id = id.Value });
+        }
         [Route("game/{id}/Live")]
         public async Task<ActionResult> Live(int id)
         {
@@ -68,7 +78,6 @@ namespace Electrons.Net8.Controllers
             }
             return View("Error");
         }
-
         public async Task<ActionResult> GetPlayByPlayPartial(int gameId)
         {
             var data = await GetCachedGameData(gameId);

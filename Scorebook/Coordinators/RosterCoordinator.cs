@@ -13,22 +13,24 @@ namespace Scorebook.Coordinators
         public async Task SelectPitcher(bool home)
         {
             var team = home ? ViewModel.HomeTeam : ViewModel.AwayTeam;
-            var allPitchers = team.CoreTeam.AvailablePitchers.Select(s => s.FullName).OrderBy(o => o).ToArray();
+            var allPitchers = team.CoreTeam.Roster.Select(s => s.FullName).OrderBy(o => o).ToArray();
             var pitcher = await Application.Current.MainPage.DisplayActionSheet("Select Pitcher", "Cancel", null, allPitchers);
-            var selectedPitcher = team.CoreTeam.AvailablePitchers.SingleOrDefault(s => s.FullName == pitcher);
+            var selectedPitcher = team.CoreTeam.Roster.SingleOrDefault(s => s.FullName == pitcher);
             if (selectedPitcher is null || selectedPitcher == (Player)team.CoreTeam.CurrentPitcher)
                 return;
-            if (team.CoreTeam.CurrentPitcher is null || !team.CoreTeam.OrderIsSet || !ViewModel.Game.IsStarted || (ViewModel.Game.IsStarted && team.CanReplacePitcher))
+            var isOnMound = selectedPitcher.IsMemberOf(ViewModel.Game.FieldingTeam);
+            if (team.CoreTeam.CurrentPitcher is null || !team.CoreTeam.OrderIsSet || !ViewModel.Game.IsStarted || 
+                (ViewModel.Game.IsStarted && team.CanReplacePitcher && !ViewModel.Game.PitcherStartedGame(home)))
             {
                 team.CoreTeam.SetStartingPitcher((Pitcher)selectedPitcher);
                 ViewModel.CurrentPitchStats = new PitchTotals(selectedPitcher.DisplayName);
-                if (ViewModel.Game.IsStarted && selectedPitcher.IsMemberOf(ViewModel.Game.FieldingTeam))
+                if (ViewModel.Game.IsStarted && isOnMound)
                     ViewModel.Game.CurrentInning.SetCurrentPitcher((Pitcher)selectedPitcher);
                 team.PitcherSelected = true;
                 team.CanReplacePitcher = false;
                 return;
             }
-            var result = await Shell.Current.DisplayAlert("Confirm", $"Replace {team.CoreTeam.CurrentPitcher.LastName} with {selectedPitcher.LastName}?  ", "Yes", "No");
+            var result = await Shell.Current.DisplayAlert("Confirm", $"Replace {team.CoreTeam.CurrentPitcher.DisplayName} with {selectedPitcher.DisplayName}?  ", "Yes", "No");
             if (!result)
                 return;
             var sub = ViewModel.Game.ChangePitcher(team.CoreTeam, selectedPitcher);
@@ -62,6 +64,8 @@ namespace Scorebook.Coordinators
                 player.SetPosition(Position.EH);
             }
             var lp = new LineupPosition(player, team.Lineup.Count + 1);
+            if (team.IsUnknownRoster)
+                lp.CanReplace = true;
             team.Lineup.Add(lp);
             team.CoreTeam.AddToLineup(player, lp.LineupNumber);
             ViewModel.OnPropertyChanged(nameof(team.Lineup));
@@ -129,7 +133,7 @@ namespace Scorebook.Coordinators
             team.CoreTeam.SetBattingOrder(lineup.Select(s => s.Player).ToList());
             _draggedLp = null;
         }
-        internal async Task RemoveFromLineup(TeamWrapper team, LineupPosition lp)
+        internal static async Task RemoveFromLineup(TeamWrapper team, LineupPosition lp)
         {
             if (lp == null || team is null) return;
             if (!team.CoreTeam.RemoveFromLineup(lp.Player))
@@ -175,9 +179,14 @@ namespace Scorebook.Coordinators
                 if (action != "Cancel" && !string.IsNullOrEmpty(action))
                 {
                     Player newPlayer;
-                    if (lp.CanReplace)
+                    if (lp.CanReplace || team.IsUnknownRoster)
                     {
-                        newPlayer = GetPlayer(team, action);
+                        newPlayer = team.CoreTeam.Roster.FirstOrDefault(s => s.Number.ToString() == action);
+                        if (newPlayer is null)
+                        {
+                            newPlayer = Player.Unknown(int.Parse(action));
+                            team.CoreTeam.AddPlayer(newPlayer);
+                        }
                         team.CoreTeam.ReplaceUnknown(lp.LineupNumber, newPlayer);
                         lp.Player = newPlayer;
                         ViewModel.Game.UpdatePlayer(replaced, newPlayer);
@@ -216,7 +225,7 @@ namespace Scorebook.Coordinators
         private Player GetPlayer(TeamWrapper team, string action)
         {
             var match = Regex.Match(action, @"^(\d+)\s*-\s*([^,]+)");
-            if (!match.Success) 
+            if (!match.Success)
                 throw new FormatException("Player string is not in the expected format 'Number - LastName, FirstName'");
             var number = int.Parse(match.Groups[1].Value.Trim());
             var lname = match.Groups[2].Value.Trim();
@@ -227,6 +236,22 @@ namespace Scorebook.Coordinators
                 team.CoreTeam.AddPlayer(newPlayer);
             }
             return newPlayer;
+        }
+
+        internal async Task AddToRoster(TeamWrapper team)
+        {
+            var action = await Application.Current.MainPage?.DisplayPromptAsync("New Player", "Enter player Number", "Ok", "Cancel", maxLength: 2, keyboard: Keyboard.Numeric);
+            if (action != "Cancel" && !string.IsNullOrEmpty(action))
+            {
+                Player newPlayer;
+                newPlayer = team.CoreTeam.Roster.FirstOrDefault(s => s.Number.ToString() == action);
+                if (newPlayer is null)
+                {
+                    newPlayer = Player.Unknown(int.Parse(action));
+                    team.CoreTeam.AddPlayer(newPlayer);
+                }
+                team.TeamPlayers.Add(newPlayer);
+            }
         }
 
         private LineupPosition? _draggedLp;

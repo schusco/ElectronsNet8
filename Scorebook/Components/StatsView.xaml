@@ -39,8 +39,8 @@
                             <Label Grid.Column="6" Text="{Binding StatLine.BB}" Style="{StaticResource StatsRowStyle}" />
                             <Label Grid.Column="7" Text="{Binding StatLine.K}" Style="{StaticResource StatsRowStyle}" />
                             <Label Grid.Column="8" Text="{Binding StatLine.HB}" Style="{StaticResource StatsRowStyle}" />
-                            <Label Grid.Column="9" Text="{Binding StatLine.BF}" Style="{StaticResource StatsRowStyle}" />
-                            <Label Grid.Column="10" Text="{Binding StatLine.HR}" Style="{StaticResource StatsRowStyle}" />
+                            <Label Grid.Column="10" Text="{Binding StatLine.BF}" Style="{StaticResource StatsRowStyle}" />
+                            <Label Grid.Column="9" Text="{Binding StatLine.HR}" Style="{StaticResource StatsRowStyle}" />
                             <Label Grid.Column="11" Text="{Binding StatLine.CG}" Style="{StaticResource StatsRowStyle}" />
                             <Label Grid.Column="12" Text="{Binding StatLine.EraFormatted}" Style="{StaticResource StatsRowStyle}" />
                             <Label Grid.Column="13" Text="{Binding StatLine.WhipFormatted}" Style="{StaticResource StatsRowStyle}" />
