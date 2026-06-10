@@ -133,7 +133,7 @@ namespace Scorebook.Coordinators
             team.CoreTeam.SetBattingOrder(lineup.Select(s => s.Player).ToList());
             _draggedLp = null;
         }
-        internal static async Task RemoveFromLineup(TeamWrapper team, LineupPosition lp)
+        internal async Task RemoveFromLineup(TeamWrapper team, LineupPosition lp)
         {
             if (lp == null || team is null) return;
             if (!team.CoreTeam.RemoveFromLineup(lp.Player))
@@ -148,6 +148,7 @@ namespace Scorebook.Coordinators
             foreach (var spot in team.Lineup)
                 spot.LineupNumber = team.Lineup.IndexOf(spot) + 1;
             team.UpdatePositionAvailability();
+            ViewModel.OnPropertyChanged(nameof(ViewModel.Game.CurrentAb));
         }
         internal void UpdatePitcherUI(TeamWrapper team)
         {

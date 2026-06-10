@@ -60,7 +60,7 @@ namespace Scorebook.Services
                 roster = LoadFromLocalDisk<List<CmbaPlayer>>($"roster_cache_{teamId}.json");
             else
             {
-                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
                 var response = await LoadFromApi<List<CmbaPlayer>>($"/api/teams/{teamId}/roster", cts.Token);
                 roster = response.Success ? response.Data : new List<CmbaPlayer>();
                 if (roster.Any())
@@ -70,6 +70,12 @@ namespace Scorebook.Services
                 }
             }
             return roster;
+        }
+        internal async Task<GameScore?> GetFullGame(int gameId)
+        {
+            var response = await LoadFromApi<GameScore>($"/api/games/{gameId}/full");
+            var fg = response.Success ? response.Data : null;
+            return fg;
         }
         public async Task SendGameUpdate(object sender, GameScoreEventArgs e)
         {
@@ -215,6 +221,7 @@ namespace Scorebook.Services
                 return response.Data;
             return null;
         }
+
 
     }
     internal class ApiResponse<T>

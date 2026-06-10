@@ -59,6 +59,7 @@ namespace Electrons.Core.Net8.Games
         private void Ab_PinchHitter(object sender, InningEventArgs e)
         {
             var sub = e.Event as Substitution;
+            InningUpdated?.Invoke(this, e);
             var ab = NewAb(sub.NewPlayer);
             _events.Push(ab);
             InningUpdated?.Invoke(this, e);

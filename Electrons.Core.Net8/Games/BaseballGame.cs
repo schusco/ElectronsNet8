@@ -317,13 +317,13 @@ namespace Electrons.Core.Net8.Games
         [JsonIgnore]
         public Team BattingTeam => CurrentInning.Half == HalfInning.Top ? AwayTeam : HomeTeam;
         [JsonIgnore]
-        public Team FieldingTeam => CurrentInning.Half == HalfInning.Top ? HomeTeam : AwayTeam;
+        public Team FieldingTeam => CurrentInning?.Half == HalfInning.Top ? HomeTeam : AwayTeam;
         [JsonIgnore]
         public Team LeadingTeam => HomeScore > AwayScore ? HomeTeam : AwayScore > HomeScore ? AwayTeam : null;
         private void Inning_InningUpdated(object sender, EventArgs e)
         {
             var inning = sender as Inning;
-            if (inning.Number >= LastInningNumber)
+            if (inning != null && inning.Number >= LastInningNumber)
                 CheckForEndOfGame();
             InningUpdated?.Invoke(this, e);
         }
@@ -353,7 +353,12 @@ namespace Electrons.Core.Net8.Games
                 CurrentAb.SetPitcher(player);
             return sub;
         }
-        public Substitution Substitute(Team team, Player bench, Player lineup) => team.Substitute(CurrentInning, bench, lineup);
+        public Substitution Substitute(Team team, Player bench, Player lineup)
+        {
+            var sub = team.Substitute(CurrentInning, bench, lineup);
+            Inning_InningUpdated(this, new EventArgs());
+            return sub;
+        }
         private void OnGameEnded(bool walkOff = false, DateTime? endTime = null)
         {
             _EndTime = endTime ?? DateTime.Now;
@@ -501,6 +506,7 @@ namespace Electrons.Core.Net8.Games
             {
                 awayTeam = value;
                 awayTeam.PitcherChanged += PitcherAdded;
+                awayTeam.CurrentBatterRemoved += OnCurrentBatterRemoved;
                 ScoreChanged += awayTeam.OnScoreChanged;
             }
         }
@@ -512,9 +518,19 @@ namespace Electrons.Core.Net8.Games
             {
                 homeTeam = value;
                 homeTeam.PitcherChanged += PitcherAdded;
+                homeTeam.CurrentBatterRemoved += OnCurrentBatterRemoved;
                 ScoreChanged += homeTeam.OnScoreChanged;
             }
         }
+
+        private void OnCurrentBatterRemoved(object sender, EventArgs e)
+        {
+            var team = sender as Team;
+            var home = team == homeTeam;
+            if ((home && CurrentInning?.Half == HalfInning.Bottom) || (!home && CurrentInning.Half == HalfInning.Top))
+                CurrentInning.NextBatter();
+        }
+
         [JsonPropertyName("home_risp")]
         public Risp HomeRisp
         {

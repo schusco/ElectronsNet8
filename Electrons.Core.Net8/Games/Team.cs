@@ -17,6 +17,7 @@ namespace Electrons.Core.Net8.Games
         }
         public event EventHandler PitcherChanged;
         public event EventHandler PlayerAdded;
+        public event EventHandler CurrentBatterRemoved;
         public Team(string name) : this() => Name = name;
         public Team(string name, List<Player> roster) : this(name) => _roster = roster;
         [JsonIgnore]
@@ -95,10 +96,18 @@ namespace Electrons.Core.Net8.Games
                 }
                 return null;
             }
-            internal int RemoveFromLineup(Player player)
+            internal int RemoveFromLineup(Player player, out bool update)
             {
+                update = false;
                 var spot = _battingOrder.Single(s => s.Value == player).Key;
+
                 _battingOrder.Remove(spot);
+                _spotsInOrder = _battingOrder.Count;
+                if (spot == CurrentSpot)
+                {
+                    CurrentSpot--;
+                    update = true;
+                }
                 return spot;
             }
             internal void RemoveFromLineup(int spot)
@@ -162,14 +171,18 @@ namespace Electrons.Core.Net8.Games
         {
             var canRemove = !OrderIsSet || force;
             if (canRemove)
-                _order.RemoveFromLineup(player);
+            {
+                _order.RemoveFromLineup(player, out bool update);
+                if (update)
+                    CurrentBatterRemoved?.Invoke(this, EventArgs.Empty);
+            }
             return canRemove;
         }
         public void ReplaceUnknown(Player replaced, Player newPlayer, bool remove = false)
         {
             if (replaced.IsUnknown)
             {
-                var spot = _order.RemoveFromLineup(replaced);
+                var spot = _order.RemoveFromLineup(replaced, out bool update);
                 _order.AddToLineup(spot, newPlayer);
                 if (remove)
                     _roster.Remove(replaced);

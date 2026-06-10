@@ -3,6 +3,7 @@ using Electrons.Core.Net8.Games;
 using ScoreboardApi.Client.Services;
 using ScoreboardApi.Models;
 using Scorebook.ViewObjects;
+using System.Threading.Tasks;
 using ApiAb = ScoreboardApi.Models.Atbat;
 using ApiInning = ScoreboardApi.Models.Inning;
 
@@ -34,7 +35,7 @@ namespace Scorebook.Services
                 var response = await _api.Login(user, pass);
                 _isLoggedIn = response.Success;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Login failed: {ex.Message}");
                 _isLoggedIn = false;
@@ -159,7 +160,7 @@ namespace Scorebook.Services
         private ApiAb ConvertAb(AtBat currentAb)
         {
             if (_currentInning is null)
-                return null;            
+                return null;
             var hittingTeam = _currentInning.IsTopHalf ? _selectedGame.AwayTeam : _selectedGame.HomeTeam;
             var pitchingTeam = _currentInning.IsTopHalf ? _selectedGame.HomeTeam : _selectedGame.AwayTeam;
             var batter = ApiService.ApiRosters[hittingTeam.Name].FirstOrDefault(p => p.Number == currentAb.Batter.Number);
@@ -195,6 +196,14 @@ namespace Scorebook.Services
                 OnBase = (int)_vm.Game.CurrentInning.CurrentRunners.Runners
             };
             return ab;
+        }
+        internal async Task Refresh()
+        {
+            var fg = await _apiService.GetFullGame(_selectedGame.GameId);
+            _currentInning = fg.Innings.LastOrDefault();
+            _currentAtbat = _currentInning?.Atbats.LastOrDefault();
+            _inningNumber = _currentInning.Number;
+            _halfInning = _currentInning.IsTopHalf ? HalfInning.Top : HalfInning.Bottom;
         }
 
         private HalfInning _halfInning;

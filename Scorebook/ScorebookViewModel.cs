@@ -447,6 +447,10 @@ namespace Scorebook
                 AwayTeam = new TeamWrapper(this, game.AwayTeam, false);
                 HomeTeam.FillLineup(true);
                 AwayTeam.FillLineup(true);
+                if (GameSelection.SelectedGame!=null && GameSelection.SendGameUpdates)
+                {
+                    GameManager.Refresh();
+                }
             }
             catch (BaseballGameException ex)
             {

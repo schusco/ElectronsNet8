@@ -14,7 +14,6 @@ namespace Electrons.Net8.Models
 
         public MainModel(Repository repo, GameSettings settings, IWebHostEnvironment env, List<GameScore> apiData, List<StandingsRow> standings = null)
         {
-
             JumboText = settings.JumboText;
             var nextOutingTime = DateTime.Now.Actual().AddHours(-3);
             var lastOuting = repo.GetNextOuting(DateTime.Now.Actual().AddHours(-18));
@@ -22,6 +21,7 @@ namespace Electrons.Net8.Models
             if (lastOuting != nextOuting && DateTime.Now.AddHours(12) < nextOuting.GameDate)
                 DisplayLastGame = true;
             var displayOuting = DisplayLastGame && lastOuting != null ? lastOuting : nextOuting;
+            DbGameId = displayOuting?.GameId;
             if (displayOuting != null)
             {
                 if (displayOuting.GameDate.Date == DateTime.Now.Actual().Date && displayOuting.GameDate < DateTime.Now.Actual())
@@ -70,6 +70,7 @@ namespace Electrons.Net8.Models
                 else if (DisplayLastGame)
                 {
                     LiveInning = "Final";
+                    NextOutingText = "Last Game";
                     var currentGame = apiData.Where(w => w.GameDate < DateTime.Now).OrderBy(o => o.GameDate).LastOrDefault();
                     var test = apiData.Where(w => w.GameDate < DateTime.Now);
                     var test2 = test.OrderBy(o => o.GameDate).LastOrDefault();
@@ -88,6 +89,7 @@ namespace Electrons.Net8.Models
                 Standings = standings.Select(s => StandingsModel.Create(s.Name, s.Wins, s.Losses, s.Ties, s.Points))
                     .OrderByDescending(o => o.Points).ThenByDescending(o => o.Wins);
         }
+        public string NextOutingText { get; set; } = "Next Outing";
         public string JumboText { get; set; }
         public string HomeTeam { get; set; }
         public string HomeLogo { get; set; }
@@ -97,6 +99,7 @@ namespace Electrons.Net8.Models
         public string HomeScore { get; set; } = "0";
         public string AwayScore { get; set; } = "0";
         public int? GameId { get; set; }
+        public int? DbGameId { get; set; }
         public string GameDate { get; set; }
         public string Location { get; set; }
         public bool NextGameInProgress { get; set; }

@@ -74,9 +74,7 @@
         <div class="col-md-4 mt-1">
             <div class="tronNextouting align-content-start">
                 <div class="row mt-1">
-                    <div class="nextOutingText col col-sm-12">
-                        Next Outing
-                    </div>
+                    <div class="nextOutingText col col-sm-12">@Model.NextOutingText</div>
                 </div>
 
                 <div class="row mt-3 nextOutingRow">
@@ -133,7 +131,7 @@
                         }
                         else if (Model.NextGameRecap)
                         {
-                            <span><a asp-controller="Game" asp-action="Live" asp-route-id="@Model.GameId">Game Recap</a></span>
+                            <span><a asp-controller="Game" asp-action="Recap" asp-route-id="@Model.DbGameId">Game Recap</a></span>
                         }
                         else
                         {
