@@ -153,7 +153,7 @@
                     Standings
                 </div>
                 <div class="col-md-12 tronStandings">
-                    @Html.Table(m => m.Standings, "tronTable", "tronTable", "tronTable oddrow", new { @class = "tronTable" })
+                    <partial name="Standings" model="@Model.Standings" />                    
                 </div>
             </div>
         </div>

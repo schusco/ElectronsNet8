@@ -28,6 +28,12 @@
     width: 100%;
     color: white;
 }
+.logoText {
+    display: inline-block;
+    width: 100px;
+    padding-left: 10px;
+    text-align: left;
+}
 .score-updated {
     animation: card-glow-pulse 2.5s ease-in-out;
     

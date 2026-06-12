@@ -1,0 +1,35 @@
+﻿@using Electrons.Net8
+@using Electrons.Net8.Models
+@using ScoreboardApi.Models
+@model IEnumerable<StandingsModel>
+<table class="tronTable">
+    <thead>
+        <tr>
+            <th class="tronTable">Team</th>
+            <th class="tronTable">W</th>
+            <th class="tronTable">L</th>
+            <th class="tronTable">T</th>
+            <th class="tronTable">Pts.</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var counter = 1;
+        }
+        @foreach (var row in Model)
+        {
+            var css = counter % 2 == 1 ? "oddrow" : "";
+            <tr>
+                <td class="tronTable @css">
+                    @Html.Image(@row.Logo, "25", "25")
+                    <span class="logoText">@row.Team</span>
+                </td>
+                <td class="tronTable @css">@row.Wins</td>
+                <td class="tronTable @css">@row.Losses</td>
+                <td class="tronTable @css">@row.Ties</td>
+                <td class="tronTable @css">@row.Points</td>
+            </tr>
+            counter++;
+        }
+    </tbody>
+</table>
