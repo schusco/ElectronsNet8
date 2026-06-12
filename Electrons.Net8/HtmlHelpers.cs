@@ -353,7 +353,7 @@ namespace Electrons.Net8
                         var attribute = prop.GetCustomAttributes(typeof(TableColumnAttribute), false).SingleOrDefault() as TableColumnAttribute;
                         if (!string.IsNullOrEmpty(attribute.ImageFormat))
                         {
-                            var imagePath = string.Format(attribute.ImageFormat, innertext.Replace(" ", ""));
+                            var imagePath = string.Format(attribute.ImageFormat, innertext.Replace(" ", "").ToLower());
                             imageTag = ToHtmlString(helper.Image(imagePath, "25", "25") as TagBuilder);
                         }
                         if (!string.IsNullOrEmpty(attribute.ColumnCss))
