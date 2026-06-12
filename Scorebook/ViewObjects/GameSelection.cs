@@ -57,7 +57,7 @@ namespace Scorebook.ViewObjects
         public bool ShowCancelSelectionBox => IsSelectingGameFromSchedule || IsConfiguringNewGame;
         public string? SelectedHomeLeague
         {
-            get => _selectedHomeLeague;
+            get => _selectedHomeLeague ?? "CMBA";
             set
             {
                 if (_selectedHomeLeague != value)
@@ -70,7 +70,7 @@ namespace Scorebook.ViewObjects
         }
         public string? SelectedAwayLeague
         {
-            get => _selectedAwayLeague;
+            get => _selectedAwayLeague ?? "CMBA";
             set
             {
                 if (_selectedAwayLeague != value)

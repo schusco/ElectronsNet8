@@ -645,6 +645,7 @@ namespace Scorebook
             foreach (var game in await _apiService.GetSchedule(teamId))
                 GameSelection.Schedule.Add(game);
         }
+        public string VersionText => $"Version: {AppVersion}";
         public string LocalSavePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Baseball", DateTime.Now.Year.ToString(), "Game Files");
         private BaseballGame? _game;
         private AtBat? _currentAb;
@@ -682,5 +683,6 @@ namespace Scorebook
         private PitchTotals? _currentPitchStats;
         private DefensiveAlignment? _defense;
         public const string FinalText = "Final";
+        private static readonly string AppVersion = AppInfo.Current.VersionString;
     }
 }

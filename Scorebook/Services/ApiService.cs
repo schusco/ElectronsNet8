@@ -50,7 +50,7 @@ namespace Scorebook.Services
                 SaveToLocalDisk(teams, "teams_cache.json");
                 Preferences.Default.Set("TeamsNextSync", DateTime.Now.AddYears(1));
             }
-            return teams;
+            return teams.Where(w => w.Current).ToList();
         }
         public async Task<List<CmbaPlayer>> GetRoster(int teamId, bool forceRefresh)
         {

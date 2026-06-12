@@ -5,13 +5,14 @@
              x:Class="Scorebook.Components.GameSelectionView">    
     <Grid  BackgroundColor="#BB000000" ZIndex="100" >
         <Grid ColumnDefinitions="2*,1.5*,2*"  >
-            <VerticalStackLayout x:Name="GameSelectionOptions"  Grid.Column="0" Grid.ColumnSpan="2" HorizontalOptions="End"  VerticalOptions="Center" Spacing="20"  >
+            <VerticalStackLayout x:Name="GameSelectionOptions"  Grid.Column="0" Grid.ColumnSpan="2" HorizontalOptions="End"  VerticalOptions="Center" Spacing="5"  >
                 <Label Text="Electrons Baseball Scorebook" HorizontalOptions="Center" TextColor="White" FontSize="24"/>
-                <Button Text="Start New Game" Command="{Binding Source={x:Reference Root}, Path=Selection.ConfigureGameCommand}" />
-                <Button Text="Select From Schedule" Command="{Binding Source={x:Reference Root}, Path=Selection.SelectFromScheduleCommand}" />
-                <Button Text="Load Game from File" Command="{Binding Source={x:Reference Root}, Path=Selection.LoadGameCommand}" />
-                <Button Text="Save Game" Command="{Binding Source={x:Reference Root}, Path=Selection.SaveCommand}" IsVisible="{Binding Source={x:Reference Root}, Path=Selection.IsGameStarted}" />
-                <Button Text="End Game" Command="{Binding Source={x:Reference Root}, Path=Selection.EndGameCommand}" IsVisible="{Binding Source={x:Reference Root}, Path=Selection.GameInProgress}" />
+                <Label Text="{Binding VersionText}" HorizontalOptions="Center" VerticalOptions="Center" FontSize="14" TextColor="LightGray" />
+                <Button Text="Start New Game" Command="{Binding Source={x:Reference Root}, Path=Selection.ConfigureGameCommand}" Margin="5" />
+                <Button Text="Select From Schedule" Command="{Binding Source={x:Reference Root}, Path=Selection.SelectFromScheduleCommand}" Margin="5" />
+                <Button Text="Load Game from File" Command="{Binding Source={x:Reference Root}, Path=Selection.LoadGameCommand}" Margin="5" />
+                <Button Text="Save Game" Command="{Binding Source={x:Reference Root}, Path=Selection.SaveCommand}" IsVisible="{Binding Source={x:Reference Root}, Path=Selection.IsGameStarted}" Margin="5" />
+                <Button Text="End Game" Command="{Binding Source={x:Reference Root}, Path=Selection.EndGameCommand}" IsVisible="{Binding Source={x:Reference Root}, Path=Selection.GameInProgress}" Margin="5" />
             </VerticalStackLayout>
             <VerticalStackLayout x:Name="GameConfiguration" ZIndex="110" Spacing="15" Grid.Column="2"  Padding="10,0,25,10"
                                  IsVisible="{Binding Source={x:Reference Root}, Path=Selection.IsConfiguringNewGame}" BackgroundColor="White">
