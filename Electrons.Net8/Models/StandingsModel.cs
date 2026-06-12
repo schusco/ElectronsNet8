@@ -6,7 +6,7 @@ namespace Electrons.Net8.Models
     {
         public virtual string LogoName => $@"{Logo}<span style=""display:inline-block;width:100px;padding-left:10px;text-align:left"">{Team}</span>";
 
-        public virtual string Logo => $@"<img src=""Content/images/logos/nextOuting_{Team.Replace(" ", "")}.png"" height=""25"" width=""25"" />";
+        public virtual string Logo => $@"<img src=""Content/images/logos/nextOuting_{Team.Replace(" ", "").ToLower()}.png"" height=""25"" width=""25"" />";
         [TableColumn(HeaderText = "Team", SortOrder = 0, ColumnCss = "display: inline-block; width: 100px; padding-left: 10px; text-align: left;", ImageFormat = "~/Content/images/logos/nextOuting_{0}.png")]
         public string Team { get; set; }
         [TableColumn(HeaderText = "W", SortOrder = 5)]
