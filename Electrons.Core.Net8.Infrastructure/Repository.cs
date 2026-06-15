@@ -697,7 +697,7 @@ namespace Electrons.Core.Net8.Infrastructure
                 .List<object[]>().Select(ManagerHistory.Create).ToList();
             var playoffs = Session.CreateSQLQuery(
                 @"SELECT concat_ws(' ',players.First_Name,players.Last_Name) as Manager,cast(Concat_ws('-',SUM(W) ,SUM(L)) as char(10)) as record
-                                                            from Season2 join gameschedule on gameschedule.Game_ID = Season2.game_id
+                                                            from season2 join gameschedule on gameschedule.Game_ID = season2.game_id
                                                             join history on history.YearStart = year(gameschedule.Game_Date) and history.Category = 'Manage'
                                                             join players on players.Player_ID = history.Data where gameschedule.Playoff = 1
                                                             group by history.Data").List<object[]>();
@@ -712,7 +712,7 @@ namespace Electrons.Core.Net8.Infrastructure
 
             return records;
         }
-        public IList<ResultsHistory> GetResults() => Session.CreateSQLQuery("SELECT * FROM RecordHistory order by Year").List<object[]>().Select(ResultsHistory.Create).ToList();
+        public IList<ResultsHistory> GetResults() => Session.CreateSQLQuery("SELECT * FROM recordhistory order by Year").List<object[]>().Select(ResultsHistory.Create).ToList();
         public IList<PlayoffHistory> GetPlayoffs() => Session.CreateSQLQuery("SELECT * FROM playoffhistory order by Year").List<object[]>().Select(PlayoffHistory.Create).ToList();
         public IEnumerable<GameData> GetGamesByMonth(int month, int year) => Session.QueryOver<GameData>().Where(Restrictions.Eq(NhProjections.Year<GameData>(g => g.GameDate), year))
                 .Where(Restrictions.Eq(NhProjections.Month<GameData>(m => m.GameDate), month)).List();//                string commandstring = @"select gs.game_id,gs.game_date,gs.opponent,gs.hv,gs.Location,rh.r as Hscore,ra.r as Ascore,l.shortName from gameschedule gs //left outer join rhe rh on rh.game_id=gs.game_id and rh.hv='H'//left outer join rhe ra on ra.game_id=gs.game_id and ra.hv='V'//join Locations l on l.id=gs.locationId where year(game_date)=@yr and month(game_date)=@mo";
