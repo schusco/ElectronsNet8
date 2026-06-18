@@ -824,6 +824,8 @@ namespace Electrons.Core.Net8.Games
         {
             if (CurrentAb.AdvancingRunners.Any(a => a.AdvanceTo == onBase && a.Player == runner))
                 return CurrentAb.AdvancingRunners.Single(s => s.AdvanceTo == onBase && s.Player == runner);
+            if (CurrentAb.Result.AdvancingRunners.Any(a => a.AdvanceTo == onBase && a.Player == runner))
+                return CurrentAb.Result.AdvancingRunners.Single(a => a.AdvanceTo == onBase && a.Player == runner);
             return null;
         }
         private OnBase GetCurrentBase(BaseRunner runner)

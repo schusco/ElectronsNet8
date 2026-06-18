@@ -20,7 +20,7 @@ namespace Electrons.Net8.Controllers
         public async Task<ActionResult> Index()
         {
             List<StandingsRow> standings = null;
-            List<GameScore> apiData = null; 
+            List<GameScore> apiData = null;
             try
             {
                 apiData = await _client.GetFromJsonAsync<List<GameScore>>($"{GameSettings.BaseApiUrl}api/teams/1/Games");
@@ -29,11 +29,9 @@ namespace Electrons.Net8.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception (you can use a logging framework like Serilog, NLog, etc.)
                 Console.WriteLine($"Error fetching standings: {ex.Message}");
-                // Optionally, you can set standings to an empty list or null to handle it gracefully in the view
                 standings = new List<StandingsRow>();
-            }            
+            }
             return View(new MainModel(Repository, GameSettings, apiData, standings));
         }
         public ActionResult Download() => View();
