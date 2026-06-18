@@ -12,73 +12,72 @@ namespace Electrons.Net8.Models
     {
         public MainModel() { }
 
-        public MainModel(Repository repo, GameSettings settings, IWebHostEnvironment env, List<GameScore> apiData, List<StandingsRow> standings = null)
+        public MainModel(Repository repo, GameSettings settings, List<GameScore> apiData, List<StandingsRow> standings = null)
         {
             JumboText = settings.JumboText;
-            var nextOutingTime = DateTime.Now.Actual().AddHours(-3);
-            var lastOuting = repo.GetNextOuting(DateTime.Now.Actual().AddHours(-18));
-            var nextOuting = repo.GetNextOuting(nextOutingTime);
-            if (lastOuting != nextOuting && DateTime.Now.AddHours(12) < nextOuting.GameDate)
-                DisplayLastGame = true;
-            var displayOuting = DisplayLastGame && lastOuting != null ? lastOuting : nextOuting;
-            DbGameId = displayOuting?.GameId;
-            if (displayOuting != null)
+            var nextOutingData = repo.GetNextOuting(apiData);
+            DisplayLastGame = nextOutingData.DisplayLastGame;
+            DbGameId = nextOutingData.DisplayGameApi?.GameId;
+
+            if (nextOutingData.DisplayGameApi != null)
             {
-                if (displayOuting.GameDate.Date == DateTime.Now.Actual().Date && displayOuting.GameDate < DateTime.Now.Actual())
+                if (nextOutingData.DisplayGameApi.GameDate.Date == DateTime.Now.Actual().Date && nextOutingData.DisplayGameApi.GameDate < DateTime.Now.Actual())
                     NextGameInProgress = true;
-                if (displayOuting.GameFile != null)
+                if (nextOutingData.DisplayGameDb?.GameFile != null)
                     NextGameRecap = true;
-
-                var gd = GameDataModel.Create(displayOuting);
-                HomeLogo = gd.GetHomeLogo();
-                AwayLogo = gd.GetAwayLogo();
-                HomeTeam = gd.HomeTeam;
-                AwayTeam = gd.AwayTeam;
-
-                GameDate = gd.GameDate.ToString("g");
-                Location = displayOuting.Location.Field;
+                if (nextOutingData?.DisplayGameDb != null)
+                {
+                    var gd = GameDataModel.Create(nextOutingData.DisplayGameDb);
+                    HomeLogo = gd.GetHomeLogo();
+                    AwayLogo = gd.GetAwayLogo();
+                    HomeTeam = gd.HomeTeam;
+                    AwayTeam = gd.AwayTeam;
+                    GameDate = gd.GameDate.ToString("g");
+                    Location = nextOutingData.DisplayGameDb.Location.Field;
+                }
+                else
+                {
+                    HomeLogo = nextOutingData.DisplayGameApi.HomeTeam.Name.GetLogo();
+                    AwayLogo = nextOutingData.DisplayGameApi.AwayTeam.Name.GetLogo();
+                    HomeTeam = nextOutingData.DisplayGameApi.HomeTeam.Name;
+                    AwayTeam = nextOutingData.DisplayGameApi.AwayTeam.Name;
+                    GameDate = nextOutingData.DisplayGameApi.GameDate.ToString("g");
+                    Location = nextOutingData.DisplayGameApi.Location?.FieldName;
+                }
                 if (NextGameInProgress)
                 {
-                    GameScore currentGame;
-                    if (displayOuting.HV == HV.H)
-                        currentGame = apiData.SingleOrDefault(s => s.GameDate.Date == DateTime.Today && s.HomeTeam.Name == "Electrons" && s.AwayTeam.Name == nextOuting.Opponent);
-                    else
-                        currentGame = apiData.SingleOrDefault(s => s.GameDate.Date == DateTime.Today && s.HomeTeam.Name == nextOuting.Opponent && s.AwayTeam.Name == "Electrons");
-                    if (currentGame != null)
+                    if (nextOutingData.DisplayGameApi != null)
                     {
-                        GameId = currentGame.GameId;
-                        HomeScore = currentGame.HomeRuns.ToString() ?? "0";
-                        AwayScore = currentGame.AwayRuns.ToString() ?? "0";
-                        if (currentGame.Status == "Scheduled")
-                            LiveInning = currentGame.GameDate.ToShortTimeString();
-                        else if (currentGame.Status.Contains("Top"))
+                        GameId = nextOutingData.DisplayGameApi.GameId;
+                        HomeScore = nextOutingData.DisplayGameApi.HomeRuns.ToString() ?? "0";
+                        AwayScore = nextOutingData.DisplayGameApi.AwayRuns.ToString() ?? "0";
+                        if (nextOutingData.DisplayGameApi.Status == "Scheduled")
+                            LiveInning = nextOutingData.DisplayGameApi.GameDate.ToShortTimeString();
+                        else if (nextOutingData.DisplayGameApi.Status.Contains("Top"))
                         {
                             IsTopHalfOfInning = true;
-                            LiveInning = currentGame.Status.Replace("Top of", "").Trim();
+                            LiveInning = nextOutingData.DisplayGameApi.Status.Replace("Top of", "").Trim();
                         }
-                        else if (currentGame.Status.Contains("Bottom"))
+                        else if (nextOutingData.DisplayGameApi.Status.Contains("Bottom"))
                         {
                             IsTopHalfOfInning = false;
-                            LiveInning = currentGame.Status.Replace("Bottom of", "").Trim();
+                            LiveInning = nextOutingData.DisplayGameApi.Status.Replace("Bottom of", "").Trim();
                         }
                         else
-                            LiveInning = currentGame.Status ?? "";
+                            LiveInning = nextOutingData.DisplayGameApi.Status ?? "";
                     }
                     else
-                        LiveInning = nextOuting.GameDate.ToShortTimeString();
+                        LiveInning = nextOutingData.DisplayGameApi.GameDate.ToShortTimeString();
                 }
-                else if (DisplayLastGame)
+                else if (nextOutingData.DisplayLastGame)
                 {
                     LiveInning = "Final";
                     NextOutingText = "Last Game";
-                    var currentGame = apiData.Where(w => w.GameDate < DateTime.Now).OrderBy(o => o.GameDate).LastOrDefault();
-                    var test = apiData.Where(w => w.GameDate < DateTime.Now);
-                    var test2 = test.OrderBy(o => o.GameDate).LastOrDefault();
-                    if (currentGame != null)
+                    if (nextOutingData.DisplayGameApi != null)
                     {
-                        GameId = currentGame.GameId;
-                        HomeScore = currentGame.HomeRuns.ToString();
-                        AwayScore = currentGame.AwayRuns.ToString();
+                        GameId = nextOutingData.DisplayGameApi.GameId;
+                        HomeScore = nextOutingData.DisplayGameApi.HomeRuns.ToString();
+                        AwayScore = nextOutingData.DisplayGameApi.AwayRuns.ToString();
                     }
                 }
             }

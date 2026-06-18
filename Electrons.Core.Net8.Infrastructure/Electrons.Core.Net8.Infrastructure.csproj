@@ -3,7 +3,7 @@
     <OutputType>Library</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>        
     <Configurations>Debug;Local;Prev;Preview;Release</Configurations>
-    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <AssemblyTitle>Elecredesign.Core.Infrastructure</AssemblyTitle>
     <Product>Elecredesign.Core.Infrastructure</Product>
     <Copyright>Copyright ©  2020</Copyright>
@@ -61,5 +61,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Electrons.Core.Net8\Electrons.Core.Net8.csproj" />
+    <ProjectReference Include="..\External\CmbaLeagueApp\ScoreboardApi.Models\ScoreboardApi.Models.csproj" />
   </ItemGroup>
 </Project>
