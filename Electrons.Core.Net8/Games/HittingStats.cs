@@ -15,7 +15,7 @@ namespace Electrons.Core.Net8.Games
     {
         private HStats() { }
         [TableColumn("Hitters", 1, Class = "alignLeft")]
-        public string PlayerDisplay => Player.IsUnknown ? $"{Player.LastName} #{Player.Number}" : $"{Player.LastName}, {Player.FirstName[0]}";
+        public string PlayerDisplay => Player.IsUnknown ? $"{Player.LastName} #{Player.Number}" : $"{Player.LastName}, {(Player.FirstName.Length > 0 ? Player.FirstName[0] : Player.Number)}";
         public string PlayerName => $"{Player.FirstName[0]}. {Player.LastName}";
         public Player Player { get; private set; }
         public int G { get; private set; }
@@ -98,9 +98,9 @@ namespace Electrons.Core.Net8.Games
 
         internal static HStats Create(IGrouping<Player, AtBat> abs)
         {
-            var stats= new HStats
+            var stats = new HStats
             {
-                Player = abs.Key                
+                Player = abs.Key
             };
             stats.UpdateFromAbList(abs.ToList());
             return stats;
@@ -168,6 +168,6 @@ namespace Electrons.Core.Net8.Games
                 Triples = stats.Triples
             };
         }
-        
+
     }
 }

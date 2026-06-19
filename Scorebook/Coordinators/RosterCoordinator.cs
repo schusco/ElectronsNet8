@@ -139,10 +139,11 @@ namespace Scorebook.Coordinators
             if (!team.CoreTeam.RemoveFromLineup(lp.Player))
             {
                 var result = await Application.Current.MainPage.DisplayAlert("Confirm", "Game is started, remove anyway?", "ok", "cancel");
-                if (!result) return;
+                if (!result)
+                    return;
+                if (!team.CoreTeam.RemoveFromLineup(lp.Player, true))
+                    return;
             }
-            if (!team.CoreTeam.RemoveFromLineup(lp.Player, true))
-                return;
             team.TeamPlayers.Add(lp.Player);
             team.Lineup.Remove(lp);
             foreach (var spot in team.Lineup)
