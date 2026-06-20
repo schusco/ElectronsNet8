@@ -145,21 +145,22 @@ namespace Electrons.Core.Net8.Infrastructure
         {
             var returnVal = new NextOutingData();
             var lastOutingTime = DateTime.Now.Actual().AddHours(-18);
-            var dbdata = Session.QueryOver<GameData>().Where(w => w.GameDate > lastOutingTime).OrderBy(o => o.GameDate).Asc.Take(2).List();
-            var apiGms = apiData.Where(w => w.GameDate > lastOutingTime).OrderBy(o => o.GameDate).Take(2);
-            var lastOuting = dbdata.FirstOrDefault();
-            var nextOuting = dbdata.LastOrDefault();
-            if (lastOuting != nextOuting && DateTime.Now.AddHours(12) < nextOuting.GameDate)
+            var lastOutingDb = Session.QueryOver<GameData>().Where(w => w.GameDate < DateTime.Now).OrderBy(o => o.GameDate).Desc.Take(1).List().FirstOrDefault();
+            var nextOutingDb = Session.QueryOver<GameData>().Where(w => w.GameDate > DateTime.Now).OrderBy(o => o.GameDate).Asc.Take(1).List().FirstOrDefault();
+            var nextOutingApi = apiData.Where(w => w.GameDate > DateTime.Now).OrderBy(o => o.GameDate).FirstOrDefault();
+            var lastOutingApi = apiData.Where(w => w.GameDate < DateTime.Now).OrderByDescending(o => o.GameDate).FirstOrDefault();
+
+            if (lastOutingApi != nextOutingApi && lastOutingTime < lastOutingApi.GameDate)
                 returnVal.DisplayLastGame = true;
-            if (returnVal.DisplayLastGame && lastOuting != null)
+            if (returnVal.DisplayLastGame && lastOutingApi != null)
             {
-                returnVal.DisplayGameDb = lastOuting;
-                returnVal.DisplayGameApi = apiGms.FirstOrDefault();
+                returnVal.DisplayGameDb = lastOutingDb;
+                returnVal.DisplayGameApi = lastOutingApi;
             }
             else
             {
-                returnVal.DisplayGameDb = nextOuting;
-                returnVal.DisplayGameApi = apiGms.LastOrDefault();
+                returnVal.DisplayGameDb = nextOutingDb;
+                returnVal.DisplayGameApi = nextOutingApi;
             }
             return returnVal;
         }

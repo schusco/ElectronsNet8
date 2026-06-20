@@ -32,7 +32,7 @@
             else
             {
                 var currentInning = i + 1;
-                var inningClass = Model.InningHalf == Electrons.Core.Net8.HalfInning.Top && currentInning == Model.InningNumber ? "activeInning" : "";
+                var inningClass = Model.InningHalf == Electrons.Core.Net8.HalfInning.Top && currentInning == Model.InningNumber && !Model.GameIsOver ? "activeInning" : "";
                 <td class="text-center @inningClass">@Model.AwayInnings[i]</td>
             }
         }
@@ -52,7 +52,7 @@
             else
             {
                 var currentInning = i + 1;
-                var inningClass = Model.InningHalf == Electrons.Core.Net8.HalfInning.Bottom && currentInning == Model.InningNumber ? "activeInning" : "";
+                var inningClass = Model.InningHalf == Electrons.Core.Net8.HalfInning.Bottom && currentInning == Model.InningNumber && !Model.GameIsOver ? "activeInning" : "";
                 <td class="text-center @inningClass">@Model.HomeInnings[i]</td>
             }
         }
