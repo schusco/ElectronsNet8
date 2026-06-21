@@ -13,6 +13,7 @@
                 <Button Text="Load Game from File" Command="{Binding Source={x:Reference Root}, Path=Selection.LoadGameCommand}" Margin="5" />
                 <Button Text="Save Game" Command="{Binding Source={x:Reference Root}, Path=Selection.SaveCommand}" IsVisible="{Binding Source={x:Reference Root}, Path=Selection.IsGameStarted}" Margin="5" />
                 <Button Text="End Game" Command="{Binding Source={x:Reference Root}, Path=Selection.EndGameCommand}" IsVisible="{Binding Source={x:Reference Root}, Path=Selection.GameInProgress}" Margin="5" />
+                <Button Text="Show Score" Command="{Binding Source={x:Reference Root}, Path=Selection.ShowScoreCommand}" IsVisible="{Binding Source={x:Reference Root}, Path=Selection.GameIsOver}" Margin="5" />
             </VerticalStackLayout>
             <VerticalStackLayout x:Name="GameConfiguration" ZIndex="110" Spacing="15" Grid.Column="2"  Padding="10,0,25,10"
                                  IsVisible="{Binding Source={x:Reference Root}, Path=Selection.IsConfiguringNewGame}" BackgroundColor="White">

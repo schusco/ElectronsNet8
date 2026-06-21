@@ -96,6 +96,7 @@ namespace Scorebook.ViewObjects
         public DateTime? StartDateTime { get; set; }
         public bool IsGameStarted => _vm.IsGameStarted;
         public bool GameInProgress => _vm.IsGameStarted && !_vm.GameIsOver;
+        public bool GameIsOver => _vm.GameIsOver;
         public ObservableCollection<Team> FilteredHomeTeams { get; set; } = [];
         public ObservableCollection<Team> FilteredAwayTeams { get; set; } = [];
         public ObservableCollection<string> Leagues { get; set; } = [];
@@ -239,6 +240,7 @@ namespace Scorebook.ViewObjects
         public ICommand CloseGameSelectionCommand => new Command(() => IsSelectingGameFromSchedule = IsConfiguringNewGame = false);
         public ICommand SaveCommand => new Command(async () => await _vm.GameCoordinator.SaveGame(_vm.Game));
         public ICommand EndGameCommand => new Command(() => _vm.Game.EndGame());
+        public ICommand ShowScoreCommand => new Command(() => _vm.ShowLineScore = true);
 
         private readonly ScorebookViewModel _vm = vm;
         private readonly ApiService _apiService = apiService;

@@ -306,6 +306,8 @@ namespace Scorebook
             {
                 _gameIsOver = value;
                 OnPropertyChanged(nameof(GameIsOver));
+                GameSelection?.OnPropertyChanged(nameof(GameSelection.GameIsOver));
+                GameSelection?.OnPropertyChanged(nameof(GameSelection.GameInProgress));
             }
         }
         public bool ShowGameSelectionOptions
@@ -443,10 +445,12 @@ namespace Scorebook
                 Game = game;
                 GameLoaded();
                 IsGameStarted = game.IsStarted;
+                GameIsOver = game.IsGameOver;
                 HomeTeam = new TeamWrapper(this, game.HomeTeam, true);
                 AwayTeam = new TeamWrapper(this, game.AwayTeam, false);
                 HomeTeam.FillLineup(true);
                 AwayTeam.FillLineup(true);
+                GameCoordinator.UpdateLineScore();
                 if (GameSelection.SelectedGame!=null && GameSelection.SendGameUpdates)
                 {
                     GameManager.Refresh();

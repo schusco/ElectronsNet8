@@ -13,6 +13,17 @@ namespace Scorebook.Coordinators
             ViewModel.GameIsOver = true;
             ViewModel.LineScore.Clear();            
             ViewModel.Game.SetGameEndTime(ViewModel.GameSelection?.EndDateTime);
+            UpdateLineScore();
+            ViewModel.OnPropertyChanged(nameof(ViewModel.Game));
+            ViewModel.ShowLineScore = true;
+            ViewModel.InningNumber = ScorebookViewModel.FinalText;
+            ViewModel.IsTopHalfOfInning = false;
+            ViewModel.IsBottomHalfOfInning = false;
+            ViewModel.GameManager.SetGameEnded(ViewModel.Game.EndTime);
+            ViewModel.GameSelection.OnPropertyChanged(nameof(ViewModel.GameSelection.GameInProgress));
+        }
+        internal void UpdateLineScore()
+        {
             ViewModel.TotalInningCount = new int[] { 7, ViewModel.Game.Innings.Max(m => m.Number) }.Max();
             var grps = ViewModel.Game?.Innings.GroupBy(g => g.Number);
             for (int i = 1; i <= ViewModel.TotalInningCount; i++)
@@ -28,13 +39,6 @@ namespace Scorebook.Coordinators
                 ViewModel.SaveAwarded = true;
                 ViewModel.SaveAwardedTo = ViewModel.Game.SaveAwardedTo.FullName;
             }
-            ViewModel.OnPropertyChanged(nameof(ViewModel.Game));
-            ViewModel.ShowLineScore = true;
-            ViewModel.InningNumber = ScorebookViewModel.FinalText;
-            ViewModel.IsTopHalfOfInning = false;
-            ViewModel.IsBottomHalfOfInning = false;
-            ViewModel.GameManager.SetGameEnded(ViewModel.Game.EndTime);
-            ViewModel.GameSelection.OnPropertyChanged(nameof(ViewModel.GameSelection.GameInProgress));
         }
         internal void InningEnded(object? sender, InningChangeEventArgs e)
         {
