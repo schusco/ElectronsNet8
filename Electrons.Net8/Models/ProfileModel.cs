@@ -1,5 +1,7 @@
 ﻿using Electrons.Core.Net8;
 using Electrons.Core.Net8.Entities;
+using Electrons.Core.Net8.Games;
+using iText.Layout.Font;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -28,10 +30,8 @@ namespace Electrons.Net8.Models
             Divorces = profile.Divorces.GetValueOrDefault();
             Bitches = profile.HittingStats.Sum(s => s.Bitches);
             ImageFile = profile.ImageFile.TrimStart('/');
-            var yearsPlayed = HittingStats.Select(s => s.Year).Union(PitchingStats.Select(s => s.Year)).Distinct().ToList();
-            var years = yearsPlayed.Count;
-            var rookie = years == 0 || yearsPlayed.Min() == DateTime.Today.Year;
-            YearDisplay = rookie ? "Rookie" : $"{years} year{(years == 1 ? "" : "s")}";
+            var yearsPlayed = YearsPlayed(profile.HittingStats.ToList(), profile.PitchingStats.ToList());
+            YearDisplay = yearsPlayed;
         }
 
         public string DisplayName => $"{FirstName} {(string.IsNullOrEmpty(NickName) ? "" : $"\"{NickName}\"")} {LastName}";
@@ -77,5 +77,66 @@ namespace Electrons.Net8.Models
         public int Bitches { get; }
         [DisplayName("Experience:")]
         public string YearDisplay { get; }
+
+        private string YearsPlayed(List<HittingStats> hittingStats, List<PitchingStats> pitchingStats)
+        {
+            var hitting_years = hittingStats.Select(s => s.Game.GameDate.Year).Distinct();
+            var pitching_years = pitchingStats.Select(s => s.Game.GameDate.Year).Distinct();
+            var all_years = hitting_years.Union(pitching_years).Distinct().OrderBy(o => o);
+            if (!all_years.Any())
+                return "N/A";
+            var current_year = DateTime.Now.Year;
+            var ranges = GetYearRanges(all_years);
+
+            var formatted_ranges = GetFormattedRanges(ranges);
+            var ranges_string = string.Join(", ", formatted_ranges);
+
+            if (all_years.Count() == 1 && all_years.First() == current_year)
+                return "Rookie";
+            else if (all_years.Count() == 1)
+                return $"1 year ({all_years.First()})";
+            else
+                return $"{all_years.Count()} years ({ranges_string})";
+        }
+
+        private IEnumerable<string> GetFormattedRanges(IEnumerable<Tuple<int, int>> ranges)
+        {
+            var currentYear = DateTime.Now.Year;
+            foreach (var range in ranges)
+            {
+                var start_yr = range.Item1;
+                var end_yr = range.Item2;
+
+                if (start_yr == end_yr)
+                    yield return start_yr == currentYear ? currentYear.ToString() : start_yr.ToString();
+                else
+                {
+                    var display_end = (end_yr == currentYear) ? "Present" : end_yr.ToString();
+                    yield return $"{start_yr}-{display_end}";
+                }
+            }
+        }
+
+        private IEnumerable<Tuple<int, int>> GetYearRanges(IOrderedEnumerable<int> all_years)
+        {
+            int start = all_years.First();
+            int current = 0;
+            int prev = all_years.First();
+            foreach (var year in all_years)
+            {
+                current = year;
+                if (year == all_years.First())
+                    continue;
+                if (current != prev + 1)
+                {
+                    var val= new Tuple<int, int>(start, prev);
+                    start = current;
+                    prev = current;
+                    yield return val;                    
+                }
+                prev = current;
+            }
+            yield return new Tuple<int, int>(start, current);
+        }
     }
 }

@@ -144,14 +144,19 @@ namespace Electrons.Core.Net8.Infrastructure
         public NextOutingData GetNextOuting(List<ScoreboardApi.Models.GameScore> apiData)
         {
             var returnVal = new NextOutingData();
-            var lastOutingTime = DateTime.Now.Actual().AddHours(-18);
             var lastOutingDb = Session.QueryOver<GameData>().Where(w => w.GameDate < DateTime.Now).OrderBy(o => o.GameDate).Desc.Take(1).List().FirstOrDefault();
             var nextOutingDb = Session.QueryOver<GameData>().Where(w => w.GameDate > DateTime.Now).OrderBy(o => o.GameDate).Asc.Take(1).List().FirstOrDefault();
             var nextOutingApi = apiData.Where(w => w.GameDate > DateTime.Now).OrderBy(o => o.GameDate).FirstOrDefault();
             var lastOutingApi = apiData.Where(w => w.GameDate < DateTime.Now).OrderByDescending(o => o.GameDate).FirstOrDefault();
 
-            if (lastOutingApi != nextOutingApi && lastOutingTime < lastOutingApi.GameDate)
+            bool isNextGameTooClose = nextOutingApi != null && nextOutingApi.GameDate < DateTime.Now.Actual().AddHours(12);
+
+            bool isLastGameRecent = lastOutingApi.GameDate > DateTime.Now.Actual().AddHours(-18) &&
+                        lastOutingApi.GameDate < DateTime.Now.Actual();
+
+            if (isLastGameRecent && !isNextGameTooClose)
                 returnVal.DisplayLastGame = true;
+
             if (returnVal.DisplayLastGame && lastOutingApi != null)
             {
                 returnVal.DisplayGameDb = lastOutingDb;
@@ -737,9 +742,8 @@ namespace Electrons.Core.Net8.Infrastructure
         public IList<ResultsHistory> GetResults() => Session.CreateSQLQuery("SELECT * FROM recordhistory order by Year").List<object[]>().Select(ResultsHistory.Create).ToList();
         public IList<PlayoffHistory> GetPlayoffs() => Session.CreateSQLQuery("SELECT * FROM playoffhistory order by Year").List<object[]>().Select(PlayoffHistory.Create).ToList();
         public IEnumerable<GameData> GetGamesByMonth(int month, int year) => Session.QueryOver<GameData>().Where(Restrictions.Eq(NhProjections.Year<GameData>(g => g.GameDate), year))
-                .Where(Restrictions.Eq(NhProjections.Month<GameData>(m => m.GameDate), month)).List();//                string commandstring = @"select gs.game_id,gs.game_date,gs.opponent,gs.hv,gs.Location,rh.r as Hscore,ra.r as Ascore,l.shortName from gameschedule gs //left outer join rhe rh on rh.game_id=gs.game_id and rh.hv='H'//left outer join rhe ra on ra.game_id=gs.game_id and ra.hv='V'//join Locations l on l.id=gs.locationId where year(game_date)=@yr and month(game_date)=@mo";
+                .Where(Restrictions.Eq(NhProjections.Month<GameData>(m => m.GameDate), month)).List();
         public IEnumerable<GameData> GetGamesByYear(int year) => Session.QueryOver<GameData>().Where(Restrictions.In(NhProjections.Year<GameData>(y => y.GameDate), new[] { year, year + 100 })).List();
-        //public async Task<IEnumerable<GameData>> GetGamesByYearAsync(int year) => Task..Run(Session.QueryOver<GameData>().Where(Restrictions.In(NhProjections.Year<GameData>(y => y.GameDate), new[] { year, year + 100 })).List());
         public Dictionary<DateTime, string> GetEventsByMonth(int month, int year) => Session.QueryOver<ScheduleEvent>().Where(Restrictions.Eq(NhProjections.Year<ScheduleEvent>(s => s.Date), year))
                 .Where(Restrictions.Eq(NhProjections.Month<ScheduleEvent>(s => s.Date), month))
                 .List().ToDictionary(k => k.Date, v => v.Event);
