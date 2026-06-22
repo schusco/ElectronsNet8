@@ -8,10 +8,19 @@ using System.Xml.Linq;
 
 namespace Electrons.Core.Net8.Entities
 {
-    [Class(Table = "gameschedule")]
-    public class GameData
+    public interface IGameData
     {
-
+        int GameId { get; }
+        DateTime GameDate { get; }
+        string Opponent { get; }
+        int HomeRuns { get; }
+        int AwayRuns { get; }
+        bool IsHome { get; }
+        string GameString { get; }
+    }
+    [Class(Table = "gameschedule")]
+    public class GameData : IGameData
+    {
         protected GameData()
         {
             HittingStats = new List<HittingStats>();
@@ -93,6 +102,15 @@ namespace Electrons.Core.Net8.Entities
 
         [ManyToOne(Column = "SP", ClassType = typeof(PlayerProfile))]
         public virtual PlayerProfile StartingPitcher { get; protected set; }
+
+        public virtual int HomeRuns => Innings.Sum(s => s.HomeRuns ?? 0);
+
+        public virtual int AwayRuns => Innings.Sum(s => s.AwayRuns ?? 0);
+
+        public virtual bool IsHome => HV == HV.H;
+
+        public virtual string GameString => $"{Opponent} - {Location.ShortFieldName} {GameDate.ToShortTimeString()} {(Wood ? "(WB)" : "")}";
+
         public virtual LineScoreModel GetLineScore(HV hv)
         {
             var model = new LineScoreModel();
@@ -137,21 +155,21 @@ namespace Electrons.Core.Net8.Entities
             gd.Update(gameDate, hv, location);
             return gd;
         }
-        public static string GetScore(HV hv, int hscore, int ascore)
+        public static string GetScore(bool isHome, int hscore, int ascore)
         {
             if (ascore == 0 && hscore == 0)
                 return "";
             string wlInd = string.Empty;
             if (hscore == ascore)
                 wlInd = "T";
-            if (hv == HV.V)
+            if (!isHome)
             {
                 if (hscore > ascore)
                     wlInd = "L";
                 else if (hscore < ascore)
                     wlInd = "W";
             }
-            else if (hv == HV.H)
+            else if (isHome)
             {
                 if (hscore < ascore)
                     wlInd = "L";

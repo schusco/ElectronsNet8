@@ -90,9 +90,9 @@ namespace Electrons.Net8.Models
             Events = eventData.Where(w => w.Key.Day == i).Select(s => s.Value);
             Birthdays = birthdayData.TryGetValue(i, out IEnumerable<string> value) ? value : [];
             DayOfMonth = i;
-            if (Games.Any(a => a.HV == HV.H))
+            if (Games.Any(a => a.IsHome))
                 CellCss = "homeGame";
-            else if (Games.Any(a => a.HV == HV.V))
+            else if (Games.Any(a => !a.IsHome))
                 CellCss = "awayGame";
             if (Events.Any())
                 CellCss = "eventCss";

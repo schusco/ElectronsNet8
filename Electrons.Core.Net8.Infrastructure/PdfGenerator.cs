@@ -49,7 +49,7 @@ namespace Electrons.Core.Net8.Infrastructure
                 table.AddCell(CreateCell(game.GameDate.ToString("g")));
                 table.AddCell(CreateCell(string.Format("{0} {1}", game.HV.ToString() == "V" ? "@ " : "vs. ", game.Opponent)));
                 table.AddCell(CreateCell(game.Location.Field));
-                table.AddCell(CreateCell(game.GameDate < DateTime.Now ? GameData.GetScore(game.HV, game.Innings.Sum(s => s.HomeRuns) ?? 0, game.Innings.Sum(s => s.AwayRuns) ?? 0) : ""));
+                table.AddCell(CreateCell(game.GameDate < DateTime.Now ? GameData.GetScore(game.IsHome, game.Innings.Sum(s => s.HomeRuns) ?? 0, game.Innings.Sum(s => s.AwayRuns) ?? 0) : ""));
             }
             doc.Add(table);
             doc.Close();

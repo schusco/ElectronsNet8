@@ -106,7 +106,7 @@
     <PackageReference Include="knockoutjs" Version="2.2.0" />
     <PackageReference Include="log4net" Version="3.3.0" />
     <PackageReference Include="Microsoft.AspNet.Mvc.FixedDisplayModes" Version="5.3.0" />
-    <PackageReference Include="Microsoft.AspNet.Providers.Core" Version="1.2" />
+    <PackageReference Include="Microsoft.AspNet.Providers.Core" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNet.Providers.LocalDB" Version="1.1" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />

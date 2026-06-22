@@ -1,6 +1,5 @@
 ﻿using Electrons.Core.Net8;
 using Electrons.Core.Net8.Infrastructure;
-using Microsoft.AspNetCore.Hosting;
 using ScoreboardApi.Models;
 using System;
 using System.Collections.Generic;
@@ -17,15 +16,24 @@ namespace Electrons.Net8.Models
             JumboText = settings.JumboText;
             var nextOutingData = repo.GetNextOuting(apiData);
             DisplayLastGame = nextOutingData.DisplayLastGame;
-            DbGameId = nextOutingData.DisplayGameApi?.GameId;
-
+            DbGameId = nextOutingData.DisplayGameDb?.GameId;
+            GameId = nextOutingData.DisplayGameApi?.GameId;
             if (nextOutingData.DisplayGameApi != null)
             {
                 if (nextOutingData.DisplayGameApi.GameDate.Date == DateTime.Now.Actual().Date && nextOutingData.DisplayGameApi.GameDate < DateTime.Now.Actual())
                     NextGameInProgress = true;
                 if (nextOutingData.DisplayGameDb?.GameFile != null)
                     NextGameRecap = true;
-                if (nextOutingData?.DisplayGameDb != null)
+                if (nextOutingData?.DisplayGameApi != null)
+                {
+                    HomeLogo = nextOutingData.DisplayGameApi.HomeTeam.Name.GetLogo();
+                    AwayLogo = nextOutingData.DisplayGameApi.AwayTeam.Name.GetLogo();
+                    HomeTeam = nextOutingData.DisplayGameApi.HomeTeam.Name;
+                    AwayTeam = nextOutingData.DisplayGameApi.AwayTeam.Name;
+                    GameDate = nextOutingData.DisplayGameApi.GameDate.ToString("g");
+                    Location = nextOutingData.DisplayGameApi.Location?.FieldName;
+                }
+                else
                 {
                     var gd = GameDataModel.Create(nextOutingData.DisplayGameDb);
                     HomeLogo = gd.GetHomeLogo();
@@ -35,20 +43,11 @@ namespace Electrons.Net8.Models
                     GameDate = gd.GameDate.ToString("g");
                     Location = nextOutingData.DisplayGameDb.Location.Field;
                 }
-                else
-                {
-                    HomeLogo = nextOutingData.DisplayGameApi.HomeTeam.Name.GetLogo();
-                    AwayLogo = nextOutingData.DisplayGameApi.AwayTeam.Name.GetLogo();
-                    HomeTeam = nextOutingData.DisplayGameApi.HomeTeam.Name;
-                    AwayTeam = nextOutingData.DisplayGameApi.AwayTeam.Name;
-                    GameDate = nextOutingData.DisplayGameApi.GameDate.ToString("g");
-                    Location = nextOutingData.DisplayGameApi.Location?.FieldName;
-                }
+
                 if (NextGameInProgress)
                 {
                     if (nextOutingData.DisplayGameApi != null)
-                    {
-                        GameId = nextOutingData.DisplayGameApi.GameId;
+                    {                        
                         HomeScore = nextOutingData.DisplayGameApi.HomeRuns.ToString() ?? "0";
                         AwayScore = nextOutingData.DisplayGameApi.AwayRuns.ToString() ?? "0";
                         if (nextOutingData.DisplayGameApi.Status == "Scheduled")
@@ -74,8 +73,7 @@ namespace Electrons.Net8.Models
                     LiveInning = "Final";
                     NextOutingText = "Last Game";
                     if (nextOutingData.DisplayGameApi != null)
-                    {
-                        GameId = nextOutingData.DisplayGameApi.GameId;
+                    {                        
                         HomeScore = nextOutingData.DisplayGameApi.HomeRuns.ToString();
                         AwayScore = nextOutingData.DisplayGameApi.AwayRuns.ToString();
                     }
