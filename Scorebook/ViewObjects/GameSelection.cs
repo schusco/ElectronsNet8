@@ -141,7 +141,7 @@ namespace Scorebook.ViewObjects
             var awayTeam = ApiService.ApiTeams.FirstOrDefault(f => f.Name == SelectedGame?.AwayTeam?.Name);
             if (homeTeam == null || awayTeam == null)
                 return;
-            var innings = _leagueDict.ContainsKey(homeLeague) ? _leagueDict[homeLeague] : 7;
+            var innings = _leagueDict.TryGetValue(homeLeague, out int value) ? value : 7;
             _vm.Game = new BaseballGame(innings);
             await _vm.SetTeamsForGame(homeTeam, awayTeam);
             IsSelectingGameFromSchedule = false;
@@ -149,13 +149,9 @@ namespace Scorebook.ViewObjects
             await LoadGameData();
             if (SendGameUpdates && !_vm.GameManager.IsLoggedIn)
                 await _vm.GameManager.StartAsync();
-            if (GameUpdateId.HasValue)
+            if (GameUpdateId.HasValue && SelectedGame != null)
             {
                 SelectedGame.GameScoreUpdated += _vm.ApiService.SendGameUpdate;
-                //SelectedGame.InningUpdated += _vm.ApiService.SendInningUpdate;
-                //SelectedGame.AtbatUpdated += _vm.ApiService.SendAbUpdate;
-                //_vm.ApiService.InningCreated += SelectedGame.UpdateCurrentInning;
-                //_vm.ApiService.AbCreated += SelectedGame.UpdateCurrentAtbat;
                 _vm.GameManager.SetSelectedGame(SelectedGame, _vm);
             }
         });
@@ -166,7 +162,7 @@ namespace Scorebook.ViewObjects
                 id = SelectedGame.GameId;
             else
             {
-                var game = Schedule.FirstOrDefault(s => s.HomeTeam?.Name == _vm.Game.HomeTeam.Name && s.AwayTeam.Name == _vm.Game?.AwayTeam.Name);
+                var game = Schedule.FirstOrDefault(s => s.HomeTeam?.Name == _vm.Game?.HomeTeam.Name && s.AwayTeam?.Name == _vm.Game?.AwayTeam.Name);
                 if (game is not null)
                     id = game.GameId;
             }
@@ -180,7 +176,7 @@ namespace Scorebook.ViewObjects
             var awayTeam = ApiService.ApiTeams.FirstOrDefault(f => f.Name == SelectedAwayTeam?.Name);
             if (homeTeam == null || awayTeam == null)
                 return;
-            var innings = _leagueDict.ContainsKey(SelectedHomeLeague) ? _leagueDict[SelectedHomeLeague] : 7;
+            var innings = _leagueDict.TryGetValue(SelectedHomeLeague ?? "", out int value) ? value : 7;
             _vm.Game = new BaseballGame(innings);
             await _vm.SetTeamsForGame(homeTeam, awayTeam);
             IsConfiguringNewGame = false;
@@ -227,7 +223,7 @@ namespace Scorebook.ViewObjects
             }
             catch (Exception ex)
             {
-                var dInfo = Directory.EnumerateFiles(_vm.LocalSavePath).Where(w => w.EndsWith(".sbg")).ToArray();
+                var dInfo = Directory.EnumerateFiles(ScorebookViewModel.LocalSavePath).Where(w => w.EndsWith(".sbg")).ToArray();
                 var displayNames = dInfo.Select(s => Path.GetFileName(s)).ToArray();
                 var fName = await Application.Current.MainPage.DisplayActionSheet("Select File", "Cancel", null, displayNames);
                 if (fName == "Cancel")
@@ -238,8 +234,8 @@ namespace Scorebook.ViewObjects
         });
         public ICommand ConfigureGameCommand => new Command(() => IsConfiguringNewGame = true);
         public ICommand CloseGameSelectionCommand => new Command(() => IsSelectingGameFromSchedule = IsConfiguringNewGame = false);
-        public ICommand SaveCommand => new Command(async () => await _vm.GameCoordinator.SaveGame(_vm.Game));
-        public ICommand EndGameCommand => new Command(() => _vm.Game.EndGame());
+        public ICommand SaveCommand => new Command(async () => await Coordinators.GameCoordinator.SaveGame(_vm.Game));
+        public ICommand EndGameCommand => new Command(() => _vm.Game?.EndGame());
         public ICommand ShowScoreCommand => new Command(() => _vm.ShowLineScore = true);
 
         private readonly ScorebookViewModel _vm = vm;

@@ -10,14 +10,13 @@ using Scorebook.ViewObjects;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using CoreTeam = Electrons.Core.Net8.Games.Team;
 using Team = ScoreboardApi.Models.Team;
 
 namespace Scorebook
 {
-    public class ScorebookViewModel : INotifyPropertyChanged
+    public partial class ScorebookViewModel : INotifyPropertyChanged
     {
         public ScorebookViewModel(ApiService apiService, RosterCoordinator rosterCoordinator, GameCoordinator gameCoordinator, GameUpdateManager gameManager)
         {
@@ -470,7 +469,7 @@ namespace Scorebook
         }
         internal void UpdateRunners()
         {
-            var oobs = CurrentAb?.Result?.Events?.OfType<OutOnBases>() ?? new List<OutOnBases>();
+            var oobs = CurrentAb?.Result?.Events?.OfType<OutOnBases>() ?? [];
 
             RunnerOnFirstIsOut = oobs.Any(a => a.OutAt == OnBase.First);
             RunnerOnSecondIsOut = oobs.Any(a => a.OutAt == OnBase.Second);
@@ -530,7 +529,7 @@ namespace Scorebook
         public ICommand ShowCurrentAbCommand => new Command(async () =>
         {
             if (CurrentAb != null)
-                await Application.Current?.MainPage?.DisplayAlert("Current At Bat", string.Join("\n\n", CurrentAb.Events.Select(s => $"{s.Sequence}) {s.ToString()}")), "OK");
+                await Application.Current?.MainPage?.DisplayAlert("Current At Bat", string.Join("\n\n", CurrentAb.Events.Select(s => $"{s.Sequence}) {s}")), "OK");
         });
         public ICommand ShowPreviousAbsCommand => new Command(async () =>
         {
@@ -545,8 +544,8 @@ namespace Scorebook
         public ICommand ToggleSidebarCommand => new Command(() => IsSideBarOpen = !IsSideBarOpen);
         public ICommand PrevBatterNavigationCommmand => new Command(async () =>
         {
-            Game.PreviousAtBat();
-            CurrentAb = Game.CurrentAb;
+            Game?.PreviousAtBat();
+            CurrentAb = Game?.CurrentAb;
             InningEvents.RemoveAt(0);
             await LinkAb();
         });
@@ -626,13 +625,13 @@ namespace Scorebook
         }
         private void SetHomeTeam(List<CmbaPlayer> hroster, string name, bool unknown = false)
         {
-            var team = CoreTeam.Create(name, hroster.Select(s => Player.Create(s.Number, s.FirstName, s.LastName)).ToList());
+            var team = CoreTeam.Create(name, [.. hroster.Select(s => Player.Create(s.Number, s.FirstName, s.LastName))]);
             Game.SetHomeTeam(team);
             HomeTeam = new TeamWrapper(this, team, true, unknown);
         }
         private void SetAwayTeam(List<CmbaPlayer> aroster, string name, bool unknown = false)
         {
-            var team = CoreTeam.Create(name, aroster.Select(s => Player.Create(s.Number, s.FirstName, s.LastName)).ToList());
+            var team = CoreTeam.Create(name, [.. aroster.Select(s => Player.Create(s.Number, s.FirstName, s.LastName))]);
             Game.SetAwayTeam(team);
             AwayTeam = new TeamWrapper(this, team, false, unknown);
         }
@@ -649,14 +648,14 @@ namespace Scorebook
             foreach (var game in await _apiService.GetSchedule(teamId))
                 GameSelection.Schedule.Add(game);
         }
-        public string VersionText => $"Version: {AppVersion}";
-        public string LocalSavePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Baseball", DateTime.Now.Year.ToString(), "Game Files");
+        public static string VersionText => $"Version: {AppVersion}";
+        public static string LocalSavePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Baseball", DateTime.Now.Year.ToString(), "Game Files");
         private BaseballGame? _game;
         private AtBat? _currentAb;
-        private ApiService _apiService;
-        private RosterCoordinator _rosterCoordinator;
-        private GameCoordinator _gameCoordinator;
-        private GameUpdateManager _gameManager;
+        private readonly ApiService _apiService;
+        private readonly RosterCoordinator _rosterCoordinator;
+        private readonly GameCoordinator _gameCoordinator;
+        private readonly GameUpdateManager _gameManager;
         private TeamWrapper? _homeTeam;
         private TeamWrapper? _awayTeam;
         private bool _isPitchesPanelVisible;

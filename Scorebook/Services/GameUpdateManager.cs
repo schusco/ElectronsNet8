@@ -103,7 +103,7 @@ namespace Scorebook.Services
             _currentAtbat = ab;
             await OnAtBatUpdated();
         }
-        internal async Task UpdateAb(AtBat ab)
+        internal async Task UpdateAb(AtBat? ab)
         {
             if (_currentInning != null)
                 await UpdateAb(ConvertAb(ab));
@@ -157,20 +157,20 @@ namespace Scorebook.Services
             if (result != null)
                 _currentInning.Id = result.Id;
         }
-        private ApiAb ConvertAb(AtBat currentAb)
+        private ApiAb? ConvertAb(AtBat? currentAb)
         {
             if (_currentInning is null)
                 return null;
-            var hittingTeam = _currentInning.IsTopHalf ? _selectedGame.AwayTeam : _selectedGame.HomeTeam;
-            var pitchingTeam = _currentInning.IsTopHalf ? _selectedGame.HomeTeam : _selectedGame.AwayTeam;
-            var batter = ApiService.ApiRosters[hittingTeam.Name].FirstOrDefault(p => p.Number == currentAb.Batter.Number);
-            var pitcher = ApiService.ApiRosters[pitchingTeam.Name].FirstOrDefault(p => p.Number == currentAb.Pitcher.Number);
+            var hittingTeam = _currentInning.IsTopHalf ? _selectedGame?.AwayTeam : _selectedGame?.HomeTeam;
+            var pitchingTeam = _currentInning.IsTopHalf ? _selectedGame?.HomeTeam : _selectedGame?.AwayTeam;
+            var batter = ApiService.ApiRosters[hittingTeam.Name].FirstOrDefault(p => p.Number == currentAb?.Batter.Number);
+            var pitcher = ApiService.ApiRosters[pitchingTeam.Name].FirstOrDefault(p => p.Number == currentAb?.Pitcher.Number);
 
             var batterId = batter?.Id ?? 0;
             var pitcherId = pitcher?.Id ?? 0;
             var ab = new ApiAb
             {
-                Id = _currentAtbat?.Sequence != currentAb.Sequence ? 0 : _currentAtbat.Id,
+                Id = _currentAtbat?.Sequence != currentAb?.Sequence ? 0 : _currentAtbat.Id,
                 Sequence = currentAb.Sequence,
                 BatterId = batterId,
                 PitcherId = pitcherId,

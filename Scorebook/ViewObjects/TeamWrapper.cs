@@ -137,8 +137,8 @@ namespace Scorebook.ViewObjects
             var counts = Lineup.Where(p => p.Position != null).GroupBy(p => p.Position).ToDictionary(g => g.Key, g => g.Count());
             var dhPositions = Lineup.Select(s => s.HittingFor).Where(w => w is not null).Select(s => s.Position);
             foreach (var pos in dhPositions)
-                if (counts.ContainsKey(pos))
-                    counts[pos]++;
+                if (counts.TryGetValue(pos, out int value))
+                    counts[pos] = ++value;
                 else
                     counts.Add(pos, 1);
             PositionStatusList.Clear();
@@ -211,10 +211,10 @@ namespace Scorebook.ViewObjects
 
         public int CurrentBatterIndex => CoreTeam.CurrentHitterIndex;
 
-        private ScorebookViewModel _vm;
+        private readonly ScorebookViewModel _vm;
         private bool _isUnknownRoster;
         private bool _pitcherSelected;
-        private bool _isHome;
+        private readonly bool _isHome;
         private string? _mobileText;
         private bool _isEditing;
         private bool _canReplacePitcher;

@@ -34,7 +34,7 @@ namespace Scorebook.Coordinators
                 else
                     ViewModel.LineScore.Add(new LineScoreData(i));
             }
-            if (!(ViewModel.Game?.SaveAwardedTo is null))
+            if (ViewModel.Game?.SaveAwardedTo is not null)
             {
                 ViewModel.SaveAwarded = true;
                 ViewModel.SaveAwardedTo = ViewModel.Game.SaveAwardedTo.FullName;
@@ -85,9 +85,9 @@ namespace Scorebook.Coordinators
             var stats = ViewModel.Game.CurrentInning.Half == HalfInning.Top ? ViewModel.Game.HomeTeamPitching : ViewModel.Game.AwayTeamPitching;
             return stats.FirstOrDefault(s => s.Player == ViewModel.Game.CurrentInning.CurrentPitcher);
         }
-        internal async Task ScoringEntered(AB ab, BaseballGame Game)
+        internal async Task ScoringEntered(AB ab, BaseballGame? Game)
         {
-            if (await ShowNextBatterWarning())
+            if (Game is null || await ShowNextBatterWarning())
                 return;
             IList<RunningEvent>? advances = null;
             bool add = true;
@@ -115,7 +115,7 @@ namespace Scorebook.Coordinators
                     break;
                 case AB.StrikeOut:
                     var lastPitch = ViewModel.CurrentAb?.Pitches?.LastOrDefault();
-                    if (!(lastPitch is null))
+                    if (lastPitch is not null)
                     {
                         if (lastPitch.Result == PitchResult.CalledStrike)
                             ab = AB.StrikeOutLooking;
@@ -125,9 +125,9 @@ namespace Scorebook.Coordinators
                     break;
                 case AB.ReachedOnError:
                     bool chargeEarned = false;
-                    if (ViewModel.Game.CurrentInning.CurrentRunners.RunnerOnThird)
-                        chargeEarned = await ShowEarnedDialog(ViewModel.Game.CurrentInning.CurrentRunners.OnThird.Runner);
-                    advances = ViewModel.Game.ForceRunners(true, chargeEarned);
+                    if (Game.CurrentInning.CurrentRunners.RunnerOnThird)
+                        chargeEarned = await ShowEarnedDialog(Game.CurrentInning.CurrentRunners.OnThird.Runner);
+                    advances = Game.ForceRunners(true, chargeEarned);
                     break;
                 case AB.FieldersChoice:
                     ViewModel.ScoringIsRequired = true;
@@ -140,26 +140,18 @@ namespace Scorebook.Coordinators
                     if (!Game.CurrentInning.CurrentRunners.RunnersOnBase.Any())
                         return;
                     string action = await Application.Current?.Windows[0]?.Page?.DisplayActionSheet(ab.ToString(), "Cancel",
-                        null, Game.CurrentInning.CurrentRunners.RunnersOnBase.Select(s => s.Runner.FullName).ToArray());
+                        null, [.. Game.CurrentInning.CurrentRunners.RunnersOnBase.Select(s => s.Runner.FullName)]);
                     if (action != null && action != "Cancel")
                     {
-                        var runner = ViewModel.Game.CurrentInning.Runners.Single(s => s.Value.Runner.FullName == action);
+                        var runner = Game.CurrentInning.Runners.Single(s => s.Value.Runner.FullName == action);
                         if (ab == AB.StolenBase)
                         {
-                            OnBase nextBase;
-                            switch (runner.Key)
+                            var nextBase = runner.Key switch
                             {
-                                case OnBase.First:
-                                    nextBase = OnBase.Second;
-                                    break;
-                                case OnBase.Second:
-                                    nextBase = OnBase.Third;
-                                    break;
-                                default:
-                                    nextBase = OnBase.None;
-                                    break;
-                            }
-
+                                OnBase.First => OnBase.Second,
+                                OnBase.Second => OnBase.Third,
+                                _ => OnBase.None,
+                            };
                             if (runner.Key == OnBase.Third)
                                 Game.AddEventToAb(!runner.Value.ReachedOnError ? AB.StealOfHome : AB.StealOfHomeUnearned,
                                     runner.Value, nextBase);
@@ -188,8 +180,10 @@ namespace Scorebook.Coordinators
             if (ViewModel.MobileActionTrigger)
                 ViewModel.ShowActionDialog = false;
         }
-        internal async Task ShowOtherMenu(BaseballGame game)
+        internal async Task ShowOtherMenu(BaseballGame? game)
         {
+            if (game is null)
+                return;
             IList<RunningEvent>? advances = null;
             string action = await Application.Current?.Windows[0]?.Page?.DisplayActionSheet("Options", "Cancel",
                         null, "Balk", "Wild Pitch", "Passed Ball", "Sacrifice Fly", "Sac / Reached on Error", "Drop Third Strike");
@@ -230,13 +224,15 @@ namespace Scorebook.Coordinators
         }
         internal async Task AdvanceRunners(OnBase onBase, AdvanceReason reason)
         {
+            if (ViewModel?.Game is null || ViewModel.Game.CurrentInning?.CurrentRunners is null)
+                return;
             var runners = ViewModel.Game.CurrentInning.CurrentRunners;
             switch (onBase)
             {
                 case OnBase.Third:
                     {
                         var chargeAsEarned = true;
-                        if (ViewModel.Game.CurrentInning.Errors > 0 || ViewModel.Game.CurrentAb.Result.Errors > 0)
+                        if (ViewModel.Game?.CurrentInning.Errors > 0 || ViewModel.Game.CurrentAb.Result.Errors > 0)
                             chargeAsEarned = await ShowEarnedDialog(runners.OnThird.Runner);
                         ViewModel.Game.AddEventToAb(ViewModel.Game.ScoreRunner(runners.OnThird, reason, chargeAsEarned));
                         break;
@@ -258,7 +254,7 @@ namespace Scorebook.Coordinators
             {
                 if (!ViewModel.IsGameStarted)
                 {
-                    if (game.HomeTeam is null || game.AwayTeam is null)
+                    if (game?.HomeTeam is null || game.AwayTeam is null)
                     {
                         await Shell.Current.DisplayAlert("Error", "Select teams before starting game", "OK");
                         return;
@@ -269,10 +265,10 @@ namespace Scorebook.Coordinators
                     ViewModel.IsGameStarted = true;
                     ViewModel.OnPropertyChanged(nameof(ViewModel.Game));
                     ViewModel.OnPropertyChanged(nameof(ViewModel.Defense));
-                    if (!ViewModel.HomeTeam.Lineup.Any())
-                        ViewModel.HomeTeam.FillLineup(false);
-                    if (!ViewModel.AwayTeam.Lineup.Any())
-                        ViewModel.AwayTeam.FillLineup(false);
+                    if (!ViewModel.HomeTeam?.Lineup.Any() ?? false)
+                        ViewModel.HomeTeam?.FillLineup(false);
+                    if (!ViewModel.AwayTeam?.Lineup.Any()??false)
+                        ViewModel.AwayTeam?.FillLineup(false);
                     await ViewModel.LinkAb();
                 }
                 else
@@ -283,9 +279,9 @@ namespace Scorebook.Coordinators
                     {
                         var scoringAdded = game?.AddScoring();
                         ViewModel.ScoringIsRequired = false;
-                        if (!ViewModel.CurrentAb.IsFinished && ViewModel.CurrentAb.Result is FieldersChoice fc)
+                        if (!(ViewModel.CurrentAb?.IsFinished ?? false) && ViewModel.CurrentAb?.Result is FieldersChoice fc)
                         {
-                            var advances = game.ForceRunners();
+                            var advances = game?.ForceRunners();
                             fc.AddAdvances(advances);
                             ViewModel.UpdateRunners();
                         }
@@ -308,7 +304,7 @@ namespace Scorebook.Coordinators
         internal async void AddPitch(PitchResult pitchType)
         {
             var pitch = Pitch.GetPitch(pitchType);
-            ViewModel.Game.AddEventToAb(pitch);
+            ViewModel.Game?.AddEventToAb(pitch);
             switch (pitchType)
             {
                 case PitchResult.InPlay:
@@ -330,7 +326,7 @@ namespace Scorebook.Coordinators
             ViewModel.OnPropertyChanged(nameof(ViewModel.CurrentStrikes));
             ViewModel.ReplaceCurrentAbInLog();
             ViewModel.UpdatePitches();
-            await ViewModel.GameManager.UpdateAb(ViewModel.CurrentAb);
+            await ViewModel.GameManager.UpdateAb(ViewModel?.CurrentAb);
         }
         internal void SetStats(bool home)
         {
@@ -339,44 +335,44 @@ namespace Scorebook.Coordinators
             ViewModel.ShowStats = true;
             if (home)
             {
-                AddStats(ViewModel.GamePitchingStats, ViewModel.Game.HomeTeamPitching);
-                AddStats(ViewModel.GameHittingStats, ViewModel.Game.HomeTeamHitting);
+                AddStats(ViewModel.GamePitchingStats, ViewModel.Game?.HomeTeamPitching);
+                AddStats(ViewModel.GameHittingStats, ViewModel.Game?.HomeTeamHitting);
             }
             else
             {
-                AddStats(ViewModel.GamePitchingStats, ViewModel.Game.AwayTeamPitching);
+                AddStats(ViewModel.GamePitchingStats, ViewModel.Game?.AwayTeamPitching);
                 AddStats(ViewModel.GameHittingStats, ViewModel.Game.AwayTeamHitting);
             }
         }
         internal async Task HandleRunningEvents(OnBase onBase)
         {
             string header = "";
-            var runners = ViewModel.Game.CurrentInning.CurrentRunners;
+            var runners = ViewModel.Game?.CurrentInning.CurrentRunners;
             switch (onBase)
             {
                 case OnBase.First:
-                    if (!runners.RunnerOnFirst)
+                    if (!runners?.RunnerOnFirst ?? false)
                         return;
                     header = "Runner On First";
                     break;
                 case OnBase.Second:
-                    if (!runners.RunnerOnSecond)
+                    if (!runners?.RunnerOnSecond?? false)
                         return;
                     header = "Runner On Second";
                     break;
                 case OnBase.Third:
-                    if (!runners.RunnerOnThird)
+                    if (!runners?.RunnerOnThird ?? false)
                         return;
                     header = "Runner On Third";
                     break;
             }
-            string action = await Application.Current.MainPage.DisplayActionSheet(header, "Cancel", null, _runnerMenuOptions);
+            string action = await Application.Current.MainPage?.DisplayActionSheet(header, "Cancel", null, _runnerMenuOptions);
             if (action == _runnerMenuOptions[0])  // "Advance Runner"
                 await AdvanceRunners(onBase, AdvanceReason.Ab);
             else if (action == _runnerMenuOptions[1])  // "Runner Advanced On Throw"
                 await AdvanceRunners(onBase, AdvanceReason.Throw);
             else if (action == _runnerMenuOptions[2]) // Move Runner Back
-                ViewModel.Game.ReturnRunner(onBase);
+                ViewModel.Game?.ReturnRunner(onBase);
             else if (action == _runnerMenuOptions[3]) // Runner Out At Base
             {
                 ViewModel.ScoringIsRequired = true;
@@ -389,39 +385,39 @@ namespace Scorebook.Coordinators
             }
             else if (action == _runnerMenuOptions[5]) // Runner Out Advancing
             {
-                if (!ViewModel.CurrentAb.Result.HasFielders)
+                if (!ViewModel.CurrentAb?.Result.HasFielders ?? false)
                     ViewModel.ScoringIsRequired = true;
                 AddRunnerOutEvent(onBase, true);
             }
             else if (action == _runnerMenuOptions[6]) // Courtesy Runner
             {
-                var bench = ViewModel.Game.BattingTeam.Bench;
-                var allRunners = bench.Select(s => s.FullName).ToArray();
-                var cr = await Application.Current.MainPage.DisplayActionSheet("Select Courtesy Runner", "Cancel", null, allRunners);
+                var bench = ViewModel.Game?.BattingTeam.Bench;
+                var allRunners = bench?.Select(s => s.FullName).ToArray();
+                var cr = await Application.Current.MainPage?.DisplayActionSheet("Select Courtesy Runner", "Cancel", null, allRunners);
 
                 var nameNumber = cr.Split('-');
-                var runner = ViewModel.Game.BattingTeam.GetPlayer(nameNumber[1].Split(',')[0], int.Parse(nameNumber[0]));
-                var previousRunner = ViewModel.Game.CurrentInning.CurrentRunners[onBase];
-                ViewModel.Game.CurrentInning.AddCourtesyRunner(runner, previousRunner);
+                var runner = ViewModel.Game?.BattingTeam.GetPlayer(nameNumber[1].Split(',')[0], int.Parse(nameNumber[0]));
+                var previousRunner = ViewModel.Game?.CurrentInning.CurrentRunners[onBase];
+                ViewModel.Game?.CurrentInning.AddCourtesyRunner(runner, previousRunner);
             }
             ViewModel.UpdateRunners();
         }
         private void AddRunnerOutEvent(OnBase onBase, bool advance)
         {
-            var runners = ViewModel.Game.CurrentInning.CurrentRunners;
+            var runners = ViewModel.Game?.CurrentInning.CurrentRunners;
             if (onBase == OnBase.Third)
-                ViewModel.Game.AddRunnerOutEvent(runners.OnThird, advance ? OnBase.None : OnBase.Third);
+                ViewModel.Game?.AddRunnerOutEvent(runners?.OnThird, advance ? OnBase.None : OnBase.Third);
             if (onBase == OnBase.Second)
-                ViewModel.Game.AddRunnerOutEvent(runners.OnSecond, advance ? OnBase.Third : OnBase.Second);
+                ViewModel.Game?.AddRunnerOutEvent(runners?.OnSecond, advance ? OnBase.Third : OnBase.Second);
             if (onBase == OnBase.First)
-                ViewModel.Game.AddRunnerOutEvent(runners.OnFirst, advance ? OnBase.Second : OnBase.First);
+                ViewModel.Game?.AddRunnerOutEvent(runners?.OnFirst, advance ? OnBase.Second : OnBase.First);
             ViewModel.UpdateRunners();
         }
         private async Task UpdateCurrentAbResult(AB ab, IList<RunningEvent> advances)
         {
             if (await ShowNextBatterWarning())
                 return;
-            ViewModel.Game.UpdateCurrentAbResult(ab, advances);
+            ViewModel.Game?.UpdateCurrentAbResult(ab, advances);
         }
         private static void AddStats<T>(ObservableCollection<StatsRow<T>> collection, List<T> stats) where T : IHasPlayer
         {
@@ -436,18 +432,17 @@ namespace Scorebook.Coordinators
         }
         private async Task<IList<RunningEvent>> CheckRunsScoredForEarned(IList<RunningEvent> advances)
         {
-            if (ViewModel.Game.CurrentInning.Errors > 0)
+            if (ViewModel.Game?.CurrentInning.Errors > 0)
             {
                 for (int i = 0; i < advances.Count; i++)
                 {
                     var advance = advances[i];
                     var runner = ViewModel.Game.CurrentInning.CurrentRunners.RunnersOnBase.SingleOrDefault(s => s.Runner == advance.Player);
-                    if (!(runner is null) && advance is RunScored && !runner.ReachedOnError)
+                    if (runner is not null && advance is RunScored && !runner.ReachedOnError)
                     {
                         var result = await ShowEarnedDialog(advance.Player);
                         if (!result)
                             advances[i] = RunScored.Unearned(advance);
-
                     }
                 }
             }
@@ -466,16 +461,16 @@ namespace Scorebook.Coordinators
         {
             return await Shell.Current.DisplayAlert("Earned Run", $"Errors occurred this inning, charge {runner.DisplayName}'s run as earned?", "Yes", "No");
         }
-        internal async Task SaveGame(BaseballGame game)
+        internal static async Task SaveGame(BaseballGame game)
         {
             if (game is null)
                 return;
-            string fileName = $"{game.HomeTeam.Name}{game.AwayTeam.Name}{game.GameDate.ToString("Md")}.sbg";
+            string fileName = $"{game.HomeTeam.Name}{game.AwayTeam.Name}{game.GameDate:Md}.sbg";
             if (DeviceInfo.Current.Platform == DevicePlatform.WinUI)
             {
-                string localPath = Path.Combine(ViewModel.LocalSavePath, fileName);
+                string localPath = Path.Combine(ScorebookViewModel.LocalSavePath, fileName);
                 game.SaveAs(localPath);
-                await Application.Current.MainPage.DisplayAlert("Saved", "Game progress saved to device.", "OK");
+                await Application.Current.MainPage?.DisplayAlert("Saved", "Game progress saved to device.", "OK");
             }
             else
             {

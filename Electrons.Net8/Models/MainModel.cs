@@ -70,7 +70,7 @@ namespace Electrons.Net8.Models
                 }
                 else if (nextOutingData.DisplayLastGame)
                 {
-                    LiveInning = "Final";
+                    LiveInning = nextOutingData.DisplayGameApi.Status;
                     NextOutingText = "Last Game";
                     if (nextOutingData.DisplayGameApi != null)
                     {                        
