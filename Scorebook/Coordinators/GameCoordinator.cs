@@ -1,4 +1,4 @@
-﻿ using Electrons.Core.Net8;
+﻿using Electrons.Core.Net8;
 using Electrons.Core.Net8.Games;
 using Scorebook.ViewObjects;
 using System.Collections.ObjectModel;
@@ -11,7 +11,7 @@ namespace Scorebook.Coordinators
         internal void GameEnded(object? sender, EventArgs e)
         {
             ViewModel.GameIsOver = true;
-            ViewModel.LineScore.Clear();            
+            ViewModel.LineScore.Clear();
             ViewModel.Game.SetGameEndTime(ViewModel.GameSelection?.EndDateTime);
             UpdateLineScore();
             ViewModel.OnPropertyChanged(nameof(ViewModel.Game));
@@ -40,14 +40,14 @@ namespace Scorebook.Coordinators
                 ViewModel.SaveAwardedTo = ViewModel.Game.SaveAwardedTo.FullName;
             }
         }
-        internal void InningEnded(object? sender, InningChangeEventArgs e)
+        internal async void InningEnded(object? sender, InningChangeEventArgs e)
         {
             ViewModel.InningEvents.Clear();
             var stats = GetCurrentPitcherStats();
             ViewModel.CurrentPitchStats = new PitchTotals(stats);
-            ViewModel.GameManager.UpdateInning(ViewModel.Game.CurrentInning);
+            await ViewModel.GameManager.UpdateInning(ViewModel.Game.CurrentInning);
         }
-        internal void InningStarted(object? sender, InningChangeEventArgs e)
+        internal async void InningStarted(object? sender, InningChangeEventArgs e)
         {
             ViewModel.InningNumber = ViewModel.Game.CurrentInning.Number.ToString();
             ViewModel.IsTopHalfOfInning = ViewModel.Game.CurrentInning.Half == HalfInning.Top;
@@ -62,7 +62,7 @@ namespace Scorebook.Coordinators
                 ViewModel.AwayTeam.Defense.RefreshPositions(ViewModel.AwayTeam.Lineup);
                 ViewModel.Defense = ViewModel.AwayTeam.Defense;
             }
-            ViewModel.GameManager.SetNextInning();            
+            await ViewModel.GameManager.SetNextInning();
         }
         internal void InningUpdated(object? sender, EventArgs e)
         {
@@ -266,14 +266,14 @@ namespace Scorebook.Coordinators
                     if (ViewModel.GameSelection.SelectedGame is not null)
                         ViewModel.GameManager.SetStartDateTime(ViewModel.GameSelection.StartDateTime);
                     game?.StartGame(ViewModel.GameSelection.SelectedGame?.GameDate ?? DateTime.Today, ViewModel.GameSelection?.StartDateTime ?? DateTime.Now);
-                    ViewModel.IsGameStarted = true;                    
+                    ViewModel.IsGameStarted = true;
                     ViewModel.OnPropertyChanged(nameof(ViewModel.Game));
                     ViewModel.OnPropertyChanged(nameof(ViewModel.Defense));
                     if (!ViewModel.HomeTeam.Lineup.Any())
                         ViewModel.HomeTeam.FillLineup(false);
                     if (!ViewModel.AwayTeam.Lineup.Any())
                         ViewModel.AwayTeam.FillLineup(false);
-                    ViewModel.LinkAb();
+                    await ViewModel.LinkAb();
                 }
                 else
                 {
@@ -297,7 +297,7 @@ namespace Scorebook.Coordinators
                     }
 
                     if (!game?.IsGameOver ?? false)
-                        ViewModel.LinkAb();
+                        await ViewModel.LinkAb();
                 }
             }
             catch (Exception ex)
@@ -305,7 +305,7 @@ namespace Scorebook.Coordinators
                 await Shell.Current.DisplayAlert("Error", $"An error occurred: {ex.Message}", "OK");
             }
         }
-        internal void AddPitch(PitchResult pitchType)
+        internal async void AddPitch(PitchResult pitchType)
         {
             var pitch = Pitch.GetPitch(pitchType);
             ViewModel.Game.AddEventToAb(pitch);
@@ -330,7 +330,7 @@ namespace Scorebook.Coordinators
             ViewModel.OnPropertyChanged(nameof(ViewModel.CurrentStrikes));
             ViewModel.ReplaceCurrentAbInLog();
             ViewModel.UpdatePitches();
-            ViewModel.GameManager.UpdateAb(ViewModel.CurrentAb);
+            await ViewModel.GameManager.UpdateAb(ViewModel.CurrentAb);
         }
         internal void SetStats(bool home)
         {

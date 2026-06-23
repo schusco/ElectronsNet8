@@ -206,7 +206,7 @@ namespace Scorebook.ViewObjects
         public ICommand RemoveFromLineupCommand => new Command<LineupPosition>(async (lp) => await _vm.RosterCoordinator.RemoveFromLineup(this, lp));
         public ICommand LineupItemDraggedCommand => new Command<LineupPosition>(_vm.RosterCoordinator.SetDraggedLineupPosition);
         public ICommand LineupItemDroppedCommand => new Command<LineupPosition>((lp) => _vm.RosterCoordinator.LineupItemDropped(this, lp));
-        public ICommand AddToRosterCommand => new Command(() => _vm.RosterCoordinator.AddToRoster(this));
+        public ICommand AddToRosterCommand => new Command(async () =>await _vm.RosterCoordinator.AddToRoster(this));
         public bool IsSideBarOpen => _vm.IsSideBarOpen;
 
         public int CurrentBatterIndex => CoreTeam.CurrentHitterIndex;

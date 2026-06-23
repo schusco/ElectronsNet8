@@ -401,7 +401,7 @@ namespace Electrons.Net8
             return helper.Table(expression, "", "", "", htmlattibutes);
         }
 
-        public static IHtmlContent Image(this IHtmlHelper helper, string path, string? height = null, string? width = null)
+        public static IHtmlContent Image(this IHtmlHelper helper, string path, string height = null, string width = null)
         {
             var urlHelper = helper.ViewContext.HttpContext.RequestServices.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(helper.ViewContext);
             var imageTag = new TagBuilder("img");

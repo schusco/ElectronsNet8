@@ -10,6 +10,7 @@ using Scorebook.ViewObjects;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using CoreTeam = Electrons.Core.Net8.Games.Team;
 using Team = ScoreboardApi.Models.Team;
@@ -437,7 +438,7 @@ namespace Scorebook
             HomeTeam?.OnPropertyChanged(nameof(HomeTeam.MobileText));
             AwayTeam?.OnPropertyChanged(nameof(AwayTeam.MobileText));
         }
-        internal void LoadGame(string loadPath)
+        internal async Task LoadGame(string loadPath)
         {
             try
             {
@@ -451,10 +452,9 @@ namespace Scorebook
                 HomeTeam.FillLineup(true);
                 AwayTeam.FillLineup(true);
                 GameCoordinator.UpdateLineScore();
-                if (GameSelection.SelectedGame!=null && GameSelection.SendGameUpdates)
-                {
-                    GameManager.Refresh();
-                }
+                if (GameSelection.SelectedGame != null && GameSelection.SendGameUpdates)
+                    await GameManager.Refresh();
+
             }
             catch (BaseballGameException ex)
             {
@@ -479,7 +479,7 @@ namespace Scorebook
             OnPropertyChanged(nameof(RunnerOnSecond));
             OnPropertyChanged(nameof(RunnerOnThird));
         }
-        public void LinkAb()
+        public async Task LinkAb()
         {
             if (InningEvents.Any())
             {
@@ -490,7 +490,7 @@ namespace Scorebook
             {
                 CurrentAb = Game?.CurrentAb;
                 InningEvents.Insert(0, CurrentAb?.ToString() ?? "");
-                GameManager.UpdateAb(CurrentAb);
+                await GameManager.UpdateAb(CurrentAb);
             }
 
             var team = Game?.CurrentInning.Half == HalfInning.Top ? AwayTeam : HomeTeam;
@@ -543,12 +543,12 @@ namespace Scorebook
                 await Application.Current?.MainPage?.DisplayAlert("Current Pitch Totals", $"{CurrentPitchStats.PlayerName}\n\nStrikes: {CurrentPitchStats.Strikes}\nBalls: {CurrentPitchStats.Balls}\nTotal: {CurrentPitchStats.Total}", "OK");
         });
         public ICommand ToggleSidebarCommand => new Command(() => IsSideBarOpen = !IsSideBarOpen);
-        public ICommand PrevBatterNavigationCommmand => new Command(() =>
+        public ICommand PrevBatterNavigationCommmand => new Command(async () =>
         {
             Game.PreviousAtBat();
             CurrentAb = Game.CurrentAb;
             InningEvents.RemoveAt(0);
-            LinkAb();
+            await LinkAb();
         });
         public ICommand TogglePitchesCommand => new RelayCommand(() => IsPitchesPanelVisible = !IsPitchesPanelVisible);
         public ICommand NextBatterCommand => new Command(async () => await _gameCoordinator.NextBatter(Game));

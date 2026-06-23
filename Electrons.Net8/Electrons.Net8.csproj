@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TypeScriptToolsVersion>4.0</TypeScriptToolsVersion>
+    <OutputType>Exe</OutputType>    
     <Configurations>Debug;Local;Prev;Preview;Release</Configurations>
     <AssemblyTitle>Elecredesign</AssemblyTitle>
     <Product>Elecredesign</Product>

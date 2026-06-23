@@ -208,7 +208,7 @@ namespace Scorebook.Coordinators
                         ViewModel.ReplaceCurrentAbInLog();
                         ViewModel.CurrentAb = ViewModel.Game.CurrentAb;
                         ViewModel.InningEvents.Insert(0, ViewModel.CurrentAb.ToString());
-                        ViewModel.LinkAb();
+                        await ViewModel.LinkAb();
                         ViewModel.OnPropertyChanged(nameof(ViewModel.CurrentAb));
                     }
                     team.UpdatePositionAvailability(); // Re-run your strikethrough logic

@@ -217,7 +217,7 @@ namespace Scorebook.ViewObjects
                     var fNameSplit = result.FileName.Split('.');
                     if (fNameSplit.Length > 1 && fNameSplit[1] == "sbg")
                     {
-                        _vm.LoadGame(result.FullPath);
+                        await _vm.LoadGame(result.FullPath);
                     }
                     else
                     {
@@ -233,7 +233,7 @@ namespace Scorebook.ViewObjects
                 if (fName == "Cancel")
                     return;
                 var index = displayNames.ToList().IndexOf(fName);
-                _vm.LoadGame(dInfo[index]);
+                await _vm.LoadGame(dInfo[index]);
             }
         });
         public ICommand ConfigureGameCommand => new Command(() => IsConfiguringNewGame = true);
