@@ -5,22 +5,24 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ScoreboardApi.Models;
 using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace Electrons.Net8.Controllers
 {
     public class GameController(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor,
-        IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings, HttpClient client)
-        : ControllerBase(session, cache, httpContextAccessor, env, settings)
+        IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings, HttpClient client, ILogger<GameController> logger)
+        : ControllerBase(session, cache, httpContextAccessor, env, settings, logger)
     {
         private readonly HttpClient _client = client;
-        
+
         public ActionResult Index(int? id) => RedirectToAction("Game", "Statistics", new { id });
         public ActionResult Plays(int? id)
         {
@@ -73,7 +75,7 @@ namespace Electrons.Net8.Controllers
             var response = await _client.GetAsync($"{GameSettings.BaseApiUrl}api/Games/{id}/full");
             if (response.IsSuccessStatusCode)
             {
-                var game = await response.Content.ReadAsAsync<GameScore>();
+                var game = await response.Content.ReadFromJsonAsync<GameScore>();
                 return View(new LiveGameModel(game));
             }
             return View("Error");
@@ -108,7 +110,7 @@ namespace Electrons.Net8.Controllers
                 var response = await _client.GetAsync($"{GameSettings.BaseApiUrl}api/Games/{gameId}/full");
                 if (response.IsSuccessStatusCode)
                 {
-                    var game = await response.Content.ReadAsAsync<GameScore>();
+                    var game = await response.Content.ReadFromJsonAsync<GameScore>();
 
                     // Fetch the heavy data from the database ONCE
                     return new GameInningUpdateDto

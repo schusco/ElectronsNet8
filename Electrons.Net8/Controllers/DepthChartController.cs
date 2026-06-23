@@ -5,13 +5,15 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Linq;
 
 namespace Electrons.Net8.Controllers
 {
-    public class DepthChartController(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings)
-        : ControllerBase(session, cache, httpContextAccessor, env, settings)
+    public class DepthChartController(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env,
+        IOptionsSnapshot<GameSettings> settings, ILogger<DepthChartController> logger)
+        : ControllerBase(session, cache, httpContextAccessor, env, settings, logger)
     {
         public ActionResult Index() => View(new DepthChartModel(Repository, IsAdmin));
         [HttpGet, Route("DepthChart/Edit/{pos:int}")]

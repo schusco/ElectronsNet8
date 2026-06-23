@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
-using Electrons.Core.Net8;
 using Electrons.Net8.Models;
 using Electrons.Core.Net8.Infrastructure;
 using Microsoft.AspNetCore.Http;
@@ -11,11 +9,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 
 namespace Electrons.Net8.Controllers
 {
-    public class StatisticsController(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings)
-        : ControllerBase(session, cache, httpContextAccessor, env, settings)
+    public class StatisticsController(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env,
+        IOptionsSnapshot<GameSettings> settings, ILogger<StatisticsController> logger)
+        : ControllerBase(session, cache, httpContextAccessor, env, settings, logger)
     {
         [Route("statistics/{id:int?}/{type?}")]
         public async Task<IActionResult> Index(int? id, string type)

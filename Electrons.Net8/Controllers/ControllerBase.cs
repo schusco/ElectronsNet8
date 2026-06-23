@@ -1,10 +1,10 @@
 ﻿using Electrons.Core.Net8.Infrastructure;
-using log4net;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text;
 using System.Text.Json;
@@ -15,16 +15,17 @@ namespace Electrons.Net8.Controllers
     public class ControllerBase : Controller, IExceptionFilter, IAuthorizationFilter
     {
         protected Repository Repository;
-        protected ILog Log;
+        protected readonly ILogger Logger;
         protected IMemoryCache Cache;
         private readonly IHttpContextAccessor _httpContextAccessor;
         protected HttpContext CurrentContext => _httpContextAccessor.HttpContext;
         protected IWebHostEnvironment WebHostEnvironment { get; set; }
         protected GameSettings GameSettings { get; set; }
-        public ControllerBase(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings)
+        public ControllerBase(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings, ILogger logger)
         {
             _httpContextAccessor = httpContextAccessor;
             GameSettings = settings.Value;
+            Logger = logger;
             WebHostEnvironment = env;
             var configPath = WebHostEnvironment.ContentRootPath;
             Cache = cache;
@@ -46,12 +47,11 @@ namespace Electrons.Net8.Controllers
         void IExceptionFilter.OnException(ExceptionContext context)
         {
             var ex = context.Exception;
-            Log.Error(ex.Message, ex);
+            Logger.LogError(ex.Message, ex);
         }
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            Log = LogManager.GetLogger("ErrorLog");
             ViewBag.Title = "Winnemac Electrons Baseball";
         }
     }

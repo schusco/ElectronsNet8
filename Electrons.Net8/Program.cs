@@ -13,6 +13,8 @@ using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 // Add services to the container.
 builder.Services.Configure<GameSettings>(builder.Configuration.GetSection(nameof(GameSettings)));
 string pwd = builder.Configuration["GameSettings:DefaultConnection:Password"];

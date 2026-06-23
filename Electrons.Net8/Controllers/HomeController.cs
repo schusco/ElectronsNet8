@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ScoreboardApi.Models;
 using System;
@@ -14,7 +15,7 @@ using System.Threading.Tasks;
 namespace Electrons.Net8.Controllers
 {
     public class HomeController(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor context, IWebHostEnvironment env,
-        IOptionsSnapshot<GameSettings> settings, HttpClient client) : ControllerBase(session, cache, context, env, settings)
+        IOptionsSnapshot<GameSettings> settings, HttpClient client, ILogger<HomeController> logger) : ControllerBase(session, cache, context, env, settings, logger)
     {
         private readonly HttpClient _client = client;
         public async Task<ActionResult> Index()

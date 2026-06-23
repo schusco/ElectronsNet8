@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Linq;
@@ -11,8 +12,9 @@ using System.Linq;
 
 namespace Electrons.Net8.Controllers
 {
-    public class ApiController(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings)
-        : ControllerBase(session, cache, httpContextAccessor, env, settings)
+    public class ApiController(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env,
+        IOptionsSnapshot<GameSettings> settings, ILogger<ApiController> logger)
+        : ControllerBase(session, cache, httpContextAccessor, env, settings, logger)
     {
         public ActionResult GetUpcomingGames()
         {
