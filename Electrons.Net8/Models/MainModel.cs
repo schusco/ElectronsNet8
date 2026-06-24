@@ -10,7 +10,7 @@ namespace Electrons.Net8.Models
     public class MainModel
     {
         public MainModel() { }
-
+        internal const string DateFormatString = "M/d/yyyy h:m tt";
         public MainModel(Repository repo, GameSettings settings, List<GameScore> apiData, List<StandingsRow> standings = null)
         {
             JumboText = settings.JumboText;
@@ -30,7 +30,7 @@ namespace Electrons.Net8.Models
                     AwayLogo = nextOutingData.DisplayGameApi.AwayTeam.Name.GetLogo();
                     HomeTeam = nextOutingData.DisplayGameApi.HomeTeam.Name;
                     AwayTeam = nextOutingData.DisplayGameApi.AwayTeam.Name;
-                    GameDate = nextOutingData.DisplayGameApi.GameDate.ToString("g");
+                    GameDate = nextOutingData.DisplayGameApi.GameDate.ToString(DateFormatString);
                     Location = nextOutingData.DisplayGameApi.Location?.FieldName;
                 }
                 else
@@ -40,7 +40,7 @@ namespace Electrons.Net8.Models
                     AwayLogo = gd.GetAwayLogo();
                     HomeTeam = gd.HomeTeam;
                     AwayTeam = gd.AwayTeam;
-                    GameDate = gd.GameDate.ToString("g");
+                    GameDate = gd.GameDate.ToString(DateFormatString);
                     Location = nextOutingData.DisplayGameDb.Location.Field;
                 }
 

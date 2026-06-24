@@ -1,5 +1,4 @@
 ﻿using NHibernate.Mapping.Attributes;
-using System.ComponentModel.DataAnnotations;
 
 namespace Electrons.Core.Net8.Entities
 {
@@ -7,8 +6,8 @@ namespace Electrons.Core.Net8.Entities
     public class StandingsRow
     {
 
-        
-        
+
+
         [Id(Column = "Team", Name = "Team"), Generator(Class = "assigned")]
         public virtual string Team { get; protected set; }
         [Property(Column = "W")]
@@ -25,6 +24,8 @@ namespace Electrons.Core.Net8.Entities
         public virtual string Division { get; protected set; }
         [Property(Column = "Active")]
         public virtual bool IsActive { get; protected set; }
+        [Property]
+        public virtual string? Region { get; protected set; }
         public override string ToString()
         {
             return $"{Team} {Wins} - {Losses}";

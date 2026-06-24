@@ -139,7 +139,7 @@ namespace Scorebook.Coordinators
                 case AB.OutStealing:
                     if (!Game.CurrentInning.CurrentRunners.RunnersOnBase.Any())
                         return;
-                    string action = await Application.Current?.Windows[0]?.Page?.DisplayActionSheet(ab.ToString(), "Cancel",
+                    string action = await Application.Current.MainPage?.DisplayActionSheet(ab.ToString(), "Cancel",
                         null, [.. Game.CurrentInning.CurrentRunners.RunnersOnBase.Select(s => s.Runner.FullName)]);
                     if (action != null && action != "Cancel")
                     {

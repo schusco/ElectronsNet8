@@ -35,7 +35,7 @@
             catch(e) { console.error('linescore update failed: ',e); }              
             
         });
-        connection.on("GameUpdated", (game) => {
+        connection.on("InningUpdated", (game) => {
             console.log("Received game update: ", game);
             fetch('/Game/GetPlayByPlayPartial?gameId=@Model.GameId').then(response => response.text()).then(html => {
                 document.getElementById('playbyplay').innerHTML = html;
@@ -120,7 +120,7 @@
                             <div class="navbar-header d-inline">
 
                                 <div class="navbar-brand navbar-left mr-lg-3 d-none d-md-inline teamName">
-                                    @Html.Image(@Model.AwayLogo, "70")
+                                    <img src="@Model.AwayLogo" height="70" asp-append-version="true"  />
                                 </div>
                                 <h3 id="awayTeamName" class="navbar-text navbar-left mr-lg-3 teamName d-none d-lg-inline">@Model.AwayName</h3>
                                 <h1 id="awayscore-@Model.GameId" class="navbar-text navbar-left scoreStyle">@Model.AwayScore</h1>
@@ -139,15 +139,9 @@
                                             <span class="sbStyle mx-2">@Model.GameTime</span>
                                         }
                                         else
-                                        {
-                                            if (Model.InningHalf == HalfInning.Bottom)
-                                            {
-                                                <i id="caret-down" class="bi bi-caret-down-fill" style="color:white"></i>
-                                            }
-                                            if (Model.InningHalf == HalfInning.Top)
-                                            {
-                                                <i id="caret-up" class="bi bi-caret-up-fill" style="color:white"></i>
-                                            }
+                                        {                                            
+                                            <i id="caret-down" class="bi bi-caret-down-fill @(Model.InningHalf==HalfInning.Bottom ? "": "d-none")" style="color:white"></i>
+                                            <i id="caret-up" class="bi bi-caret-up-fill @(Model.InningHalf == HalfInning.Top ? "" : "d-none")" style="color:white"></i>
                                             <span id="inningnumber-@Model.GameId" class="sbStyle px-1">@Model.InningNumber</span>
                                         }
 
@@ -184,7 +178,7 @@
                             <h1 id="homescore-@Model.GameId" class="navbar-text navbar-right scoreStyle">@Model.HomeScore</h1>
                             <h3 id="homeTeamName" class="navbar-text navbar-right ml-lg-3 d-none d-lg-inline teamName">@Model.HomeName</h3>
                             <div class="navbar-brand navbar-right ml-lg-3 d-none d-md-inline">
-                                @Html.Image(Model.HomeLogo, "70")
+                              <img src="@Model.HomeLogo" height="70" asp-append-version="true" />  
                             </div>
                         </div>
                     </div>

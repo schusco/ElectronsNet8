@@ -46,7 +46,7 @@ namespace Electrons.Core.Net8.Infrastructure
             var games = repo.GetGamesByYear(year).OrderBy(o => o.GameDate);
             foreach (var game in games)
             {
-                table.AddCell(CreateCell(game.GameDate.ToString("g")));
+                table.AddCell(CreateCell(game.GameDate.ToString("M/d/yyyy h:m tt")));
                 table.AddCell(CreateCell(string.Format("{0} {1}", game.HV.ToString() == "V" ? "@ " : "vs. ", game.Opponent)));
                 table.AddCell(CreateCell(game.Location.Field));
                 table.AddCell(CreateCell(game.GameDate < DateTime.Now ? GameData.GetScore(game.IsHome, game.Innings.Sum(s => s.HomeRuns) ?? 0, game.Innings.Sum(s => s.AwayRuns) ?? 0) : ""));

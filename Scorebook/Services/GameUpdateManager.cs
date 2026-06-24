@@ -159,7 +159,7 @@ namespace Scorebook.Services
         }
         private ApiAb? ConvertAb(AtBat? currentAb)
         {
-            if (_currentInning is null)
+            if (_currentInning is null || currentAb is null)
                 return null;
             var hittingTeam = _currentInning.IsTopHalf ? _selectedGame?.AwayTeam : _selectedGame?.HomeTeam;
             var pitchingTeam = _currentInning.IsTopHalf ? _selectedGame?.HomeTeam : _selectedGame?.AwayTeam;

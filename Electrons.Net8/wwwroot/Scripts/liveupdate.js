@@ -39,14 +39,10 @@
     }
     if (inningEl) {
         inningEl.innerText = ab.inning.number;
-    }
-    if (ab.inning && ab.inning.top) {
-        upCaret?.classList.remove("d-none");
-        downCaret?.classList.add("d-none");
-    } else if (ab.inning && !ab.inning.top) {
-        downCaret?.classList.remove("d-none");
-        upCaret?.classList.add("d-none");
-    }
+    }   
+    console.log(ab.inning.top);
+    upCaret?.classList.toggle("d-none", !ab.inning?.top);
+    downCaret?.classList.toggle("d-none", ab.inning?.top);
     try { updateRunnersOnDisplay(ab.onBase); }
     catch (e) {
         console.error(`update to update on base display`, e);

@@ -17,9 +17,12 @@ namespace Electrons.Core.Net8.Entities
         int AwayRuns { get; }
         bool IsHome { get; }
         string GameString { get; }
+        string Division { get; }
+        string Region { get; }
+
     }
     [Class(Table = "gameschedule")]
-    public class GameData : IGameData
+    public class GameData
     {
         protected GameData()
         {
@@ -108,8 +111,12 @@ namespace Electrons.Core.Net8.Entities
         public virtual int AwayRuns => Innings.Sum(s => s.AwayRuns ?? 0);
 
         public virtual bool IsHome => HV == HV.H;
+        [Property(Formula ="(select t.Division from teams t where t.Team=Opponent)")]
+        public virtual string Division { get; set; }
+        [Property(Formula ="(select t2.Region from teams t2 where t2.Team=Opponent)")]
+        public virtual string Region { get; set; }
 
-        public virtual string GameString => $"{Opponent} - {Location.ShortFieldName} {GameDate.ToShortTimeString()} {(Wood ? "(WB)" : "")}";
+        public virtual string GameString => $"{Opponent} - {Location.ShortFieldName} {GameDate.ToShortTimeString()} {(Wood ? "(WB)" : "")}";        
 
         public virtual LineScoreModel GetLineScore(HV hv)
         {
