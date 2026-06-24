@@ -27,7 +27,7 @@ namespace Electrons.Net8.Models
             {
                 var opponentString = Opponent;
                 if (string.IsNullOrEmpty(Opponent)) return "";
-                if (Division != "CMBA")
+                if (Division != "CMBA" && !opponentString.Contains(Region))
                     opponentString = $"{Region}{Opponent}";
                 return $"~{logoUrl}/nextOuting_{opponentString.Replace(" ", "").ToLower()}.png";
             }
