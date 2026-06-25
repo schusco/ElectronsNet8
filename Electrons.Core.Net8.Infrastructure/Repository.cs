@@ -146,13 +146,13 @@ namespace Electrons.Core.Net8.Infrastructure
             var returnVal = new NextOutingData();
             var lastOutingDb = Session.QueryOver<GameData>().Where(w => w.GameDate < DateTime.Now).OrderBy(o => o.GameDate).Desc.Take(1).List().FirstOrDefault();
             var nextOutingDb = Session.QueryOver<GameData>().Where(w => w.GameDate > DateTime.Now).OrderBy(o => o.GameDate).Asc.Take(1).List().FirstOrDefault();
-            var nextOutingApi = apiData.Where(w => w.GameDate > DateTime.Now).OrderBy(o => o.GameDate).FirstOrDefault();
-            var lastOutingApi = apiData.Where(w => w.GameDate < DateTime.Now).OrderByDescending(o => o.GameDate).FirstOrDefault();
+            var nextOutingApi = apiData?.Where(w => w.GameDate > DateTime.Now).OrderBy(o => o.GameDate).FirstOrDefault();
+            var lastOutingApi = apiData?.Where(w => w.GameDate < DateTime.Now).OrderByDescending(o => o.GameDate).FirstOrDefault();
 
             bool isNextGameTooClose = nextOutingApi != null && nextOutingApi.GameDate < DateTime.Now.Actual().AddHours(12);
 
-            bool isLastGameRecent = lastOutingApi.GameDate > DateTime.Now.Actual().AddHours(-18) &&
-                        lastOutingApi.GameDate < DateTime.Now.Actual();
+            bool isLastGameRecent = lastOutingApi?.GameDate > DateTime.Now.Actual().AddHours(-18) &&
+                        lastOutingApi?.GameDate < DateTime.Now.Actual();
 
             if (isLastGameRecent && !isNextGameTooClose)
                 returnVal.DisplayLastGame = true;

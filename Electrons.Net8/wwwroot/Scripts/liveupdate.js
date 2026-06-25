@@ -68,11 +68,10 @@ function updateAbData(ab) {
         pitcherEl.innerText = ab.pitching ? ` ${ab.pitching} pitching` : "";
     }
     const pitchLogo = document.querySelector('#pitcherLogo img');
-    const hitLogo = document.querySelector('#hitterLogo img');
-    const awayTeam = document.getElementById('awayTeamName').innerHTML.replace(/\s+/g, '').toLowerCase();
-    const homeTeam = document.getElementById('homeTeamName').innerHTML.replace(/\s+/g, '').toLowerCase();
-    const homeLogo = `/Content/images/logos/nextOuting_${homeTeam}.png`
-    const awayLogo = `/Content/images/logos/nextOuting_${awayTeam}.png`
+    const hitLogo = document.querySelector('#hitterLogo img');    
+    const imgElement = document.getElementById('imgel');
+    const homeLogo = imgElement.getAttribute("data-homelogo-path");
+    const awayLogo = imgElement.getAttribute("data-awaylogo-path");
     if (pitchLogo && hitLogo) {
         if (ab.inning.top) {
             pitchLogo.src = homeLogo;

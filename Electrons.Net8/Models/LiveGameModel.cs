@@ -46,8 +46,10 @@ namespace Electrons.Net8.Models
             LocationText = game.Location?.FieldName ?? "";
             CityText = game.Location?.CityAndState ?? "";
             //LengthOfGame = game.EndDateTime.LengthOfGameString;
-            AwayLogo = game.AwayTeam.Name.GetLogo();
-            HomeLogo = game.HomeTeam.Name.GetLogo();
+            var awayReg = game.AwayTeam.Division != "CMBA" ? game.AwayTeam.Region : "";
+            AwayLogo = game.AwayTeam.Name.GetLogo(awayReg);
+            var homeReg = game.HomeTeam.Division != "CMBA" ? game.HomeTeam.Region : "";
+            HomeLogo = game.HomeTeam.Name.GetLogo(homeReg);
             if (!IsStarted)
                 return;
             var currentInning = game.Innings.LastOrDefault();

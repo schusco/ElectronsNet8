@@ -302,9 +302,10 @@ namespace Electrons.Core.Net8
             else
                 return new List<HStats> { HStats.Sum(input) };
         }
-        public static string GetLogo(this string input)
+        public static string GetLogo(this string input, string region = null)
         {
-            return string.Format(@"~/Content/images/logos/nextOuting_{0}.png", input.Replace(" ", "").ToLower());
+            var team = $"{region}{input}".Replace(" ", "").ToLower();
+            return string.Format(@"~/Content/images/logos/nextOuting_{0}.png", team);
         }
         public static void SetDuplicatePlayers(this IEnumerable<IHasPlayer> input)
         {

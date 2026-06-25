@@ -51,13 +51,13 @@
                 }
             }).catch(err => console.error("Failed to update scoring plays: ", err));
             fetch(`/Game/GetBoxScorePartial?gameId=@Model.GameId&home=false`).then(response => response.text()).then(html => {
-                const boxScore = document.getElementById('awayBox');
+                const boxScore = document.getElementById('awaybox');
                 if (boxScore) {
                     boxScore.innerHTML = html;
                 }
             }).catch(err => console.error("Failed to update box score: ", err));
             fetch(`/Game/GetBoxScorePartial?gameId=@Model.GameId&home=true`).then(response => response.text()).then(html => {
-                const boxScore = document.getElementById('homeBox');
+                const boxScore = document.getElementById('homebox');
                 if (boxScore) {
                     boxScore.innerHTML = html;
                 }
@@ -120,7 +120,8 @@
                             <div class="navbar-header d-inline">
 
                                 <div class="navbar-brand navbar-left mr-lg-3 d-none d-md-inline teamName">
-                                    <img src="@Model.AwayLogo" height="70" asp-append-version="true"  />
+                                    <img src="@Model.AwayLogo" id="imgel" data-homelogo-path="@Url.Content(Model.HomeLogo)" data-awaylogo-path="@Url.Content(Model.AwayLogo)" 
+                                    height="70" asp-append-version="true"  />
                                 </div>
                                 <h3 id="awayTeamName" class="navbar-text navbar-left mr-lg-3 teamName d-none d-lg-inline">@Model.AwayName</h3>
                                 <h1 id="awayscore-@Model.GameId" class="navbar-text navbar-left scoreStyle">@Model.AwayScore</h1>
@@ -209,7 +210,7 @@
                 <div role="tabpanel" class="tab-pane active scroll" id="live">
                     <div class="row" style="margin-top:5px">
                         <div class="col-12 col-md-6 col-lg-3 order-1">
-                            <div id="awayBox" style="margin-right:0;margin-left:auto;text-align:right">
+                            <div id="awaybox" style="margin-right:0;margin-left:auto;text-align:right">
                                 <partial name="BoxScore" for="AwayBox" view-data="ViewData" />
                             </div>
                         </div>
