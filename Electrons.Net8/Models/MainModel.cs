@@ -10,7 +10,7 @@ namespace Electrons.Net8.Models
     public class MainModel
     {
         public MainModel() { }
-        internal const string DateFormatString = "M/d/yyyy h:m tt";
+        
         public MainModel(Repository repo, GameSettings settings, List<GameScore> apiData, List<StandingsRow> standings = null)
         {
             JumboText = settings.JumboText;
@@ -104,5 +104,6 @@ namespace Electrons.Net8.Models
         public bool DisplayLastGame { get; set; }
         public IEnumerable<StandingsModel> Standings { get; set; }
         public bool? IsTopHalfOfInning { get; set; }
+        internal const string DateFormatString = "M/d/yyyy h:m tt";
     }
 }

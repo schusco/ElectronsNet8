@@ -45,17 +45,17 @@ namespace Electrons.Core.Net8.Games
                 if (!_StartTime.HasValue && !_EndTime.HasValue)
                     return new TimeSpan();
                 if (_StartTime.HasValue && !_EndTime.HasValue)
-                    end = DateTime.Now;
+                    end = DateTime.Now.Actual();
                 if (!_gameDelays.Any())
                     return (end - _StartTime).Value;
                 TimeSpan ts = new TimeSpan();
-                DateTime workingTime = _StartTime.Value;
+                DateTime workingTime = _StartTime.Value.Actual();
                 foreach (var delay in _gameDelays)
                 {
                     ts = ts.Add(delay.Start - workingTime);
-                    workingTime = delay.End.Value;
+                    workingTime = delay.End.Value.Actual();
                 }
-                ts = ts.Add(end.Value - workingTime);
+                ts = ts.Add(end.Value.Actual() - workingTime);
                 return ts;
             }
         }

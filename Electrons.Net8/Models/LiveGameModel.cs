@@ -45,7 +45,8 @@ namespace Electrons.Net8.Models
             AwayName = game.AwayTeam.Name;
             LocationText = game.Location?.FieldName ?? "";
             CityText = game.Location?.CityAndState ?? "";
-            //LengthOfGame = game.EndDateTime.LengthOfGameString;
+            var ts = (game.EndDateTime?.Actual() ?? DateTime.Now.Actual()) - game.StartDateTime?.Actual();
+            LengthOfGame = ts is null ? "" : ts.Value.TimeLength();
             var awayReg = game.AwayTeam.Division != "CMBA" ? game.AwayTeam.Region : "";
             AwayLogo = game.AwayTeam.Name.GetLogo(awayReg);
             var homeReg = game.HomeTeam.Division != "CMBA" ? game.HomeTeam.Region : "";
