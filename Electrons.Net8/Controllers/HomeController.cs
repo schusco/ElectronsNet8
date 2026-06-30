@@ -24,6 +24,7 @@ namespace Electrons.Net8.Controllers
             List<GameScore> apiData = null;
             try
             {
+                var test = Repository.GetGameById(829);
                 apiData = await _client.GetFromJsonAsync<List<GameScore>>($"{GameSettings.BaseApiUrl}api/teams/1/Games");
                 if (GameSettings.UseApiForStandings)
                     standings = await _client.GetFromJsonAsync<List<StandingsRow>>($"{GameSettings.BaseApiUrl}api/Standings/CMBA");

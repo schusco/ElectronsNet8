@@ -111,9 +111,9 @@ namespace Electrons.Core.Net8.Entities
         public virtual int AwayRuns => Innings.Sum(s => s.AwayRuns ?? 0);
 
         public virtual bool IsHome => HV == HV.H;
-        [Property(Formula ="(select t.Division from teams t where t.Team=Opponent)")]
+        [Property(Formula = "(select t.Division from teams t where CONCAT_WS(' ',t.Region,t.Team)=Opponent)")]
         public virtual string Division { get; set; }
-        [Property(Formula ="(select t2.Region from teams t2 where t2.Team=Opponent)")]
+        [Property(Formula ="(select t2.Region from teams t2 where CONCAT_WS(' ',t2.Region,t2.Team)=Opponent)")]
         public virtual string Region { get; set; }
 
         public virtual string GameString => $"{Opponent} - {Location.ShortFieldName} {GameDate.ToShortTimeString()} {(Wood ? "(WB)" : "")}";        

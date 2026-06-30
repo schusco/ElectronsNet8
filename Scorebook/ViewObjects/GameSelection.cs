@@ -186,7 +186,7 @@ namespace Scorebook.ViewObjects
         {
             if (Schedule.Count != 0 && GameScores.Count == 0)
             {
-                foreach (var game in Schedule)
+                foreach (var game in Schedule.OrderBy(o => o.GameDate))
                     GameScores.Add(GameScoreWrapper.Create(game));
             }
             IsSelectingGameFromSchedule = true;

@@ -25,9 +25,9 @@ namespace Electrons.Net8.Models
         {
             get
             {
-                var opponentString = Opponent;
+                var opponentString = Opponent ?? "";
                 if (string.IsNullOrEmpty(Opponent)) return "";
-                if (Division != "CMBA" && !opponentString.Contains(Region))
+                if (Division != "CMBA" && !opponentString.Contains(Region ?? ""))
                     opponentString = $"{Region}{Opponent}";
                 return $"~{logoUrl}/nextOuting_{opponentString.Replace(" ", "").ToLower()}.png";
             }
@@ -35,7 +35,7 @@ namespace Electrons.Net8.Models
         public virtual string GetHomeLogo() => IsHome ? Eleclogo : OpponentLogo;
         public virtual string GetAwayLogo() => IsHome ? OpponentLogo : Eleclogo;
         public virtual string GetScore() => GameData.GetScore(IsHome, Hscore, Ascore);
-        public string Region { get; set; }
+        public string Region { get; set; } = "";
         public string Division { get; set; }
         internal static GameDataModel Create(GameData arg)
         {
