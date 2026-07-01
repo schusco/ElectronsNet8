@@ -31,7 +31,7 @@ namespace Electrons.Net8.Models
         {
             GameId = game.GameId;
             Title = $"{game.AwayTeam.Name} @ {game.HomeTeam.Name}, {game.GameDate.ToShortDateString()}";
-            DateString = game.StartDateTime.HasValue ? game.StartDateTime.Value.ToString("M/d/yyyy h:mm tt") : game.GameDate.ToLongDateString();
+            DateString = game.GameDate.ToString(MainModel.DateFormatString);
             GameIsOver = game.Status.IsIn(ScoreboardApi.Models.GameScore.CompletedStatuses);
             IsStarted = game.Status != "Scheduled";
             GameTime = game.GameDate.ToShortTimeString();
@@ -118,7 +118,7 @@ namespace Electrons.Net8.Models
         private void Fill(BaseballGame fullGame, DateTime gameDate, Location location, List<HittingStatsRow> seasonStats = null)
         {
             Title = $"{fullGame.AwayTeam} @ {fullGame.HomeTeam}, {fullGame.GameDate.ToShortDateString()}";
-            DateString = fullGame.StartTime.HasValue ? fullGame.StartTime.Value.ToString("M/d/yyyy h:mm tt") : fullGame.GameDate.ToLongDateString();
+            DateString =  fullGame.GameDate.ToString(MainModel.DateFormatString);
             GameIsOver = fullGame.IsGameOver;
             IsStarted = fullGame.IsStarted;
             GameTime = gameDate.ToShortTimeString();

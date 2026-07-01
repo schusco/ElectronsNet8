@@ -104,6 +104,6 @@ namespace Electrons.Net8.Models
         public bool DisplayLastGame { get; set; }
         public IEnumerable<StandingsModel> Standings { get; set; }
         public bool? IsTopHalfOfInning { get; set; }
-        internal const string DateFormatString = "M/d/yyyy h:m tt";
+        internal const string DateFormatString = "M/d/yyyy h:mm tt";
     }
 }
