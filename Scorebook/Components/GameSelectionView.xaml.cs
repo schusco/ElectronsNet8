@@ -16,6 +16,7 @@ public partial class GameSelectionView : ContentView
         get => (GameSelection)GetValue(SelectionProperty);
         set => SetValue(SelectionProperty, value);
     }
+    
     protected override void OnSizeAllocated(double width, double height)
     {
         base.OnSizeAllocated(width, height);

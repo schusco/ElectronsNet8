@@ -519,7 +519,8 @@ namespace Scorebook
         }
         public void ReplaceCurrentAbInLog()
         {
-            InningEvents.RemoveAt(0);
+            if (InningEvents.Any())
+                InningEvents.RemoveAt(0);
             InningEvents.Insert(0, $"{CurrentAb?.ToString()}");
         }
         public ICommand ShowInningLogCommand => new Command(async () =>
@@ -546,7 +547,8 @@ namespace Scorebook
         {
             Game?.PreviousAtBat();
             CurrentAb = Game?.CurrentAb;
-            InningEvents.RemoveAt(0);
+            if (InningEvents.Any())
+                InningEvents.RemoveAt(0);
             await LinkAb();
         });
         public ICommand TogglePitchesCommand => new RelayCommand(() => IsPitchesPanelVisible = !IsPitchesPanelVisible);
@@ -648,7 +650,7 @@ namespace Scorebook
             foreach (var game in await _apiService.GetSchedule(teamId))
                 GameSelection.Schedule.Add(game);
         }
-        public static string VersionText => $"Version: {AppVersion}";
+        public static string VersionText => $"Version {AppInfo.Current.VersionString}";
         public static string LocalSavePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Baseball", DateTime.Now.Year.ToString(), "Game Files");
         private BaseballGame? _game;
         private AtBat? _currentAb;
@@ -686,6 +688,6 @@ namespace Scorebook
         private PitchTotals? _currentPitchStats;
         private DefensiveAlignment? _defense;
         public const string FinalText = "Final";
-        private static readonly string AppVersion = AppInfo.Current.VersionString;
+        
     }
 }

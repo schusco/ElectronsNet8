@@ -237,7 +237,7 @@ namespace Scorebook.ViewObjects
         public ICommand SaveCommand => new Command(async () => await Coordinators.GameCoordinator.SaveGame(_vm.Game));
         public ICommand EndGameCommand => new Command(() => _vm.Game?.EndGame());
         public ICommand ShowScoreCommand => new Command(() => _vm.ShowLineScore = true);
-
+        
         private readonly ScorebookViewModel _vm = vm;
         private readonly ApiService _apiService = apiService;
         private string? _selectedHomeLeague = "CMBA";
@@ -246,7 +246,7 @@ namespace Scorebook.ViewObjects
         private Team? _selectedAwayTeam;
         private bool _isSelectingGameFromSchedule;
         private bool _isConfiguringNewGame;
-        private bool _sendGameUpdates;
+        private bool _sendGameUpdates;        
         private readonly Dictionary<string, int> _leagueDict = new()
         {
             { "CMBA", 7 },

@@ -16,8 +16,8 @@
         <Button Text="Fly Ball" Style="{StaticResource ActionButtonStyle}" Command="{Binding ScoringEnteredCommand}" CommandParameter="{x:Static games:AB.FlyOut}"  />
         <Button Text="Error" Style="{StaticResource ActionButtonStyle}" Command="{Binding ScoringEnteredCommand}" CommandParameter="{x:Static games:AB.ReachedOnError}"  />
         <Button Text="FC" Style="{StaticResource ActionButtonStyle}" Command="{Binding ScoringEnteredCommand}" CommandParameter="{x:Static games:AB.FieldersChoice}"  />
-        <Button Text="SB" Style="{StaticResource ActionButtonStyle}" Command="{Binding ScoringEnteredCommand}" CommandParameter="{x:Static games:AB.StolenBase}"  />
-        <Button Text="CS" Style="{StaticResource ActionButtonStyle}" Command="{Binding ScoringEnteredCommand}" CommandParameter="{x:Static games:AB.OutStealing}"  />
+        <Button Text="SB" Style="{StaticResource ActionButtonStyle}" Command="{Binding ScoringEnteredCommand}" IsVisible="{OnPlatform Android=false, WinUI=true}" CommandParameter="{x:Static games:AB.StolenBase}"  />
+        <Button Text="CS" Style="{StaticResource ActionButtonStyle}" Command="{Binding ScoringEnteredCommand}" IsVisible="{OnPlatform Android=false, WinUI=true}" CommandParameter="{x:Static games:AB.OutStealing}"  />
         <Button Text="SAC" Style="{StaticResource ActionButtonStyle}" Command="{Binding ScoringEnteredCommand}" CommandParameter="{x:Static games:AB.Sacrifice}"  />
         <BoxView FlexLayout.Basis="100%" Color="Transparent" HeightRequest="0"/>
         <Button Text="Close" Style="{StaticResource ActionButtonStyle}" WidthRequest="80" Command="{Binding CloseActionDialogCommand}"  />
