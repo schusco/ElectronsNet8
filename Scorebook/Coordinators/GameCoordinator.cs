@@ -2,12 +2,21 @@
 using Electrons.Core.Net8.Games;
 using Scorebook.ViewObjects;
 using System.Collections.ObjectModel;
+using System.Text;
 
 namespace Scorebook.Coordinators
 {
     public class GameCoordinator
     {
-        public ScorebookViewModel ViewModel { get; set; }
+        public GameCoordinator()
+        {
+            if (DeviceInfo.Platform == DevicePlatform.Android)
+            {
+                _runnerMenuOptions.Add("Stolen Base");
+                _runnerMenuOptions.Add("Out Stealing");
+            }
+        }
+        public ScorebookViewModel? ViewModel { get; set; }
         internal void GameEnded(object? sender, EventArgs e)
         {
             ViewModel.GameIsOver = true;
@@ -267,7 +276,7 @@ namespace Scorebook.Coordinators
                     ViewModel.OnPropertyChanged(nameof(ViewModel.Defense));
                     if (!ViewModel.HomeTeam?.Lineup.Any() ?? false)
                         ViewModel.HomeTeam?.FillLineup(false);
-                    if (!ViewModel.AwayTeam?.Lineup.Any()??false)
+                    if (!ViewModel.AwayTeam?.Lineup.Any() ?? false)
                         ViewModel.AwayTeam?.FillLineup(false);
                     await ViewModel.LinkAb();
                 }
@@ -356,7 +365,7 @@ namespace Scorebook.Coordinators
                     header = "Runner On First";
                     break;
                 case OnBase.Second:
-                    if (!runners?.RunnerOnSecond?? false)
+                    if (!runners?.RunnerOnSecond ?? false)
                         return;
                     header = "Runner On Second";
                     break;
@@ -366,7 +375,7 @@ namespace Scorebook.Coordinators
                     header = "Runner On Third";
                     break;
             }
-            string action = await Application.Current.MainPage?.DisplayActionSheet(header, "Cancel", null, _runnerMenuOptions);
+            string action = await Application.Current.MainPage?.DisplayActionSheet(header, "Cancel", null, _runnerMenuOptions.ToArray());
             if (action == _runnerMenuOptions[0])  // "Advance Runner"
                 await AdvanceRunners(onBase, AdvanceReason.Ab);
             else if (action == _runnerMenuOptions[1])  // "Runner Advanced On Throw"
@@ -400,6 +409,29 @@ namespace Scorebook.Coordinators
                 var previousRunner = ViewModel.Game?.CurrentInning.CurrentRunners[onBase];
                 ViewModel.Game?.CurrentInning.AddCourtesyRunner(runner, previousRunner);
             }
+            else if (action == _runnerMenuOptions[7]) // Stolen Base
+            {
+                var runner = ViewModel.Game?.CurrentInning.CurrentRunners[onBase];
+                var nextBase =onBase switch
+                {
+                    OnBase.First => OnBase.Second,
+                    OnBase.Second => OnBase.Third,
+                    _ => OnBase.None,
+                };
+                if (onBase == OnBase.Third)
+                    ViewModel?.Game.AddEventToAb(!runner.ReachedOnError ? AB.StealOfHome : AB.StealOfHomeUnearned, runner, nextBase);
+                else
+                    ViewModel?.Game.AddEventToAb(AB.StolenBase, runner, nextBase);
+
+            }
+            else if (action == _runnerMenuOptions[8]) // Out Stealing
+            {
+                var runner = ViewModel?.Game.CurrentInning.CurrentRunners[onBase];
+                ViewModel?.Game.AddEventToAb(new OutStealing(runner));
+                ViewModel.ScoringIsRequired = true;
+                ViewModel.UpdateRunners();
+            }
+            ViewModel.ReplaceCurrentAbInLog();
             ViewModel.UpdateRunners();
         }
         private void AddRunnerOutEvent(OnBase onBase, bool advance)
@@ -485,7 +517,7 @@ namespace Scorebook.Coordinators
             }
         }
 
-        private readonly string[] _runnerMenuOptions = [
+        private readonly List<string> _runnerMenuOptions = [
             "Advance Runner",
             "Runner Advanced On Throw",
             "Move Runner Back",

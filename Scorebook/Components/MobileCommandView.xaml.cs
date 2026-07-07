@@ -5,5 +5,6 @@ public partial class MobileCommandView : ContentView
 	public MobileCommandView()
 	{
 		InitializeComponent();
-	}
+		
+    }
 }

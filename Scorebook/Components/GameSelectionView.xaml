@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Scorebook"
              x:Name="Root"
              x:Class="Scorebook.Components.GameSelectionView">    
     <Grid  BackgroundColor="#BB000000" ZIndex="100" >
         <Grid ColumnDefinitions="2*,1.5*,2*"  >
             <VerticalStackLayout x:Name="GameSelectionOptions"  Grid.Column="0" Grid.ColumnSpan="2" HorizontalOptions="End"  VerticalOptions="Center" Spacing="5"  >
                 <Label Text="Electrons Baseball Scorebook" HorizontalOptions="Center" TextColor="White" FontSize="24"/>
-                <Label Text="{Binding VersionText}" HorizontalOptions="Center" VerticalOptions="Center" FontSize="14" TextColor="LightGray" />
+                <Label Text="{x:Static vm:ScorebookViewModel.VersionText}"  HorizontalOptions="Center" VerticalOptions="Center" FontSize="14" TextColor="LightGray" />
                 <Button Text="Start New Game" Command="{Binding Source={x:Reference Root}, Path=Selection.ConfigureGameCommand}" Margin="5" />
                 <Button Text="Select From Schedule" Command="{Binding Source={x:Reference Root}, Path=Selection.SelectFromScheduleCommand}" Margin="5" />
                 <Button Text="Load Game from File" Command="{Binding Source={x:Reference Root}, Path=Selection.LoadGameCommand}" Margin="5" />
