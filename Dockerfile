@@ -4,12 +4,12 @@ ARG TARGETARCH
 WORKDIR /src
 
 # Copy csproj and restore dependencies (Optimizes caching)
-COPY ["ElectronsNet8.csproj", "./"]
+COPY ["Electrons.Net8/Electrons.Net8.csproj", "./"]
 RUN dotnet restore -a ${TARGETARCH}
 
 # Copy everything else and build
 COPY . .
-RUN dotnet publish -c Release -o /app -a %{TARGETARCH} --self-contained false 
+RUN dotnet publish "Electrons.Net8/Electrons.Net8.csproj" -c Release -o /app -a %{TARGETARCH} --self-contained false 
 
 # 2. Runtime Stage (The final tiny image)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
@@ -18,4 +18,4 @@ COPY --from=build /app .
 
 # .NET 8 defaults to port 8080 (non-root user for security)
 EXPOSE 8080
-ENTRYPOINT ["dotnet", "ElectronsNet8.dll"]
+ENTRYPOINT ["dotnet", "Electrons.Net8.dll"]
