@@ -1,14 +1,15 @@
 # 1. Build Stage
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG TARGETARCH
 WORKDIR /src
 
 # Copy csproj and restore dependencies (Optimizes caching)
 COPY ["ElectronsNet8.csproj", "./"]
-RUN dotnet restore
+RUN dotnet restore -a ${TARGETARCH}
 
 # Copy everything else and build
 COPY . .
-RUN dotnet publish -c Release -o /app
+RUN dotnet publish -c Release -o /app -a %{TARGETARCH} --self-contained false 
 
 # 2. Runtime Stage (The final tiny image)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
