@@ -532,5 +532,14 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>    
     <OutputPath>bin\</OutputPath>    
-  </PropertyGroup> 
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- Specify the platforms you want to build for -->
+    <RuntimeIdentifiers>linux-x64;linux-arm64</RuntimeIdentifiers>
+    <ContainerRuntimeIdentifiers>linux-x64;linux-arm64</ContainerRuntimeIdentifiers>
+
+    <!-- Optional: Set your registry details here to make CLI commands cleaner -->
+    <ContainerRegistry>registry.hub.docker.com</ContainerRegistry>
+    <ContainerRepository>sschus90/electronsnet8</ContainerRepository>
+  </PropertyGroup>
 </Project>
