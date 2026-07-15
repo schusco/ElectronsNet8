@@ -23,8 +23,9 @@ namespace Electrons.Net8.Controllers
             List<StandingsRow> standings = null;
             List<GameScore> apiData = null;
             try
-            {                
+            {
                 apiData = await _client.GetFromJsonAsync<List<GameScore>>($"{GameSettings.BaseApiUrl}api/teams/1/Games");
+                Cache.Set("ApiData", apiData, TimeSpan.FromMinutes(5));
                 if (GameSettings.UseApiForStandings)
                     standings = await _client.GetFromJsonAsync<List<StandingsRow>>($"{GameSettings.BaseApiUrl}api/Standings/CMBA");
             }

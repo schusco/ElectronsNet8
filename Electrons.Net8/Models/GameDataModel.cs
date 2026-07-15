@@ -50,7 +50,24 @@ namespace Electrons.Net8.Models
                 ShortGameString = arg.GameString,
                 Region = arg.Region,
                 Division = arg.Division
-
+            };
+        }
+        internal static GameDataModel Create(ScoreboardApi.Models.GameScore arg)
+        {
+            bool isHome = arg.HomeTeamId == 1;
+            var team = isHome ? arg.AwayTeam : arg.HomeTeam;
+            var opponent = team.Division == "CMBA" ? team.Name : $"{team.Region} {team.Name}";
+            return new GameDataModel
+            {
+                GameId = arg.GameId,
+                GameDate = arg.GameDate,
+                IsHome = arg.HomeTeamId == 1,
+                Opponent = opponent,
+                Hscore = arg.HomeRuns,
+                Ascore = arg.AwayRuns,
+                ShortGameString = $"{(team.Name)} - {arg.Location.ShortName} {arg.GameDate.ToShortTimeString()}",
+                Region = team.Region,
+                Division = team.Division
             };
         }
     }

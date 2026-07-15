@@ -58,7 +58,7 @@ namespace Electrons.Core.Net8.Games
         public CourtesyRunner(Player bench, Player lineup) : base(bench, lineup) { }
         public override string EventString(Player batter)
         {
-            return $"{NewPlayer.DisplayName} entered as a courtesy runner for {Replaced.DisplayName}.  ";
+            return $"{NewPlayer?.DisplayName} entered as a courtesy runner for {Replaced.DisplayName}.  ";
         }
     }
     public class ReliefPitcher : Substitution

@@ -5,7 +5,7 @@
              x:Class="Scorebook.Components.CommandArea">
     <VerticalStackLayout  >
         <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" Padding="5" ColumnSpacing="5" RowSpacing="5" >
-            <Label Grid.Column="1" Grid.Row="0" Text="Scoring" Padding="2" FontSize="16" VerticalOptions="Center" HorizontalOptions="End" />
+            <Label Grid.Column="1" Grid.Row="0" Text="Scoring" Padding="2" FontSize="16" TextColor="Gray" Opacity=".7" VerticalOptions="Center" HorizontalOptions="End" />
             <Border Padding="5" Grid.Column="1" Grid.Row="0">
                 <Label Text="{Binding CurrentAb.Scoring}" FontSize="16" VerticalOptions="Center"/>
             </Border>

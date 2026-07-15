@@ -488,8 +488,7 @@ namespace Scorebook
             if (Game?.CurrentAb != null && Game.CurrentAb != CurrentAb)
             {
                 CurrentAb = Game?.CurrentAb;
-                InningEvents.Insert(0, CurrentAb?.ToString() ?? "");
-                await GameManager.UpdateAb(CurrentAb);
+                InningEvents.Insert(0, CurrentAb?.ToString() ?? "");                
             }
 
             var team = Game?.CurrentInning.Half == HalfInning.Top ? AwayTeam : HomeTeam;
@@ -516,6 +515,7 @@ namespace Scorebook
             UpdateScoreBoard();
             OnPropertyChanged(nameof(Game));
             UpdateRunners();
+            await GameManager.UpdateAb(CurrentAb);
         }
         public void ReplaceCurrentAbInLog()
         {
@@ -599,7 +599,7 @@ namespace Scorebook
         {
             var runners = Game?.CurrentInning?.CurrentRunners;
             if (runners != null && runners[onBase] != null)
-                return runners[onBase].Runner.FullName;
+                return runners[onBase].Runner?.FullName;
             if (CurrentAb?.Result != null && CurrentAb.Result.Events.OfType<OutOnBases>().Any(a => a.OutAt == onBase))
             {
                 return CurrentAb.Result.Events.OfType<OutOnBases>().First().Player.FullName;

@@ -221,6 +221,7 @@ namespace Scorebook.Coordinators
                     break;
             }
             ViewModel.UpdateRunners();
+            ViewModel.OnPropertyChanged(nameof(ViewModel.CurrentAb));
         }
         private async Task<IList<RunningEvent>> HandleRunnerAdvances(int bases)
         {
@@ -400,14 +401,16 @@ namespace Scorebook.Coordinators
             }
             else if (action == _runnerMenuOptions[6]) // Courtesy Runner
             {
-                var bench = ViewModel.Game?.BattingTeam.Bench;
+                var bench = ViewModel.Game?.BattingTeam.Roster;
                 var allRunners = bench?.Select(s => s.FullName).ToArray();
                 var cr = await Application.Current.MainPage?.DisplayActionSheet("Select Courtesy Runner", "Cancel", null, allRunners);
-
-                var nameNumber = cr.Split('-');
-                var runner = ViewModel.Game?.BattingTeam.GetPlayer(nameNumber[1].Split(',')[0], int.Parse(nameNumber[0]));
-                var previousRunner = ViewModel.Game?.CurrentInning.CurrentRunners[onBase];
-                ViewModel.Game?.CurrentInning.AddCourtesyRunner(runner, previousRunner);
+                if (cr != null && cr != "Cancel")
+                {
+                    var nameNumber = cr.Split('-');
+                    var runner = ViewModel.Game?.BattingTeam.GetPlayer(nameNumber[1].Split(',')[0], int.Parse(nameNumber[0]));
+                    var previousRunner = ViewModel.Game?.CurrentInning.CurrentRunners[onBase];
+                    ViewModel.Game?.CurrentInning.AddCourtesyRunner(runner, previousRunner);
+                }
             }
             else if (action == _runnerMenuOptions[7]) // Stolen Base
             {
