@@ -27,7 +27,7 @@ namespace Scorebook
                 var ex = e.ExceptionObject as Exception;
                 System.Diagnostics.Debug.WriteLine($"Unhandled exception: {ex}");
             };
-            builder.Services.AddElectronsApiClients<LocalStorageService>("https://devapi.electronsbaseball.com");
+            builder.Services.AddElectronsApiClients<LocalStorageService>(Client.ElectronsApiBaseAddress);
             builder.Services.AddSingleton<ApiService>();
             builder.Services.AddTransient<ScorebookViewModel>();
             builder.Services.AddTransient<MainPage>();
