@@ -24,7 +24,7 @@ namespace Electrons.Net8.Models
             var pitchingTrends = await repository.GetPitchingTrendsAsync(startYear);
             foreach (var year in pitchingTrends)
             {
-                var trend = HistoricalTrends.Single(t => t.Year == year.Year);
+                var trend = HistoricalTrends.SingleOrDefault(t => t.Year == year.Year);
                 if (trend != null)
                 {
                     trend.TotalPitchingRuns = year.TotalRuns;
