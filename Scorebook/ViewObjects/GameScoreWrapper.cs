@@ -8,7 +8,7 @@ namespace Scorebook.ViewObjects
     public class GameScoreWrapper(GameScore game)
     {
         public event GameScoreUpdateEventHandler? GameScoreUpdated;
-        
+
         public int GameId { get; private set; } = game.GameId;
         public ApiTeam? HomeTeam { get; private set; } = game.HomeTeam;
         public int HomeTeamId => game.HomeTeamId;
@@ -34,12 +34,13 @@ namespace Scorebook.ViewObjects
         {
             GameScoreUpdated?.Invoke(this, new GameScoreEventArgs(_game));
         }
-        
+        internal string GameStatus => _game?.Status ?? "";
         internal void SetInningStatus(string status)
         {
-            _game.Status = status;
+            if (_game.Status != "Final")
+                _game.Status = status;
         }
-        
+
         internal void SetScore(int homeScore, int awayScore)
         {
             _game.HomeRuns = homeScore;
@@ -53,17 +54,17 @@ namespace Scorebook.ViewObjects
                 _game.EndDateTime = endTime;
             OnGameScoreUpdated();
         }
-        
+
 
         private readonly GameScore _game = game;
-        
+
     }
 
     public delegate Task GameScoreUpdateEventHandler(object sender, GameScoreEventArgs e);
-    
+
     public class GameScoreEventArgs(GameScore game) : EventArgs
     {
         internal GameScore Game = game;
     }
-    
+
 }

@@ -15,7 +15,7 @@ namespace Electrons.Core.Net8.Games
     {
         private HStats() { }
         [TableColumn("Hitters", 1, Class = "alignLeft")]
-        public string PlayerDisplay => Player.IsUnknown ? $"{Player.LastName} #{Player.Number}" : $"{Player.LastName}, {(Player.FirstName.Length > 0 ? Player.FirstName[0] : Player.Number)}";
+        public string PlayerDisplay => Player.IsUnknown ? $"{Player.LastName} #{Player.Number}" : $"{Player.LastName}, {(Player.FirstName.Length > 0 ? Player.FirstName[0].ToString() : Player.Number)}";
         public string PlayerName => $"{Player.FirstName[0]}. {Player.LastName}";
         public Player Player { get; private set; }
         public int G { get; private set; }

@@ -67,8 +67,11 @@ namespace Scorebook.Services
                 _halfInning = HalfInning.Top;
                 _inningNumber++;
             }
-            _selectedGame?.SetInningStatus($"{_halfInning} of {_inningNumber}");
-            _selectedGame?.OnGameScoreUpdated();
+            if (_selectedGame.GameStatus != "Final")
+            {
+                _selectedGame?.SetInningStatus($"{_halfInning} of {_inningNumber}");
+                _selectedGame?.OnGameScoreUpdated();
+            }
             _currentInning = new ApiInning
             {
                 GameId = _selectedGame.GameId,

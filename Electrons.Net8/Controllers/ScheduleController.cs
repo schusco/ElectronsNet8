@@ -30,7 +30,7 @@ namespace Electrons.Net8.Controllers
             if (actualYear == DateTime.Now.Year)
             {
                 Cache.TryGetValue($"ApiData", out apidata);
-                apidata = apidata.Where(w => w.GameDate.Month == actualMonth).ToList();
+                apidata = apidata?.Where(w => w.GameDate.Month == actualMonth).ToList();
                 if (apidata.Count == 0)
                     apidata = await _client.GetFromJsonAsync<List<GameScore>>($"{GameSettings.BaseApiUrl}api/teams/1/Games/{actualMonth}");
             }

@@ -16,7 +16,6 @@ namespace Electrons.Net8.Models
         public ScheduleModel(Repository repo, int month, int year, List<ScoreboardApi.Models.GameScore> apidata)
             : this()
         {
-            var useApiData = apidata.Count > 0;
             string[] calmonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             if (month < 1)
                 Month = 1;
@@ -29,12 +28,12 @@ namespace Electrons.Net8.Models
             DaysInMonth = DateTime.DaysInMonth(year, month);
             DateTime firstday = new(year, month, 1);
             DaysToSkip = (int)firstday.DayOfWeek;
-            HasSchedule = useApiData || repo.GetGamesByYear(DateTime.Now.Year).Any();
-            var gdata = useApiData ? apidata.Select(GameDataModel.Create) : [.. repo.GetGamesByMonth(Month, Year).Select(GameDataModel.Create)];
+            HasSchedule = apidata.Count > 0 || repo.GetGamesByYear(DateTime.Now.Year).Any();
+            var gdata = repo.GetGamesByMonth(Month, Year).Select(GameDataModel.Create);
             Dictionary<DateTime, string> evdata = repo.GetEventsByMonth(Month, Year);
             var birthdays = repo.GetBirthdays(month).GroupBy(g => g.BirthDate.Day).ToDictionary(k => k.Key, v => v.Select(s => s.DisplayText(year)));
             for (int i = 1; i <= DaysInMonth; i++)
-                Days.Add(i, new ScheduleDayModel(i, gdata, evdata, birthdays, Month, Year));
+                Days.Add(i, new ScheduleDayModel(i, gdata, apidata, evdata, birthdays, Month, Year));
             Links = repo.GetFieldLinks();
 
 
@@ -83,11 +82,31 @@ namespace Electrons.Net8.Models
 
     public class ScheduleDayModel
     {
-        public ScheduleDayModel(int i, IEnumerable<GameDataModel> gdata, Dictionary<DateTime, string> eventData, Dictionary<int, IEnumerable<string>> birthdayData, int month, int year)
+        public ScheduleDayModel(int i, IEnumerable<GameDataModel> gdata, List<ScoreboardApi.Models.GameScore> apidata, Dictionary<DateTime, string> eventData, Dictionary<int, IEnumerable<string>> birthdayData, int month, int year)
         {
+            var useApiData = apidata.Count > 0;
+            var apiDict = apidata.GroupBy(g => g.GameDate.Day).ToDictionary(k => k.Key, v => v.ToList());
+            var currentGameData = gdata.Where(w => w.GameDate.Day == i).ToList();
+            if (useApiData)
+            {
+                foreach (var game in currentGameData)
+                {
+                    var index = 0;
+                    if (!apiDict.ContainsKey(i))
+                        continue;
+                    var apiGames = apiDict[i];
+                    try
+                    {
+                        var apiGame = apiGames[index];
+                        game.Ascore = apiGame.AwayRuns;
+                        game.Hscore = apiGame.HomeRuns;                        
+                    }
+                    catch { }                    
+                }
+            }
             Year = year;
             Month = month;
-            Games = gdata.Where(w => w.GameDate.Day == i).OrderBy(o => o.GameDate);
+            Games = currentGameData.OrderBy(o => o.GameDate);
             Events = eventData.Where(w => w.Key.Day == i).Select(s => s.Value);
             Birthdays = birthdayData.TryGetValue(i, out IEnumerable<string> value) ? value : [];
             DayOfMonth = i;

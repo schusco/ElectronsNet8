@@ -48,7 +48,7 @@ namespace Scorebook.Services
                 var response = await LoadFromApi<List<Team>>($"/api/teams");
                 teams = response.Success ? response.Data : new List<Team>();
                 SaveToLocalDisk(teams, "teams_cache.json");
-                Preferences.Default.Set("TeamsNextSync", DateTime.Now.AddYears(1));
+                Preferences.Default.Set("TeamsNextSync", DateTime.Now.AddDays(5));
             }
             return teams.Where(w => w.Current).ToList();
         }
