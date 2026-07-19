@@ -1,4 +1,4 @@
-﻿using Electrons.Core.Net8.Infrastructure;
+using Electrons.Core.Net8.Infrastructure;
 using Electrons.Net8.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +21,7 @@ namespace Electrons.Net8.Controllers
         ControllerBase(session, cache, httpContextAccessor, env, settings, logger)
     {
         private readonly HttpClient _client = client;
+
         [Route("schedule/{year:int?}/{month:int?}")]
         public async Task<ActionResult> Index(int? month, int? year)
         {
