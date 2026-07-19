@@ -1,4 +1,4 @@
-﻿using Electrons.Core.Net8.Infrastructure;
+using Electrons.Core.Net8.Infrastructure;
 using Electrons.Net8.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -29,9 +29,7 @@ namespace Electrons.Net8.Controllers
             var actualYear = year ?? DateTime.Today.Year;
             if (actualYear == DateTime.Now.Year)
             {
-                if (Cache.TryGetValue($"ApiData", out apidata));
-                    apidata = apidata?.Where(w => w.GameDate.Month == actualMonth).ToList();
-                if (apidata.Count == 0)
+                if (!Cache.TryGetValue($"ApiData", out apidata) || apidata.Count == 0)
                     apidata = await _client.GetFromJsonAsync<List<GameScore>>($"{GameSettings.BaseApiUrl}api/teams/1/Games/{actualMonth}");
             }
             return View(new ScheduleModel(Repository, actualMonth, actualYear, apidata));
