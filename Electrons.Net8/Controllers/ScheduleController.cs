@@ -32,6 +32,7 @@ namespace Electrons.Net8.Controllers
             {
                 if (!Cache.TryGetValue($"ApiData", out apidata) || apidata.Count == 0)
                     apidata = await _client.GetFromJsonAsync<List<GameScore>>($"{GameSettings.BaseApiUrl}api/teams/1/Games/{actualMonth}");
+                apidata = [.. apidata.Where(w => w.GameDate.Month == actualMonth)];
             }
             return View(new ScheduleModel(Repository, actualMonth, actualYear, apidata));
         }
