@@ -10,7 +10,7 @@ namespace Electrons.Net8.Models
     public class MainModel
     {
         public MainModel() { }
-        
+
         public MainModel(Repository repo, GameSettings settings, List<GameScore> apiData, List<StandingsRow> standings = null)
         {
             JumboText = settings.JumboText;
@@ -26,8 +26,9 @@ namespace Electrons.Net8.Models
                     NextGameRecap = true;
                 if (nextOutingData?.DisplayGameApi != null)
                 {
-                    HomeLogo = nextOutingData.DisplayGameApi.HomeTeam.Name.GetLogo();
-                    AwayLogo = nextOutingData.DisplayGameApi.AwayTeam.Name.GetLogo();
+                    var logo = GameDataModel.CreateFromApigame(nextOutingData.DisplayGameApi);
+                    HomeLogo = logo.GetHomeLogo();
+                    AwayLogo = logo.GetAwayLogo();
                     HomeTeam = nextOutingData.DisplayGameApi.HomeTeam.Name;
                     AwayTeam = nextOutingData.DisplayGameApi.AwayTeam.Name;
                     GameDate = nextOutingData.DisplayGameApi.GameDate.ToString(DateFormatString);
@@ -47,7 +48,7 @@ namespace Electrons.Net8.Models
                 if (NextGameInProgress)
                 {
                     if (nextOutingData.DisplayGameApi != null)
-                    {                        
+                    {
                         HomeScore = nextOutingData.DisplayGameApi.HomeRuns.ToString() ?? "0";
                         AwayScore = nextOutingData.DisplayGameApi.AwayRuns.ToString() ?? "0";
                         if (nextOutingData.DisplayGameApi.Status == "Scheduled")
@@ -73,7 +74,7 @@ namespace Electrons.Net8.Models
                     LiveInning = nextOutingData.DisplayGameApi.Status;
                     NextOutingText = "Last Game";
                     if (nextOutingData.DisplayGameApi != null)
-                    {                        
+                    {
                         HomeScore = nextOutingData.DisplayGameApi.HomeRuns.ToString();
                         AwayScore = nextOutingData.DisplayGameApi.AwayRuns.ToString();
                     }

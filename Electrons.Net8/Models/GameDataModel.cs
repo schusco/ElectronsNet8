@@ -1,10 +1,11 @@
 ﻿using Electrons.Core.Net8;
 using Electrons.Core.Net8.Entities;
+using ScoreboardApi.Models;
 using System;
 
 namespace Electrons.Net8.Models
 {
-    public class GameDataModel
+    public class GameDataModel : ILogo
     {
         public int GameId { get; set; }
         public int Hscore { get; set; }
@@ -19,21 +20,7 @@ namespace Electrons.Net8.Models
         public bool IsHome { get; set; }
         public virtual string AwayTeam => !IsHome ? "Electrons" : Opponent;
         public virtual string HomeTeam => IsHome ? "Electrons" : Opponent;
-        private string logoUrl => "/Content/images/logos";
-        public string Eleclogo => $"~{logoUrl}/nextOuting_electrons.png";
-        public virtual string OpponentLogo
-        {
-            get
-            {
-                var opponentString = Opponent ?? "";
-                if (string.IsNullOrEmpty(Opponent)) return "";
-                if (Division != "CMBA" && !opponentString.Contains(Region ?? ""))
-                    opponentString = $"{Region}{Opponent}";
-                return $"~{logoUrl}/nextOuting_{opponentString.Replace(" ", "").ToLower()}.png";
-            }
-        }
-        public virtual string GetHomeLogo() => IsHome ? Eleclogo : OpponentLogo;
-        public virtual string GetAwayLogo() => IsHome ? OpponentLogo : Eleclogo;
+        public virtual string OpponentLogo => !IsHome ? Extensions.GetHomeLogo(this) : Extensions.GetAwayLogo(this);
         public virtual string GetScore() => GameData.GetScore(IsHome, Hscore, Ascore);
         public string Region { get; set; } = "";
         public string Division { get; set; }
@@ -68,6 +55,18 @@ namespace Electrons.Net8.Models
                 ShortGameString = $"{(team.Name)} - {arg.Location.ShortName} {arg.GameDate.ToShortTimeString()}",
                 Region = team.Region,
                 Division = team.Division
+            };
+        }
+
+        internal static ILogo CreateFromApigame(GameScore displayGameApi)
+        {
+            var isHome = displayGameApi.HomeTeamId == 1;
+            return new GameDataModel
+            {
+                IsHome = isHome,
+                Opponent = isHome ? displayGameApi.AwayTeam.Name : displayGameApi.HomeTeam.Name,
+                Division = isHome ? displayGameApi.AwayTeam.Division : displayGameApi.HomeTeam.Division,
+                Region = isHome ? displayGameApi.AwayTeam.Region : displayGameApi.HomeTeam.Region
             };
         }
     }

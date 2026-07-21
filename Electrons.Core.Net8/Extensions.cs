@@ -1,5 +1,6 @@
 ﻿using Electrons.Core.Net8.Entities;
 using Electrons.Core.Net8.Games;
+using Org.BouncyCastle.Utilities.Collections;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,8 +11,28 @@ using System.Text;
 
 namespace Electrons.Core.Net8
 {
+    public interface ILogo
+    {
+        bool IsHome { get; }
+        string Region { get; }
+        string Division { get; }
+        string Opponent { get; }
+    }
     public static class Extensions
     {
+        private static string logoUrl => "/Content/images/logos";
+        private static string Eleclogo => $"~{logoUrl}/nextOuting_electrons.png";
+
+        private static string OpponentLogo(ILogo input)
+        {
+            var opponentString = input.Opponent ?? "";
+            if (string.IsNullOrEmpty(input.Opponent)) return "";
+            if (input.Division != "CMBA" && !opponentString.Contains(input.Region ?? ""))
+                opponentString = $"{input.Region}{input.Opponent}";
+            return $"~{logoUrl}/nextOuting_{opponentString.Replace(" ", "").ToLower()}.png";
+        }
+        public static string GetHomeLogo(this ILogo input) => input.IsHome ? Eleclogo : OpponentLogo(input);
+        public static string GetAwayLogo(this ILogo input) => input.IsHome ? OpponentLogo(input) : Eleclogo;
         public static string Capitalize(this string input)
         {
             return string.Join(" ", input.Split(' ').Select(s => s.ToCamelCaseString()));
