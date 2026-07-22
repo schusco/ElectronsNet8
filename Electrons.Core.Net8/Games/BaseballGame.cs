@@ -105,7 +105,7 @@ namespace Electrons.Core.Net8.Games
         [JsonIgnore]
         public bool IsDelayed => !_gameDelays.LastOrDefault()?.End.HasValue ?? false;
         [JsonIgnore]
-        public bool IsStarted => _StartTime.HasValue;
+        public bool IsStarted => _StartTime.HasValue && Innings.Any();
         [JsonIgnore]
         public bool IsGameOver => _EndTime.HasValue;
         public List<HStats> AwayTeamHitting => GetHittingStats(false);

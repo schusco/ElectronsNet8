@@ -33,20 +33,29 @@ namespace Scorebook.Coordinators
         }
         internal void UpdateLineScore()
         {
-            ViewModel.TotalInningCount = new int[] { 7, ViewModel.Game.Innings.Max(m => m.Number) }.Max();
-            var grps = ViewModel.Game?.Innings.GroupBy(g => g.Number);
-            for (int i = 1; i <= ViewModel.TotalInningCount; i++)
+            try
             {
-                var grp = grps?.SingleOrDefault(s => s.Key == i);
-                if (grp != null)
-                    ViewModel.LineScore.Add(new LineScoreData(i, grp));
-                else
-                    ViewModel.LineScore.Add(new LineScoreData(i));
+                if (!ViewModel?.Game?.Innings?.Any() ?? false)
+                    return;
+                ViewModel.TotalInningCount = new int[] { 7, ViewModel.Game.Innings.Max(m => m.Number) }.Max();
+                var grps = ViewModel.Game?.Innings.GroupBy(g => g.Number);
+                for (int i = 1; i <= ViewModel.TotalInningCount; i++)
+                {
+                    var grp = grps?.SingleOrDefault(s => s.Key == i);
+                    if (grp != null)
+                        ViewModel.LineScore.Add(new LineScoreData(i, grp));
+                    else
+                        ViewModel.LineScore.Add(new LineScoreData(i));
+                }
+                if (ViewModel.Game?.SaveAwardedTo is not null)
+                {
+                    ViewModel.SaveAwarded = true;
+                    ViewModel.SaveAwardedTo = ViewModel.Game.SaveAwardedTo.FullName;
+                }
             }
-            if (ViewModel.Game?.SaveAwardedTo is not null)
+            catch (Exception ex)
             {
-                ViewModel.SaveAwarded = true;
-                ViewModel.SaveAwardedTo = ViewModel.Game.SaveAwardedTo.FullName;
+                Console.WriteLine($"Error updating line score: {ex.Message}");
             }
         }
         internal async void InningEnded(object? sender, InningChangeEventArgs e)
@@ -415,7 +424,7 @@ namespace Scorebook.Coordinators
             else if (action == _runnerMenuOptions[7]) // Stolen Base
             {
                 var runner = ViewModel.Game?.CurrentInning.CurrentRunners[onBase];
-                var nextBase =onBase switch
+                var nextBase = onBase switch
                 {
                     OnBase.First => OnBase.Second,
                     OnBase.Second => OnBase.Third,

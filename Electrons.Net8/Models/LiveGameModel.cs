@@ -266,7 +266,10 @@ namespace Electrons.Net8.Models
         public HomeBoxScore() { }
         public HomeBoxScore(GameData game, List<HittingStatsRow> seasonStats)
         {
-            HittingBox = new HittingBoxScore(game.FullGame.HomeTeamHitting, new List<HittingStatsRow>());
+            if (game.HV == HV.H)
+                HittingBox = new HittingBoxScore(game, seasonStats);
+            else
+                HittingBox = new HittingBoxScore(game.FullGame.AwayTeamHitting, new List<HittingStatsRow>());
             PitchingBox = new PitchingBoxScore(game.FullGame.HomeTeamPitching);
             RispAb = game.FullGame.HomeRisp.Abs;
             RispH = game.FullGame.HomeRisp.Hits;
