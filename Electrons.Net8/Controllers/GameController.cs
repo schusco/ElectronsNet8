@@ -118,10 +118,10 @@ namespace Electrons.Net8.Controllers
                         GameId = gameId,
                         HomeTeamName = game.HomeTeam?.Name ?? "Home Team",
                         AwayTeamName = game.AwayTeam?.Name ?? "Away Team",
-                        PlayByPlay = InningModel.CreateInnings(game.Innings.ToList(), game.HomeTeam.Name.GetLogo(), game.AwayTeam.Name.GetLogo()),
+                        PlayByPlay = InningModel.CreateInnings([.. game.Innings], game.HomeTeam.Name.GetLogo(), game.AwayTeam.Name.GetLogo()),
                         HomeBoxScore = HomeBoxScore.Create(game),
                         AwayBoxScore = AwayBoxScore.Create(game),
-                        ScoringPlays = ScoringPlayModel.CreateScoringPlays(game.Innings.ToList(), game.HomeTeam.Name.GetLogo(), game.AwayTeam.Name.GetLogo())
+                        ScoringPlays = ScoringPlayModel.CreateScoringPlays([.. game.Innings], game.HomeTeam.Name.GetLogo(), game.AwayTeam.Name.GetLogo())
                     };
                 }
                 throw new Exception($"Failed to fetch game data for game ID {gameId}");

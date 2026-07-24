@@ -5,9 +5,6 @@ namespace Electrons.Core.Net8.Entities
     [Class(Table = "teams")]
     public class StandingsRow
     {
-
-
-
         [Id(Column = "Team", Name = "Team"), Generator(Class = "assigned")]
         public virtual string Team { get; protected set; }
         [Property(Column = "W")]

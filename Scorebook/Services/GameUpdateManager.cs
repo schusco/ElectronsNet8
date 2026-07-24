@@ -55,20 +55,21 @@ namespace Scorebook.Services
         {
             if (_selectedGame is null)
                 return;
-            if (_inningNumber == 0)
-            {
-                _halfInning = HalfInning.Top;
-                _inningNumber = 1;
-            }
-            else if (_halfInning == HalfInning.Top)
-                _halfInning = HalfInning.Bottom;
-            else
-            {
-                _halfInning = HalfInning.Top;
-                _inningNumber++;
-            }
+            
             if (_selectedGame.GameStatus != "Final")
             {
+                if (_inningNumber == 0)
+                {
+                    _halfInning = HalfInning.Top;
+                    _inningNumber = 1;
+                }
+                else if (_halfInning == HalfInning.Top)
+                    _halfInning = HalfInning.Bottom;
+                else
+                {
+                    _halfInning = HalfInning.Top;
+                    _inningNumber++;
+                }
                 _selectedGame?.SetInningStatus($"{_halfInning} of {_inningNumber}");
                 _selectedGame?.OnGameScoreUpdated();
             }

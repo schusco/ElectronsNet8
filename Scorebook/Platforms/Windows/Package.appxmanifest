@@ -11,7 +11,7 @@
   xmlns:uap6="http://schemas.microsoft.com/appx/manifest/uap/windows10/6"
   IgnorableNamespaces="uap rescap uap3 uap4 iot uap2 uap6">
 
-  <Identity Name="maui-package-name-placeholder" Publisher="CN=User Name" Version="0.0.0.0" />
+  <Identity Name="maui-package-name-placeholder" Publisher="CN=User Name" Version="1.5.9.0" />
 
   <mp:PhoneIdentity PhoneProductId="4E5CB671-E736-44AC-B5EE-0520547C2C65" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
