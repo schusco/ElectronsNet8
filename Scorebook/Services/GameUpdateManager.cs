@@ -55,7 +55,7 @@ namespace Scorebook.Services
         {
             if (_selectedGame is null)
                 return;
-            
+
             if (_selectedGame.GameStatus != "Final")
             {
                 if (_inningNumber == 0)
@@ -203,11 +203,16 @@ namespace Scorebook.Services
         }
         internal async Task Refresh()
         {
+            if (_selectedGame is null)
+                return;
             var fg = await _apiService.GetFullGame(_selectedGame.GameId);
-            _currentInning = fg.Innings.LastOrDefault();
-            _currentAtbat = _currentInning?.Atbats.LastOrDefault();
-            _inningNumber = _currentInning.Number;
-            _halfInning = _currentInning.IsTopHalf ? HalfInning.Top : HalfInning.Bottom;
+            if (fg != null)
+            {
+                _currentInning = fg.Innings.LastOrDefault();
+                _currentAtbat = _currentInning?.Atbats.LastOrDefault();
+                _inningNumber = _currentInning.Number;
+                _halfInning = _currentInning.IsTopHalf ? HalfInning.Top : HalfInning.Bottom;
+            }
         }
 
         private HalfInning _halfInning;

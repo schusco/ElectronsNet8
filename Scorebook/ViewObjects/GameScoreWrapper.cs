@@ -1,6 +1,4 @@
-﻿using Electrons.Core.Net8;
-using Electrons.Core.Net8.Games;
-using ScoreboardApi.Models;
+﻿using ScoreboardApi.Models;
 
 using ApiTeam = ScoreboardApi.Models.Team;
 namespace Scorebook.ViewObjects

@@ -386,6 +386,8 @@ namespace Scorebook.Coordinators
                     break;
             }
             string action = await Application.Current.MainPage?.DisplayActionSheet(header, "Cancel", null, _runnerMenuOptions.ToArray());
+            if (action == null || action == "Cancel")
+                return;
             if (action == _runnerMenuOptions[0])  // "Advance Runner"
                 await AdvanceRunners(onBase, AdvanceReason.Ab);
             else if (action == _runnerMenuOptions[1])  // "Runner Advanced On Throw"

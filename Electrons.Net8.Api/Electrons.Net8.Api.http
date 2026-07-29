@@ -1,0 +1,6 @@
+@Electrons.Net8.Api_HostAddress = http://localhost:5152
+
+GET {{Electrons.Net8.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

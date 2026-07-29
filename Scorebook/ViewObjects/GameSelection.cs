@@ -168,6 +168,7 @@ namespace Scorebook.ViewObjects
             }
             var apiGame = await _apiService.GetGame(id);
             StartDateTime = apiGame?.StartDateTime;
+            SelectedGame = new GameScoreWrapper(apiGame);
             EndDateTime = apiGame?.EndDateTime;
         }
         public ICommand CreateGameCommand => new Command(async () =>
