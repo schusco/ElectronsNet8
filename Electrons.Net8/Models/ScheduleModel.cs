@@ -15,18 +15,12 @@ namespace Electrons.Net8.Models
         }
         public ScheduleModel(Repository repo, int month, int year, List<ScoreboardApi.Models.GameScore> apidata)
             : this()
-        {
-            string[] calmonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            if (month < 1)
-                Month = 1;
-            else if (month > 12)
-                Month = 12;
-            else
-                Month = month;
+        {            
+            Month = Math.Max(1, Math.Min(month, 12));
             Year = year;
-            Monthtext = string.Format("{0} {1}", calmonths[month - 1], year);
-            DaysInMonth = DateTime.DaysInMonth(year, month);
             DateTime firstday = new(year, month, 1);
+            Monthtext = firstday.ToString("MMMM yyyy");
+            DaysInMonth = DateTime.DaysInMonth(year, month);            
             DaysToSkip = (int)firstday.DayOfWeek;
             HasSchedule = apidata.Count > 0 || repo.GetGamesByYear(DateTime.Now.Year).Any();
             var gdata = repo.GetGamesByMonth(Month, Year).Select(GameDataModel.Create);
@@ -35,8 +29,6 @@ namespace Electrons.Net8.Models
             for (int i = 1; i <= DaysInMonth; i++)
                 Days.Add(i, new ScheduleDayModel(i, gdata, apidata, evdata, birthdays, Month, Year));
             Links = repo.GetFieldLinks();
-
-
         }
         public int Month { get; set; }
         public int Year { get; set; }

@@ -20,7 +20,7 @@ namespace Electrons.Net8.Controllers
         [Route("statistics/{id:int?}/{type?}")]
         public async Task<IActionResult> Index(int? id, string type)
         {
-            bool isPlayoffs = (type is null) ? false : type.Equals("playoffs", StringComparison.OrdinalIgnoreCase) || type.Equals("true", StringComparison.OrdinalIgnoreCase);
+            bool isPlayoffs = type is not null && (type.Equals("playoffs", StringComparison.OrdinalIgnoreCase) || type.Equals("true", StringComparison.OrdinalIgnoreCase));
             if (!id.HasValue)
                 id = Repository.Seasons().First();
             var model = new StatsModel(id.Value);

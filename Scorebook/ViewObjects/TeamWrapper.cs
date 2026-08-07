@@ -163,8 +163,8 @@ namespace Scorebook.ViewObjects
             if (CoreTeam is null || TeamPlayers.Any())
                 return;
             var roster = new List<Player>();
-            if (ApiService.ApiRosters.TryGetValue(CoreTeam.Name, out var apiRoster))
-                roster = apiRoster.Select(s => new Player(s.LastName, s.Number.ToString()) { FirstName = s.FirstName }).ToList();
+            if (ApiService.TryGetRoster(CoreTeam.Name, out var apiRoster))
+                roster = [.. apiRoster.Select(s => new Player(s.LastName, s.Number.ToString()) { FirstName = s.FirstName })];
             else
                 roster = [.. CoreTeam.Roster];
             foreach (var player in roster.Except(CoreTeam.Lineup))
@@ -178,7 +178,7 @@ namespace Scorebook.ViewObjects
             var roster = await _vm.ApiService.GetRosterFromApi(team, true);
             var newTeam = Team.Create(team.Name, [.. roster.Select(s => Player.Create(s.Number, s.FirstName, s.LastName))]);
             if (roster.Any())
-                ApiService.ApiRosters[team.Name] = roster;
+                ApiService.ApiRosters[team.Id] = roster;
             CoreTeam.SetRoster(newTeam.Roster);
             foreach (var player in newTeam.Roster)
                 TeamPlayers.Add(player);

@@ -11,6 +11,7 @@ namespace Scorebook.ViewObjects
         public ApiTeam? HomeTeam { get; private set; } = game.HomeTeam;
         public int HomeTeamId => game.HomeTeamId;
         public ApiTeam? AwayTeam { get; private set; } = game.AwayTeam;
+        public int AwayTeamId => game.AwayTeamId;
         public DateTime GameDate { get; private set; } = game.GameDate;
         public DateTime? EndDateTime { get; private set; } = game.EndDateTime;
         public DateTime? StartDateTime { get; private set; } = game.StartDateTime;
@@ -30,7 +31,8 @@ namespace Scorebook.ViewObjects
         }
         internal void OnGameScoreUpdated()
         {
-            GameScoreUpdated?.Invoke(this, new GameScoreEventArgs(_game));
+            if (_updateGame)
+                GameScoreUpdated?.Invoke(this, new GameScoreEventArgs(_game));
         }
         internal string GameStatus => _game?.Status ?? "";
         internal void SetInningStatus(string status)
@@ -53,7 +55,11 @@ namespace Scorebook.ViewObjects
             OnGameScoreUpdated();
         }
 
-
+        internal void DontSendUpdates()
+        {
+            _updateGame = false;
+        }
+        private bool _updateGame;
         private readonly GameScore _game = game;
 
     }

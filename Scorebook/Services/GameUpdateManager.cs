@@ -50,29 +50,32 @@ namespace Scorebook.Services
             _inningNumber = 0;
             _currentInning = null;
             _currentAtbat = null;
+            _dontUpdateGame = game.GameStatus == "Final";
+            game.DontSendUpdates();
         }
         internal async Task SetNextInning()
         {
             if (_selectedGame is null)
                 return;
 
-            if (_selectedGame.GameStatus != "Final")
+            if (_inningNumber == 0)
             {
-                if (_inningNumber == 0)
-                {
-                    _halfInning = HalfInning.Top;
-                    _inningNumber = 1;
-                }
-                else if (_halfInning == HalfInning.Top)
-                    _halfInning = HalfInning.Bottom;
-                else
-                {
-                    _halfInning = HalfInning.Top;
-                    _inningNumber++;
-                }
+                _halfInning = HalfInning.Top;
+                _inningNumber = 1;
+            }
+            else if (_halfInning == HalfInning.Top)
+                _halfInning = HalfInning.Bottom;
+            else
+            {
+                _halfInning = HalfInning.Top;
+                _inningNumber++;
+            }
+            if (!_dontUpdateGame)
+            {
                 _selectedGame?.SetInningStatus($"{_halfInning} of {_inningNumber}");
                 _selectedGame?.OnGameScoreUpdated();
             }
+
             _currentInning = new ApiInning
             {
                 GameId = _selectedGame.GameId,
@@ -135,15 +138,15 @@ namespace Scorebook.Services
         {
             if (ab.BatterId > 0 && ab.Batter != null)
             {
-                var roster = _selectedGame.HomeTeamId == ab.Batter.TeamId ? ApiService.ApiRosters[_selectedGame.HomeTeam.Name]
-                    : ApiService.ApiRosters[_selectedGame.AwayTeam.Name];
+                var roster = _selectedGame.HomeTeamId == ab.Batter.TeamId ? ApiService.ApiRosters[_selectedGame.HomeTeamId]
+                    : ApiService.ApiRosters[_selectedGame.AwayTeamId];
                 if (!roster.Any(a => a.Id == ab.BatterId))
                     roster.Add(ab.Batter);
             }
             if (ab.PitcherId > 0 && ab.Pitcher != null)
             {
-                var roster = _selectedGame.HomeTeamId == ab.Pitcher?.TeamId ? ApiService.ApiRosters[_selectedGame.HomeTeam.Name]
-                    : ApiService.ApiRosters[_selectedGame.AwayTeam.Name];
+                var roster = _selectedGame.HomeTeamId == ab.Pitcher?.TeamId ? ApiService.ApiRosters[_selectedGame.HomeTeamId]
+                    : ApiService.ApiRosters[_selectedGame.AwayTeamId];
                 if (!roster.Any(a => a.Id == ab.PitcherId))
                     roster.Add(ab.Pitcher);
             }
@@ -163,12 +166,12 @@ namespace Scorebook.Services
         }
         private ApiAb? ConvertAb(AtBat? currentAb)
         {
-            if (_currentInning is null || currentAb is null)
+            if (_selectedGame is null || _currentInning is null || currentAb is null)
                 return null;
-            var hittingTeam = _currentInning.IsTopHalf ? _selectedGame?.AwayTeam : _selectedGame?.HomeTeam;
-            var pitchingTeam = _currentInning.IsTopHalf ? _selectedGame?.HomeTeam : _selectedGame?.AwayTeam;
-            var batter = ApiService.ApiRosters[hittingTeam.Name].FirstOrDefault(p => p.Number == currentAb?.Batter.Number);
-            var pitcher = ApiService.ApiRosters[pitchingTeam.Name].FirstOrDefault(p => p.Number == currentAb?.Pitcher.Number);
+            var hittingTeamId = _currentInning.IsTopHalf ? _selectedGame.AwayTeamId : _selectedGame.HomeTeamId;
+            var pitchingTeamId = _currentInning.IsTopHalf ? _selectedGame.HomeTeamId : _selectedGame.AwayTeamId;
+            var batter = ApiService.ApiRosters[hittingTeamId].FirstOrDefault(p => p.Number == currentAb?.Batter.Number);
+            var pitcher = ApiService.ApiRosters[pitchingTeamId].FirstOrDefault(p => p.Number == currentAb?.Pitcher.Number);
 
             var batterId = batter?.Id ?? 0;
             var pitcherId = pitcher?.Id ?? 0;
@@ -183,14 +186,14 @@ namespace Scorebook.Services
                     FirstName = currentAb.Batter.FirstName,
                     LastName = currentAb.Batter.LastName,
                     Number = currentAb.Batter.Number,
-                    TeamId = hittingTeam.Id
+                    TeamId = hittingTeamId
                 },
                 Pitcher = pitcherId > 0 ? null : new CmbaPlayer
                 {
                     FirstName = currentAb.Pitcher.FirstName,
                     LastName = currentAb.Pitcher.LastName,
                     Number = currentAb.Pitcher.Number,
-                    TeamId = pitchingTeam.Id
+                    TeamId = pitchingTeamId
                 },
                 Result = currentAb.ToString(),
                 Balls = currentAb.Balls > 3 ? 3 : currentAb.Balls,
@@ -219,5 +222,6 @@ namespace Scorebook.Services
         private int _inningNumber;
         private ApiInning? _currentInning;
         private ApiAb? _currentAtbat;
+        private bool _dontUpdateGame;
     }
 }

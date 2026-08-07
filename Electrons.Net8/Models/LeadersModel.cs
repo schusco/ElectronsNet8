@@ -6,14 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Electrons.Net8.Models
-{    
+{
     public class LeadersModel
     {
         public LeadersModel() { }
         public LeadersModel(GameSettings settings)
         {
-            HitCategories = EnumHelper.GetList<HittingCategories>().Select(s => new SelectListItem { Text = s.Key, Value = s.Value.ToString() }).ToList();
-            PitchCategories = EnumHelper.GetList<PitchingCategories>().Select(s => new SelectListItem { Text = s.Key, Value = s.Value.ToString() }).ToList();
+            HitCategories = [.. EnumHelper.GetList<HittingCategories>().Select(s => new SelectListItem { Text = s.Key, Value = s.Value.ToString() })];
+            PitchCategories = [.. EnumHelper.GetList<PitchingCategories>().Select(s => new SelectListItem { Text = s.Key, Value = s.Value.ToString() })];
             PitchCategory = StatsCategory.Season;
             HitCategory = StatsCategory.Season;
             Thresholds = settings.ThresholdSettings;
@@ -91,12 +91,13 @@ namespace Electrons.Net8.Models
                     if (qualifier) filteredStats = filteredStats.Where(w => w.Innings > threshold);
                     tempStats = filteredStats.Select(s => LeadersRow.Create(s, statCategory, category, format));
                 }
-                if (!string.IsNullOrEmpty(format))
+                if (string.IsNullOrEmpty(format))
                     tempStats = tempStats.Where(w => int.Parse(w.Stat.ToString()) > 0);
+
                 if (sort)
-                    Stats = tempStats.OrderBy(o => o.Stat, new StatComparer()).Where(w => w.HasValue).Take(displayTotal).ToList();
+                    Stats = [.. tempStats.OrderBy(o => o.Stat, new StatComparer()).Where(w => w.HasValue).Take(displayTotal)];
                 else
-                    Stats = tempStats.OrderByDescending(o => o.Stat, new StatComparer()).Where(w => w.HasValue).Take(displayTotal).ToList();
+                    Stats = [.. tempStats.OrderByDescending(o => o.Stat, new StatComparer()).Where(w => w.HasValue).Take(displayTotal)];
             }
         }
         public IList<LeadersRow> Stats { get; set; }

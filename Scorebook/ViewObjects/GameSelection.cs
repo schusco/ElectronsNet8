@@ -149,7 +149,7 @@ namespace Scorebook.ViewObjects
             await LoadGameData();
             if (SendGameUpdates && !_vm.GameManager.IsLoggedIn)
                 await _vm.GameManager.StartAsync();
-            if (GameUpdateId.HasValue && SelectedGame != null && SelectedGame.GameStatus != "Final")
+            if (GameUpdateId.HasValue && SelectedGame != null)
             {
                 SelectedGame.GameScoreUpdated += _vm.ApiService.SendGameUpdate;
                 _vm.GameManager.SetSelectedGame(SelectedGame, _vm);
