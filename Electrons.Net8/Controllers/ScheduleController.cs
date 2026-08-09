@@ -25,7 +25,7 @@ namespace Electrons.Net8.Controllers
         [Route("schedule/{year:int?}/{month:int?}")]
         public async Task<ActionResult> Index(int? month, int? year)
         {
-            List<GameScore> apidata = new List<GameScore>();
+            List<GameScore> apidata = [];
             var actualMonth = month ?? DateTime.Today.Month;
             var actualYear = year ?? DateTime.Today.Year;
             if (actualYear == DateTime.Now.Year)

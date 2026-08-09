@@ -20,8 +20,8 @@ namespace Electrons.Net8.Controllers
         private readonly HttpClient _client = client;
         public async Task<ActionResult> Index()
         {
-            List<StandingsRow> standings = null;
-            List<GameScore> apiData = null;
+            List<StandingsRow> standings=[];
+            List<GameScore> apiData;
             try
             {
                 apiData = await _client.GetFromJsonAsync<List<GameScore>>($"{GameSettings.BaseApiUrl}api/teams/1/Games");
@@ -31,8 +31,8 @@ namespace Electrons.Net8.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error fetching standings: {ex.Message}");
-                standings = new List<StandingsRow>();
+                Logger.LogWarning("Error fetching standings: {Message}", ex.Message);
+                return View("Error");
             }
             return View(new MainModel(Repository, GameSettings, apiData, standings));
         }

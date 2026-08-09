@@ -1,6 +1,5 @@
 ﻿using Electrons.Core.Net8;
 using Electrons.Core.Net8.Entities;
-using ScoreboardApi.Models;
 using System;
 
 namespace Electrons.Net8.Models
@@ -58,7 +57,7 @@ namespace Electrons.Net8.Models
             };
         }
 
-        internal static ILogo CreateFromApigame(GameScore displayGameApi)
+        internal static ILogo CreateFromApigame(ScoreboardApi.Models.GameScore displayGameApi)
         {
             var isHome = displayGameApi.HomeTeamId == 1;
             return new GameDataModel

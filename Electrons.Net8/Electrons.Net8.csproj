@@ -61,10 +61,10 @@
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Management" Version="10.0.3" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="Electrons.Core.Net8" Version="1.0.0"></PackageReference>
+    <PackageReference Include="Electrons.Core.Net8.Infrastructure" Version="1.0.2"></PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Electrons.Core.Net8.Infrastructure\Electrons.Core.Net8.Infrastructure.csproj" />
-    <ProjectReference Include="..\Electrons.Core.Net8\Electrons.Core.Net8.csproj" />
     <ProjectReference Include="..\External\CmbaLeagueApp\ScoreboardApi.Models\ScoreboardApi.Models.csproj" />
   </ItemGroup>
   <ItemGroup>

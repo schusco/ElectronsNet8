@@ -14,7 +14,9 @@ namespace Electrons.Net8.Models
         public MainModel(Repository repo, GameSettings settings, List<GameScore> apiData, List<StandingsRow> standings = null)
         {
             JumboText = settings.JumboText;
-            var nextOutingData = repo.GetNextOuting(apiData);
+            var data = apiData.Select(Convert).ToList();
+
+            var nextOutingData = repo.GetNextOuting(data);
             DisplayLastGame = nextOutingData.DisplayLastGame;
             DbGameId = nextOutingData.DisplayGameDb?.GameId;
             GameId = nextOutingData.DisplayGameApi?.GameId;
@@ -26,13 +28,15 @@ namespace Electrons.Net8.Models
                     NextGameRecap = true;
                 if (nextOutingData?.DisplayGameApi != null)
                 {
-                    var logo = GameDataModel.CreateFromApigame(nextOutingData.DisplayGameApi);
+                    var displayGameApi = nextOutingData.DisplayGameApi;
+                    GameScore displayDto = ConvertToGame(displayGameApi);
+                    var logo = GameDataModel.CreateFromApigame(displayDto);
                     HomeLogo = logo.GetHomeLogo();
                     AwayLogo = logo.GetAwayLogo();
-                    HomeTeam = nextOutingData.DisplayGameApi.HomeTeam.Name;
-                    AwayTeam = nextOutingData.DisplayGameApi.AwayTeam.Name;
+                    HomeTeam = nextOutingData.DisplayGameApi.HomeTeamName;
+                    AwayTeam = nextOutingData.DisplayGameApi.AwayTeamName;
                     GameDate = nextOutingData.DisplayGameApi.GameDate.ToString(DateFormatString);
-                    Location = nextOutingData.DisplayGameApi.Location?.FieldName;
+                    Location = nextOutingData.DisplayGameApi.FieldName;
                 }
                 else
                 {
@@ -87,6 +91,46 @@ namespace Electrons.Net8.Models
                 Standings = standings.Select(s => StandingsModel.Create(s.Name, s.Wins, s.Losses, s.Ties, s.Points))
                     .OrderByDescending(o => o.Points).ThenByDescending(o => o.Wins);
         }
+
+        private static GameScore ConvertToGame(Core.Net8.Infrastructure.Dto.GameScore displayGameApi)
+        {
+            return new GameScore
+            {
+                GameId = displayGameApi.GameId,
+                GameDate = displayGameApi.GameDate,
+                HomeTeamId = displayGameApi.HomeTeamId,
+                AwayTeamId = displayGameApi.AwayTeamId,
+                HomeRuns = displayGameApi.HomeRuns,
+                AwayRuns = displayGameApi.AwayRuns,
+                Status = displayGameApi.Status,
+                LocationId = displayGameApi.LocationId,
+                HomeTeam = new Team { Division = displayGameApi.HomeDivision, Name = displayGameApi.HomeTeamName, Region = displayGameApi.HomeRegion },
+                AwayTeam = new Team { Division = displayGameApi.AwayDivision, Name = displayGameApi.AwayTeamName, Region = displayGameApi.AwayRegion },
+            };
+        }
+
+        private static Core.Net8.Infrastructure.Dto.GameScore Convert(GameScore s, int arg2)
+        {
+            return new Core.Net8.Infrastructure.Dto.GameScore
+            {
+                GameId = s.GameId,
+                GameDate = s.GameDate,
+                HomeTeamId = s.HomeTeamId,
+                AwayTeamId = s.AwayTeamId,
+                HomeRuns = s.HomeRuns,
+                AwayRuns = s.AwayRuns,
+                Status = s.Status,
+                LocationId = s.LocationId,
+                FieldName = s.Location?.FieldName,
+                HomeRegion = s.HomeTeam.Region,
+                HomeTeamName = s.HomeTeam.Name,
+                HomeDivision = s.HomeTeam.Division,
+                AwayDivision = s.AwayTeam.Division,
+                AwayTeamName = s.AwayTeam.Name,
+                AwayRegion = s.AwayTeam.Region
+            };
+        }
+
         public string NextOutingText { get; set; } = "Next Outing";
         public string JumboText { get; set; }
         public string HomeTeam { get; set; }
