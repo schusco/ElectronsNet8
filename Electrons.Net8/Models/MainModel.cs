@@ -14,7 +14,7 @@ namespace Electrons.Net8.Models
         public MainModel(Repository repo, GameSettings settings, List<GameScore> apiData, List<StandingsRow> standings = null)
         {
             JumboText = settings.JumboText;
-            var data = apiData.Select(Convert).ToList();
+            var data = apiData.Select(ConvertToDto).ToList();
 
             var nextOutingData = repo.GetNextOuting(data);
             DisplayLastGame = nextOutingData.DisplayLastGame;
@@ -109,7 +109,7 @@ namespace Electrons.Net8.Models
             };
         }
 
-        private static Core.Net8.Infrastructure.Dto.GameScore Convert(GameScore s, int arg2)
+        private static Core.Net8.Infrastructure.Dto.GameScore ConvertToDto(GameScore s)
         {
             return new Core.Net8.Infrastructure.Dto.GameScore
             {
