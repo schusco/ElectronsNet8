@@ -19,7 +19,21 @@
     height: 30px;
     margin: 5px;
 }
+.form-select-outline-primary {
+    color: #800000; /* Electrons Red text */
+    border-color: #800000; /* Electrons Red border */
+    background-color: transparent;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
 
+    .form-select-outline-primary:hover
+     {
+        color: #ffffff;
+        background-color: #800000;
+        border-color: #800000;
+        outline: 0;
+        box-shadow: 0 0 0 0.25rem rgba(227, 6, 19, 0.25); /* Matches Bootstrap focus ring */
+    }
 /* The default empty base style */
 .base-diamond .base {
     fill: #999;
