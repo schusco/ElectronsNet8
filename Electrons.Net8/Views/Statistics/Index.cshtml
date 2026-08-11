@@ -16,7 +16,7 @@
                 <a asp-route-id="@Model.Year" asp-route-type="" class="btn btn-outline-primary">Season</a>
                 <a asp-route-id="@Model.Year" asp-route-type="playoffs" class="btn btn-outline-primary">Playoffs</a>
                 <a href="~/statistics/records" class="btn btn-outline-primary" >Records</a>
-                <button id="toggleTrendsButton" class="btn btn-outline-primary" data-toggle="collapse" data-target="#statsCollapse" aria-expanded="false" aria-controls="statsCollapse">
+                <button id="toggleTrendsButton" class="btn btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#statsCollapse" aria-expanded="false" aria-controls="statsCollapse">
                     View Trends
                 </button>
             </div>
@@ -27,7 +27,7 @@
         <div class="col-sm-4" style="text-align:right">
             <div class="btn-group pt-3 pb-1" role="group" aria-label="...">
                 <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-outline-primary dropdown dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    <button type="button" class="btn btn-outline-primary dropdown dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                         Year <span class="caret"></span>
                     </button>
                     <div class="dropdown-menu" role="menu">

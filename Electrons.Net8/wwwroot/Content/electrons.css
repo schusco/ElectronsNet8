@@ -1,4 +1,19 @@
 ﻿/* CSS Document */
+:root {
+    --bs-primary: #800000; /* Brand color */
+}
+.btn-outline-primary,
+.btn-outline-primary:active,
+.btn-outline-primary:focus {
+    border-color: #800000 !important;
+    color: #800000 !important;
+}
+
+    .btn-outline-primary:hover    
+     {
+        background-color: #800000 !important; /* A slightly darker shade for hover state */
+        color: #FFFFFF !important;
+    }
 .base-diamond-container {
     width: 30px;
     height: 30px;
@@ -624,10 +639,11 @@ a.nextOutingText {
 }*/
 .tronNextouting {
     background: #668466;
-    min-height: 330px;
+    min-height: 375px;
+    object-fit: cover;
     background-image: url(images/_fieldimg.png);
     background-repeat: repeat-y;
-    background-size: 100%;
+    background-size: cover;
 }
 
 .depthChartImg {
@@ -687,7 +703,9 @@ li.nav-item:hover {
 
 .tronStandings {
     background: #800000;
-    min-height: 100px;    
+    min-height: 100px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 img.tronCarouselImage {

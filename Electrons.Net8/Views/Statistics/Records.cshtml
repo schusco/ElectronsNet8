@@ -19,8 +19,8 @@
         <div class="col col-sm-5 mx-auto">
             <form id="myForm" action="GetLeaders">
                 <ul class="nav nav-tabs nav-justified" role="tablist" style="background-color:#ddd">
-                    <li role="presentation" class="nav-item active"><a href="#hit" aria-controls="hit" role="tab" class="nav-link" data-toggle="tab">Hitting Stats</a></li>
-                    <li role="presentation" class="nav-item"><a href="#pitch" aria-controls="pitch" role="tab" class="nav-link" data-toggle="tab">Pitching Stats</a></li>
+                    <li role="presentation" class="nav-item active"><a href="#hit" aria-controls="hit" role="tab" class="nav-link" data-bs-toggle="tab">Hitting Stats</a></li>
+                    <li role="presentation" class="nav-item"><a href="#pitch" aria-controls="pitch" role="tab" class="nav-link" data-bs-toggle="tab">Pitching Stats</a></li>
                 </ul>
                 <div class="tab-content">
                     <div role="tabpanel" class="tab-pane active" id="hit">
@@ -34,7 +34,7 @@
                                 @Html.DropDownListFor(m => m.SelectedCategory, Model.HitCategories, "-- Select --", new { @class = "form-control", width = "50px" })
                             </div>
                             <div class="col-sm-2">
-                                <input type="button" name="Hit" class="btn btn-default getleaders" value="Search" />
+                                <input type="button" name="Hit" class="btn btn-outline-primary getleaders" value="Search" />
                             </div>
                         </div>
                         <div class="row">
@@ -54,7 +54,7 @@
                                 @Html.DropDownListFor(m => m.SelectedPitchCategory, Model.PitchCategories, "-- Select --", new { @class = "form-control", width = "50px" })
                             </div>
                             <div class="col-sm-2">
-                                <input id="submitBtn" type="button"  name="Pitch" class="btn btn-default getleaders" value="Search" />
+                                <input id="submitBtn" type="button"  name="Pitch" class="btn btn-outline-primary getleaders" value="Search" />
                             </div>
                         </div>
                         <div class="row">

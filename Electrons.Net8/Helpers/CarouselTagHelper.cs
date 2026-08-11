@@ -26,7 +26,7 @@ namespace Electrons.Net8.Helpers
             var container = new TagBuilder("div");
             container.AddCssClass("carousel slide align-content-center");
             container.Attributes.Add("id", "carousel-example-generic");
-            container.Attributes.Add("data-ride", "carousel");
+            container.Attributes.Add("data-bs-ride", "carousel");
 
             var innerDiv = new TagBuilder("div");
             innerDiv.AddCssClass("carousel-inner");
@@ -59,7 +59,7 @@ namespace Electrons.Net8.Helpers
             slidePrev.AddCssClass("carousel-control-prev");
             slidePrev.Attributes.Add("href", "#carousel-example-generic");
             slidePrev.Attributes.Add("role", "button");
-            slidePrev.Attributes.Add("data-slide", "prev");
+            slidePrev.Attributes.Add("data-bs-slide", "prev");
 
             container.InnerHtml.AppendHtml(slidePrev);
 
@@ -71,7 +71,7 @@ namespace Electrons.Net8.Helpers
             slideNext.AddCssClass("carousel-control-next");
             slideNext.Attributes.Add("href", "#carousel-example-generic");
             slideNext.Attributes.Add("role", "button");
-            slideNext.Attributes.Add("data-slide", "next");
+            slideNext.Attributes.Add("data-bs-slide", "next");
 
             var slideNextIcon = new TagBuilder("span");
             slideNextIcon.AddCssClass("carousel-control-next-icon");

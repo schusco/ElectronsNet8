@@ -12,13 +12,7 @@
     <meta name="description" content="" />
     <meta name="author" content="" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-
-    <title>@ViewBag.Title</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
-
-    <link href="~/Content/bootstrap-icons.css" rel="stylesheet" />
-    <!-- Electrons theme -->
-    <link href="~/Content/electrons.css?v=@DateTime.Now.Ticks" rel="stylesheet" />
+    <title>@ViewBag.Title</title>    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
     <script>const baseurl="@Configuration["GameSettings:BaseApiUrl"]";</script>
@@ -77,12 +71,16 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
 
-    <script src="~/Scripts/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="~/Content/bootstrap.css" />
-    <script src="~/Scripts/bootstrap.js"></script>    
+    <script src="~/Scripts/jquery-3.6.0.min.js"></script>      
+    <script src="~/scripts/popper.min.js"></script>
+    <script src="~/scripts/bootstrap.bundle.min.js"></script>
     <script src="~/Scripts/jquery.tablesorter.min.js"></script>
     <script src="~/Scripts/jquery.tablesorter.widgets.js"></script>    
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <link href="~/Content/bootstrap-icons.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/Content/bootstrap.css" />
+    <!-- Electrons theme -->
+    <link href="~/Content/electrons.css" rel="stylesheet" />
     <script>
         $(document).on("ajaxStart",function () {
             $('#loadingDiv').show();
