@@ -53,16 +53,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="itext" Version="9.5.0" />
-    <PackageReference Include="itext.bouncy-castle-adapter" Version="9.5.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.7" />
-    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Management" Version="10.0.3" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
-    <PackageReference Include="Electrons.Core.Net8" Version="1.0.0"></PackageReference>
-    <PackageReference Include="Electrons.Core.Net8.Infrastructure" Version="1.0.2"></PackageReference>
+    <PackageReference Include="Electrons.Core.Net8" Version="1.0.4"></PackageReference>
+    <PackageReference Include="Electrons.Core.Net8.Infrastructure" Version="1.0.4"></PackageReference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\External\CmbaLeagueApp\ScoreboardApi.Models\ScoreboardApi.Models.csproj" />
@@ -85,27 +81,13 @@
   <ItemGroup>
     <PackageReference Include="bootstrap" Version="5.3.8" />
     <PackageReference Include="FontAwesome" Version="4.7.0" />
-    <PackageReference Include="Iesi.Collections" Version="4.1.1" />
     <PackageReference Include="jQuery" Version="3.6.0" />
     <PackageReference Include="jquery.tablesorter" Version="1.0.3" />
-    <PackageReference Include="jQuery.UI.Combined" Version="1.14.1" />
     <PackageReference Include="jQuery.Validation" Version="1.21.0" />
-    <PackageReference Include="K4os.Compression.LZ4" Version="1.3.8" />
-    <PackageReference Include="K4os.Compression.LZ4.Streams" Version="1.3.8" />
-    <PackageReference Include="K4os.Hash.xxHash" Version="1.0.8" />
-    <PackageReference Include="knockoutjs" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
-    <PackageReference Include="Microsoft.jQuery.Unobtrusive.Ajax" Version="2.0.30506.0" />
     <PackageReference Include="Microsoft.jQuery.Unobtrusive.Validation" Version="2.0.30116.0" />
-    <PackageReference Include="Modernizr" Version="2.6.2" />
     <PackageReference Include="MySql.Data" Version="9.1.0" />
-    <PackageReference Include="popper.js" Version="1.16.1" />
-    <PackageReference Include="SSH.NET" Version="2024.0.0" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.3" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="8.0.1" />
     <PackageReference Include="System.IO.Pipelines" Version="9.0.4" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
-    <PackageReference Include="ZstdSharp.Port" Version="0.8.0" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Start\" />

@@ -127,11 +127,13 @@ a.headerLink {
     height: 50px;
     display: inline-block;
     border-radius: 10px;
+    color: white !important;
 }
 
     a.headerLink:hover {
         background-color: #888 !important;
         background-image: none;
+        color: white !important;
     }
 
     a.headerLink:active {
@@ -541,18 +543,18 @@ a.monthLinks {
     color:#800000
 }
 a {
-    color:#800000;
+    color:#800000 !important;
 }
     a.complSched{
-        color:white;
+        color:white !important;
     }
     a.complSched:hover{
         color:#888;
         text-decoration:underline;
     }
     a:hover {
-        color: #800000;
-        text-decoration: underline;
+        color: #800000 !important;
+        text-decoration: underline !important;
     }
 table.schedTable th {
     background-color: #800000;
