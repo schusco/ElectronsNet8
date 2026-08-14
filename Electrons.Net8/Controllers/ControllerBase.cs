@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System;
 using System.Text;
 using System.Text.Json;
 
@@ -24,10 +25,9 @@ namespace Electrons.Net8.Controllers
         public ControllerBase(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings, ILogger logger)
         {
             _httpContextAccessor = httpContextAccessor;
-            GameSettings = settings.Value;
+            GameSettings = settings.Value;            
             Logger = logger;
-            WebHostEnvironment = env;
-            var configPath = WebHostEnvironment.ContentRootPath;
+            WebHostEnvironment = env;            
             Cache = cache;
             Repository = new Repository(session, cache);
         }

@@ -53,12 +53,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Electrons.Core.Net8" Version="1.0.5" />
+    <PackageReference Include="Electrons.Core.Net8" Version="1.0.6" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.7" />
-    <PackageReference Include="System.Management" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.11" />
+    <PackageReference Include="System.Management" Version="10.0.11" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
-    <PackageReference Include="Electrons.Core.Net8.Infrastructure" Version="1.0.4"></PackageReference>
+    <PackageReference Include="Electrons.Core.Net8.Infrastructure" Version="1.0.6"></PackageReference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\External\CmbaLeagueApp\ScoreboardApi.Models\ScoreboardApi.Models.csproj" />
@@ -82,8 +82,8 @@
     <PackageReference Include="jquery.tablesorter" Version="1.0.3" />
     <PackageReference Include="jQuery.Validation" Version="1.21.0" />
     <PackageReference Include="Microsoft.jQuery.Unobtrusive.Validation" Version="2.0.30116.0" />
-    <PackageReference Include="MySql.Data" Version="9.1.0" />
-    <PackageReference Include="System.IO.Pipelines" Version="9.0.4" />
+    <PackageReference Include="MySql.Data" Version="26.7.0" />
+    <PackageReference Include="System.IO.Pipelines" Version="10.0.11" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
   </ItemGroup>
   <ItemGroup>
@@ -386,7 +386,7 @@
     <DefineConstants>TRACE;DEBUG;Local</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>    
+    <TargetFramework>net10.0</TargetFramework>    
     <OutputPath>bin\</OutputPath>    
   </PropertyGroup>
   <PropertyGroup>
