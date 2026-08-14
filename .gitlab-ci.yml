@@ -1,6 +1,8 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
 
+image: mcr.microsoft.com/dotnet/sdk:10.0
+
 stages:
   - deploy
   - release
