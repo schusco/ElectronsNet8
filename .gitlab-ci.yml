@@ -15,6 +15,16 @@ deploy_godaddy_dev:
     - if (dotnet nuget list source | Select-String "gitlab") { dotnet nuget remove source gitlab }
     - dotnet nuget add source "${CI_API_V4_URL}/projects/85256055/packages/nuget/index.json" --name "gitlab" --username "gitlab-ci-token" --password "$CI_JOB_TOKEN" --store-password-in-clear-text
   script:
+    # 1. Download and install the .NET 10 SDK locally into a custom folder (.dotnet)
+    - powershell -Command "Invoke-WebRequest -Uri 'https://dot.net/v1/dotnet-install.ps1' -OutFile 'dotnet-install.ps1'"
+    - powershell -Command "./dotnet-install.ps1 -Channel 10.0 -InstallDir './.dotnet'"
+
+    # 2. Force the current shell session to use this newly downloaded .NET 10 SDK instead of the system default
+    - $env:DOTNET_ROOT="$PWD/.dotnet"
+    - $env:PATH="$env:DOTNET_ROOT;$env:PATH"
+
+    # 3. Verify it is running .NET 10
+    - dotnet --version
     # Use the existing publish profile.
     # Note: We pass the password via variable to keep it out of the repo.
     - dotnet publish Electrons.Net8/Electrons.Net8.csproj -c Release /p:PublishProfile="test.electronsbaseball.com - Web Deploy.pubxml" /p:Password="$env:GD_PASSWORD" /p:AllowUntrustedCertificate=True
