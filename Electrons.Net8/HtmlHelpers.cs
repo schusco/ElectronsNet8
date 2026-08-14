@@ -158,10 +158,8 @@ namespace Electrons.Net8
                     innertext = prop.GetHeaderText();
                 else if (prop.GetHeaderProperty() != null)
                 {
-                    var valueprop = type.GetProperties().SingleOrDefault(s => s.Name == prop.GetHeaderProperty());
-                    if (valueprop == null)
-                        throw new InvalidOperationException(string.Format("Property '{0}' does not exist in type '{1}'",
-                                                                          prop.GetHeaderProperty(), type.Name));
+                    var valueprop = type.GetProperties().SingleOrDefault(s => s.Name == prop.GetHeaderProperty()) ?? 
+                        throw new InvalidOperationException(string.Format("Property '{0}' does not exist in type '{1}'", prop.GetHeaderProperty(), type.Name));
                     var statData = data.FirstOrDefault();
 
                     innertext = statData is null ? "" : valueprop.GetValue(statData, null).ToString();
@@ -196,7 +194,7 @@ namespace Electrons.Net8
                             innertext = cellvalue as decimal? != null ? (cellvalue as decimal?).Value.ToString() : null;
                     }
                     else
-                        innertext = ReferenceEquals(cellvalue, null) ? null : cellvalue.ToString().Replace("\n", " ").Replace("\r", "");
+                        innertext = cellvalue?.ToString().Replace("\n", " ").Replace("\r", "");
                     if (prop.GetCustomAttributes(false).Any(s => s is LinkColumnAttribute))
                     {
                         var attribute = (LinkColumnAttribute)prop.GetCustomAttributes(false).First(s => s is LinkColumnAttribute);
@@ -220,11 +218,8 @@ namespace Electrons.Net8
                     var footerProp = GetFooterProperty(prop);
                     if (footerProp != null)
                     {
-                        var valueprop = type.GetProperties().SingleOrDefault(s => s.Name == footerProp);
-                        if (valueprop == null)
-                            throw new InvalidOperationException(string.Format("Property '{0}' does not exist in type '{1}'",
-                                                                              GetFooterProperty(prop), type.Name));
-
+                        var valueprop = type.GetProperties().SingleOrDefault(s => s.Name == footerProp) ?? 
+                            throw new InvalidOperationException(string.Format("Property '{0}' does not exist in type '{1}'", GetFooterProperty(prop), type.Name));
                         object cellvalue = 0;
                         if (data.Any())
                             cellvalue = valueprop.GetValue(data.First(), null);
@@ -237,7 +232,7 @@ namespace Electrons.Net8
                                 innertext = cellvalue as decimal? != null ? (cellvalue as decimal?).Value.ToString() : null;
                         }
                         else
-                            innertext = ReferenceEquals(cellvalue, null) ? null : cellvalue.ToString().Replace("\n", " ").Replace("\r", "");
+                            innertext = cellvalue?.ToString().Replace("\n", " ").Replace("\r", "");
                     }
                     var classattr = string.IsNullOrEmpty(headerCss) && string.IsNullOrEmpty(prop.GetClass())
                                            ? ""
@@ -302,10 +297,8 @@ namespace Electrons.Net8
                     innertext = prop.GetHeaderText();
                 else if (prop.GetHeaderProperty() != null)
                 {
-                    var valueprop = type.GetProperties().SingleOrDefault(s => s.Name == prop.GetHeaderProperty());
-                    if (valueprop == null)
-                        throw new InvalidOperationException(string.Format("Property '{0}' does not exist in type '{1}'",
-                                                                          prop.GetHeaderProperty(), type.Name));
+                    var valueprop = type.GetProperties().SingleOrDefault(s => s.Name == prop.GetHeaderProperty()) ??
+                        throw new InvalidOperationException(string.Format("Property '{0}' does not exist in type '{1}'", prop.GetHeaderProperty(), type.Name));
                     var enumerator = data.GetEnumerator();
                     enumerator.MoveNext();
                     var test = enumerator.Current;
@@ -338,7 +331,7 @@ namespace Electrons.Net8
                     if (prop.PropertyType == typeof(DateTime) || prop.PropertyType == typeof(DateTime?))
                         innertext = cellvalue as DateTime? != null ? (cellvalue as DateTime?).Value.ToShortDateString() : null;
                     else
-                        innertext = ReferenceEquals(cellvalue, null) ? null : cellvalue.ToString().Replace("\n", " ").Replace("\r", "");
+                        innertext = cellvalue?.ToString().Replace("\n", " ").Replace("\r", "");
                     if (prop.GetCustomAttributes(typeof(LinkColumnAttribute), false).Any())
                     {
                         var attribute = prop.GetCustomAttributes(typeof(LinkColumnAttribute), false).SingleOrDefault() as LinkColumnAttribute;
@@ -377,12 +370,10 @@ namespace Electrons.Net8
         }
         private static string ToHtmlString(TagBuilder tag)
         {
-            using (var writer = new StringWriter())
-            {
-                // This is the manual "Render" step
-                tag.WriteTo(writer, System.Text.Encodings.Web.HtmlEncoder.Default);
-                return writer.ToString();
-            }
+            using var writer = new StringWriter();
+            // This is the manual "Render" step
+            tag.WriteTo(writer, System.Text.Encodings.Web.HtmlEncoder.Default);
+            return writer.ToString();
         }
         private static bool IncludeColumn<T>(this PropertyInfo prop, object data)
         {
@@ -411,7 +402,7 @@ namespace Electrons.Net8
                 imageTag.Attributes.Add("width", width);
             imageTag.Attributes.Add("style", "color:white;text-align:center");
             return imageTag;
-        }        
+        }
 
         private static string MakeDataAttributeString<T>(IEnumerable<PropertyInfo> dataAttrs, T result)
         {
@@ -456,14 +447,14 @@ namespace Electrons.Net8
             if (prop.GetCustomAttributes(typeof(LinkParameterAttribute), false).Any())
             {
                 var attributes = prop.GetCustomAttributes(typeof(LinkParameterAttribute), false).ToList();
-                url.Append("?");
-                foreach (LinkParameterAttribute attr in attributes)
+                url.Append('?');
+                foreach (LinkParameterAttribute attr in attributes.Cast<LinkParameterAttribute>())
                 {
                     var propparam = type.GetProperties().Single(w => w.Name == attr.Field);
                     var propval = propparam.GetValue(result, null);
                     url.AppendFormat("{0}={1}", attr.Parameter, propval);
                     if (!Equals(attr, attributes.Last()))
-                        url.Append("&");
+                        url.Append('&');
                 }
             }
             return url.ToString();

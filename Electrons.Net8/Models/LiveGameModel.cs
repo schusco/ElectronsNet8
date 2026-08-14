@@ -14,15 +14,15 @@ namespace Electrons.Net8.Models
     {
         public LiveGameModel()
         {
-            ScoringPlays = new List<ScoringPlayModel>();
+            ScoringPlays = [];
             Defense = new Dictionary<Position, string>();
-            Innings = new List<InningModel>();
-            HomeInnings = new List<int>();
+            Innings = [];
+            HomeInnings = [];
             AwayInnings = [];
             HomeBox = BoxScore.Blank;
             AwayBox = BoxScore.Blank;
-            PreviousAbs = new List<string>();
-            Pitches = new List<string>();
+            PreviousAbs = [];
+            Pitches = [];
             Defense = new Dictionary<Position, string>();
             foreach (var position in Position.All)
                 Defense.Add(position, "");
@@ -95,13 +95,13 @@ namespace Electrons.Net8.Models
             //RunnerOnSecond = fullGame.CurrentInning.CurrentRunners.OnSecond?.Runner?.FullName;
             //RunnerOnThird = fullGame.CurrentInning.CurrentRunners.OnThird?.Runner?.FullName;
             PreviousAbs = [.. currentInning.Atbats.OrderByDescending(o => o.Sequence).Skip(1).Select(s => s.Result)];
-            Innings = InningModel.CreateInnings(game.Innings.ToList(), HomeLogo, AwayLogo);
-            ScoringPlays = ScoringPlayModel.CreateScoringPlays(game.Innings.Where(w => w.Runs > 0).ToList(), HomeLogo, AwayLogo);
-            Pitches = currentAb?.Result.Split('.').Where(w => w.Trim().IsIn(pitchResults)).ToList() ?? new List<string>();
+            Innings = InningModel.CreateInnings([.. game.Innings], HomeLogo, AwayLogo);
+            ScoringPlays = ScoringPlayModel.CreateScoringPlays([.. game.Innings.Where(w => w.Runs > 0)], HomeLogo, AwayLogo);
+            Pitches = currentAb?.Result.Split('.').Where(w => w.Trim().IsIn(pitchResults)).ToList() ?? [];
             HomeBox = HomeBoxScore.Create(game);
             AwayBox = AwayBoxScore.Create(game);
         }
-        private static string[] pitchResults = ["Ball", "Called strike", "Foul", "Strike swinging"];
+        private static readonly string[] pitchResults = ["Ball", "Called strike", "Foul", "Strike swinging"];
         public LiveGameModel(BaseballGame fullGame, DateTime gameDate, Location location, List<HittingStatsRow> seasonStats = null) : this()
         {
             Fill(fullGame, gameDate, location, seasonStats);
@@ -170,7 +170,7 @@ namespace Electrons.Net8.Models
             RunnerOnFirst = fullGame.CurrentInning.CurrentRunners.OnFirst?.Runner?.FullName;
             RunnerOnSecond = fullGame.CurrentInning.CurrentRunners.OnSecond?.Runner?.FullName;
             RunnerOnThird = fullGame.CurrentInning.CurrentRunners.OnThird?.Runner?.FullName;
-            PreviousAbs = fullGame.CurrentInning.Events.OrderByDescending(o => o.Sequence).Skip(1).Select(s => s.ToString()).ToList();
+            PreviousAbs = [.. fullGame.CurrentInning.Events.OrderByDescending(o => o.Sequence).Skip(1).Select(s => s.ToString())];
             var inningStack = new Stack<InningModel>();
             foreach (var inning in fullGame.Innings.Select(s => InningModel.Create(s, s.Half == HalfInning.Top ? AwayLogo : HomeLogo)))
                 inningStack.Push(inning);
@@ -189,7 +189,7 @@ namespace Electrons.Net8.Models
             }
             while (scoreStack.Any())
                 ScoringPlays.Add(scoreStack.Pop());
-            Pitches = fullGame.CurrentAb.Pitches.Select(s => s.ToString()).ToList();
+            Pitches = [.. fullGame.CurrentAb.Pitches.Select(s => s.ToString())];
         }
         public int GameId { get; set; }
         public string DateString { get; set; }
@@ -259,7 +259,7 @@ namespace Electrons.Net8.Models
             };
             return score;
         }
-        internal static BoxScore Blank => new BoxScore();
+        internal static BoxScore Blank => new();
     }
     public class HomeBoxScore : BoxScore
     {
@@ -269,7 +269,7 @@ namespace Electrons.Net8.Models
             if (game.HV == HV.H)
                 HittingBox = new HittingBoxScore(game, seasonStats);
             else
-                HittingBox = new HittingBoxScore(game.FullGame.HomeTeamHitting, new List<HittingStatsRow>());
+                HittingBox = new HittingBoxScore(game.FullGame.HomeTeamHitting, []);
             PitchingBox = new PitchingBoxScore(game.FullGame.HomeTeamPitching);
             RispAb = game.FullGame.HomeRisp.Abs;
             RispH = game.FullGame.HomeRisp.Hits;
@@ -298,7 +298,7 @@ namespace Electrons.Net8.Models
             if (game.HV == HV.V)
                 HittingBox = new HittingBoxScore(game, seasonStats);
             else
-                HittingBox = new HittingBoxScore(game.FullGame.AwayTeamHitting, new List<HittingStatsRow>());
+                HittingBox = new HittingBoxScore(game.FullGame.AwayTeamHitting, []);
             PitchingBox = new PitchingBoxScore(game.FullGame.AwayTeamPitching);
             RispAb = game.FullGame.AwayRisp.Abs;
             RispH = game.FullGame.AwayRisp.Hits;
@@ -323,8 +323,8 @@ namespace Electrons.Net8.Models
     {
         public HittingBoxScore()
         {
-            Stats = new List<HStats>();
-            SeasonStats = new List<HittingStatsRow>();
+            Stats = [];
+            SeasonStats = [];
         }
         internal HittingBoxScore(GameData game, List<HittingStatsRow> seasonStats) : this()
         {
@@ -340,7 +340,7 @@ namespace Electrons.Net8.Models
 
         public HittingBoxScore(IEnumerable<ScoreboardApi.Models.Atbat> abs)
         {
-            Stats = new List<HStats>();
+            Stats = [];
             foreach (var ab in abs.GroupBy(g => g.BatterId))
             {
                 var player = Player.Create(ab.First().Batter.Number, ab.First().Batter.FirstName, ab.First().Batter.LastName);
@@ -365,33 +365,26 @@ namespace Electrons.Net8.Models
             }
         }
 
-        public StatModel Doubles => new StatModel("2B", Stats.Where(w => w.Doubles > 0).Select(s => new HittingLine(s.Player.ToString(), s.Doubles, SeasonStats?.SingleOrDefault(q => q.Player.Number == s.Player.Number)?.Doubles ?? 0)).ToList());
-        public StatModel Triples => new StatModel("3B", Stats.Where(w => w.Triples > 0).Select(s => new HittingLine(s.Player.ToString(), s.Triples, SeasonStats?.SingleOrDefault(q => q.Player.Number == s.Player.Number)?.Triples ?? 0)).ToList());
-        public StatModel HomeRuns => new StatModel("HR", Stats.Where(w => w.HR > 0).Select(s => new HittingLine(s.Player.ToString(), s.HR, SeasonStats?.SingleOrDefault(q => q.Player.Number == s.Player.Number)?.HomeRuns ?? 0)).ToList());
-        public StatModel Rbis => new StatModel("RBI", Stats.Where(w => w.RBI > 0).Select(s => new HittingLine(s.Player.ToString(), s.RBI, SeasonStats?.SingleOrDefault(q => q.Player.Number == s.Player.Number)?.Rbis ?? 0)).ToList());
-        public StatModel StolenBases => new StatModel("SB", Stats.Where(w => w.SB > 0).Select(s => new HittingLine(s.Player.ToString(), s.SB, SeasonStats?.SingleOrDefault(q => q.Player.Number == s.Player.Number)?.StolenBases ?? 0)).ToList());
-        public StatModel CaughtStealing => new StatModel("CS", Stats.Where(w => w.CS > 0).Select(s => new HittingLine(s.Player.ToString(), s.CS, SeasonStats?.SingleOrDefault(q => q.Player.Number == s.Player.Number)?.CaughtStealing ?? 0)).ToList());
+        public StatModel Doubles => new("2B", [.. Stats.Where(w => w.Doubles > 0).Select(s => new HittingLine(s.Player.ToString(), s.Doubles, SeasonStats?.SingleOrDefault(q => q.Player.Number == s.Player.Number)?.Doubles ?? 0))]);
+        public StatModel Triples => new("3B", [.. Stats.Where(w => w.Triples > 0).Select(s => new HittingLine(s.Player.ToString(), s.Triples, SeasonStats?.SingleOrDefault(q => q.Player.Number == s.Player.Number)?.Triples ?? 0))]);
+        public StatModel HomeRuns => new("HR", [.. Stats.Where(w => w.HR > 0).Select(s => new HittingLine(s.Player.ToString(), s.HR, SeasonStats?.SingleOrDefault(q => q.Player.Number == s.Player.Number)?.HomeRuns ?? 0))]);
+        public StatModel Rbis => new("RBI", [.. Stats.Where(w => w.RBI > 0).Select(s => new HittingLine(s.Player.ToString(), s.RBI, SeasonStats?.SingleOrDefault(q => q.Player.Number == s.Player.Number)?.Rbis ?? 0))]);
+        public StatModel StolenBases => new("SB", [.. Stats.Where(w => w.SB > 0).Select(s => new HittingLine(s.Player.ToString(), s.SB, SeasonStats?.SingleOrDefault(q => q.Player.Number == s.Player.Number)?.StolenBases ?? 0))]);
+        public StatModel CaughtStealing => new("CS", [.. Stats.Where(w => w.CS > 0).Select(s => new HittingLine(s.Player.ToString(), s.CS, SeasonStats?.SingleOrDefault(q => q.Player.Number == s.Player.Number)?.CaughtStealing ?? 0))]);
         public List<HStats> Stats { get; set; }
         public List<HittingStatsRow> SeasonStats { get; set; }
     }
-    public class HittingLine
+    public class HittingLine(string name, int gameTotal, int seasonTotal = 0)
     {
-        public HittingLine(string name, int gameTotal, int seasonTotal = 0)
-        {
-            PlayerName = name;
-            GameTotal = gameTotal;
-            SeasonTotal = seasonTotal;
-        }
-
-        public string PlayerName { get; set; }
-        public int GameTotal { get; set; }
-        public int SeasonTotal { get; set; }
+        public string PlayerName { get; set; } = name;
+        public int GameTotal { get; set; } = gameTotal;
+        public int SeasonTotal { get; set; } = seasonTotal;
     }
     public class PitchingBoxScore
     {
         public PitchingBoxScore()
         {
-            Stats = new List<PStats>();
+            Stats = [];
         }
         internal PitchingBoxScore(GameData game, List<HittingStatsRow> seasonStats) : this()
         {
@@ -404,7 +397,7 @@ namespace Electrons.Net8.Models
 
         public PitchingBoxScore(IEnumerable<ScoreboardApi.Models.Atbat> enumerable)
         {
-            Stats = new List<PStats>();
+            Stats = [];
             foreach (var ab in enumerable.GroupBy(g => g.PitcherId))
             {
                 var player = Player.Create(ab.First().Pitcher.Number, ab.First().Pitcher.FirstName, ab.First().Pitcher.LastName);
@@ -430,9 +423,9 @@ namespace Electrons.Net8.Models
             }
         }
 
-        public PitchingStatModel Pitches => new PitchingStatModel("Pitches-Strikes", Stats.Where(w => w.Pitches > 0).Select(s => new KeyValuePair<string, string>(s.Player.ToString(), $"{s.Pitches} - {s.Strikes}")));
-        public PitchingStatModel BattersFaced => new PitchingStatModel("Batters Faced", Stats.Select(s => new KeyValuePair<string, string>(s.Player.ToString(), s.BF.ToString())));
-        public PitchingStatModel BattedBalls => new PitchingStatModel("Ground Balls-Fly Balls", Stats.Select(s => new KeyValuePair<string, string>(s.Player.ToString(), $"{s.GroundOuts} - {s.FlyOuts}")));
+        public PitchingStatModel Pitches => new("Pitches-Strikes", Stats.Where(w => w.Pitches > 0).Select(s => new KeyValuePair<string, string>(s.Player.ToString(), $"{s.Pitches} - {s.Strikes}")));
+        public PitchingStatModel BattersFaced => new("Batters Faced", Stats.Select(s => new KeyValuePair<string, string>(s.Player.ToString(), s.BF.ToString())));
+        public PitchingStatModel BattedBalls => new("Ground Balls-Fly Balls", Stats.Select(s => new KeyValuePair<string, string>(s.Player.ToString(), $"{s.GroundOuts} - {s.FlyOuts}")));
         public List<PStats> Stats { get; set; }
     }
     public class StatModel
@@ -446,14 +439,9 @@ namespace Electrons.Net8.Models
         public string Stat { get; set; }
         public List<HittingLine> Stats { get; set; }
     }
-    public class PitchingStatModel
+    public class PitchingStatModel(string stat, IEnumerable<KeyValuePair<string, string>> displayString)
     {
-        public PitchingStatModel(string stat, IEnumerable<KeyValuePair<string, string>> displayString)
-        {
-            Stat = stat;
-            Display = displayString;
-        }
-        public string Stat { get; set; }
-        public IEnumerable<KeyValuePair<string, string>> Display { get; set; }
+        public string Stat { get; set; } = stat;
+        public IEnumerable<KeyValuePair<string, string>> Display { get; set; } = displayString;
     }
 }

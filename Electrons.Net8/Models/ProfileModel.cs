@@ -18,7 +18,7 @@ namespace Electrons.Net8.Models
             BirthDate = profile.DOB;
             HittingStats = hittingStats;
             PitchingStats = pitchingStats;
-            Awards = profile.Awards.Select(s => s.AwardData).ToList();
+            Awards = [.. profile.Awards.Select(s => s.AwardData)];
             Hometown = profile.Hometown;
             Height = profile.HeightString;
             Weight = profile.Weight;
@@ -28,7 +28,7 @@ namespace Electrons.Net8.Models
             Divorces = profile.Divorces.GetValueOrDefault();
             Bitches = profile.HittingStats.Sum(s => s.Bitches);
             ImageFile = profile.ImageFile.TrimStart('/');
-            var yearsPlayed = YearsPlayed(profile.HittingStats.ToList(), profile.PitchingStats.ToList());
+            var yearsPlayed = YearsPlayed([.. profile.HittingStats], [.. profile.PitchingStats]);
             YearDisplay = yearsPlayed;
         }
 
@@ -76,7 +76,7 @@ namespace Electrons.Net8.Models
         [DisplayName("Experience:")]
         public string YearDisplay { get; }
 
-        private string YearsPlayed(List<HittingStats> hittingStats, List<PitchingStats> pitchingStats)
+        private static string YearsPlayed(List<HittingStats> hittingStats, List<PitchingStats> pitchingStats)
         {
             var hitting_years = hittingStats.Select(s => s.Game.GameDate.Year).Distinct();
             var pitching_years = pitchingStats.Select(s => s.Game.GameDate.Year).Distinct();
@@ -97,7 +97,7 @@ namespace Electrons.Net8.Models
                 return $"{all_years.Count()} years ({ranges_string})";
         }
 
-        private IEnumerable<string> GetFormattedRanges(IEnumerable<Tuple<int, int>> ranges)
+        private static IEnumerable<string> GetFormattedRanges(IEnumerable<Tuple<int, int>> ranges)
         {
             var currentYear = DateTime.Now.Year;
             foreach (var range in ranges)
@@ -115,7 +115,7 @@ namespace Electrons.Net8.Models
             }
         }
 
-        private IEnumerable<Tuple<int, int>> GetYearRanges(IOrderedEnumerable<int> all_years)
+        private static IEnumerable<Tuple<int, int>> GetYearRanges(IOrderedEnumerable<int> all_years)
         {
             int start = all_years.First();
             int current = 0;
