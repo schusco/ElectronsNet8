@@ -6,31 +6,22 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
 using System.Text;
 using System.Text.Json;
 
 
 namespace Electrons.Net8.Controllers
 {
-    public class ControllerBase : Controller, IExceptionFilter, IAuthorizationFilter
+    public class ControllerBase(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings, ILogger logger) : Controller, IExceptionFilter, IAuthorizationFilter
     {
-        protected Repository Repository;
-        protected readonly ILogger Logger;
-        protected IMemoryCache Cache;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        protected Repository Repository = new(session, cache);
+        protected readonly ILogger Logger = logger;
+        protected IMemoryCache Cache = cache;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         protected HttpContext CurrentContext => _httpContextAccessor.HttpContext;
-        protected IWebHostEnvironment WebHostEnvironment { get; set; }
-        protected GameSettings GameSettings { get; set; }
-        public ControllerBase(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings, ILogger logger)
-        {
-            _httpContextAccessor = httpContextAccessor;
-            GameSettings = settings.Value;            
-            Logger = logger;
-            WebHostEnvironment = env;            
-            Cache = cache;
-            Repository = new Repository(session, cache);
-        }
+        protected IWebHostEnvironment WebHostEnvironment { get; set; } = env;
+        protected GameSettings GameSettings { get; set; } = settings.Value;
+
         protected T GetSessionValue<T>(string key) where T : class
         {
             var json = _httpContextAccessor.HttpContext?.Session?.GetString(key);

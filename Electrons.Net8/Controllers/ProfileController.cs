@@ -24,6 +24,5 @@ namespace Electrons.Net8.Controllers
             model.ImageFile = System.IO.File.Exists(Path.Combine(WebHostEnvironment.WebRootPath, model.ImageFile)) ? model.ImageFile : "Content/images/players/NotAvailable.png";
             return View(model);
         }
-
     }
 }
