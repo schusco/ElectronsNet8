@@ -1,5 +1,4 @@
 ﻿using Electrons.Core.Net8.Infrastructure;
-using System.Configuration;
 
 namespace Electrons.Net8
 {
