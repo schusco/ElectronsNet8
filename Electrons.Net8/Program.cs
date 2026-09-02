@@ -30,8 +30,7 @@ if (!Directory.Exists(keysFolder))
 }
 
 // 2. Configure Data Protection
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(keysFolder))
+builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(keysFolder))
     .SetApplicationName("ElectronsBaseballApp"); // Hardcoding this prevents key mismatch if the environment name changes
 builder.Services.AddDistributedMemoryCache(); // Required for Session
 builder.Services.AddSession(options =>

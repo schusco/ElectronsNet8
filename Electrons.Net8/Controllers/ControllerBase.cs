@@ -12,7 +12,8 @@ using System.Text.Json;
 
 namespace Electrons.Net8.Controllers
 {
-    public class ControllerBase(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, IOptionsSnapshot<GameSettings> settings, ILogger logger) : Controller, IExceptionFilter, IAuthorizationFilter
+    public class ControllerBase(NHibernate.ISession session, IMemoryCache cache, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment env, 
+        IOptionsSnapshot<GameSettings> settings, ILogger logger) : Controller, IExceptionFilter, IAuthorizationFilter
     {
         protected Repository Repository = new(session, cache);
         protected readonly ILogger Logger = logger;

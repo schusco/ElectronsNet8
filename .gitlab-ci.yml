@@ -33,6 +33,9 @@ deploy_production:
   stage: deploy
   tags:
     - saas-windows-medium-amd64
+  before_script:
+    - if (dotnet nuget list source | Select-String "gitlab") { dotnet nuget remove source gitlab }
+    - dotnet nuget add source "${CI_API_V4_URL}/projects/85256055/packages/nuget/index.json" --name "gitlab" --username "gitlab-ci-token" --password "$CI_JOB_TOKEN" --store-password-in-clear-text
   script:
     - powershell -Command "Invoke-WebRequest -Uri 'https://dot.net/v1/dotnet-install.ps1' -OutFile 'dotnet-install.ps1'"
     - powershell -Command "./dotnet-install.ps1 -Channel 10.0 -InstallDir './.dotnet'"
